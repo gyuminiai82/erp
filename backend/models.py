@@ -1,0 +1,137 @@
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
+from database import Base
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    manager_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+
+    # Relationship (사원 목록)
+    employees = relationship("Employee", foreign_keys="Employee.department_id", back_populates="department")
+    # 부서장 관계는 파일 하단에서 정의
+
+class Position(Base):
+    __tablename__ = "positions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True) # 예: 사원, 대리, 과장
+    level = Column(Integer) # 권한 레벨
+
+    employees = relationship("Employee", back_populates="position")
+
+class Employee(Base):
+    __tablename__ = "employees"
+
+    id = Column(Integer, primary_key=True, index=True)
+    emp_no = Column(String, unique=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    password_hash = Column(String)
+    hire_date = Column(Date)
+    status = Column(String, default="재직") # 재직, 휴직, 퇴사 등
+    
+    department_id = Column(Integer, ForeignKey("departments.id"))
+    position_id = Column(Integer, ForeignKey("positions.id"))
+
+    department = relationship("Department", foreign_keys=[department_id], back_populates="employees")
+    position = relationship("Position", back_populates="employees")
+    
+    attendances = relationship("Attendance", back_populates="employee")
+    leave_requests = relationship("LeaveRequest", foreign_keys="LeaveRequest.employee_id", back_populates="employee")
+    payrolls = relationship("Payroll", back_populates="employee")
+    roles = relationship("EmployeeRole", back_populates="employee")
+
+class Attendance(Base):
+    __tablename__ = "attendances"
+
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    work_date = Column(Date)
+    check_in = Column(DateTime, nullable=True)
+    check_out = Column(DateTime, nullable=True)
+    status = Column(String) # 정상, 지각, 조퇴, 결근 등
+
+    employee = relationship("Employee", back_populates="attendances")
+
+class LeaveRequest(Base):
+    __tablename__ = "leave_requests"
+
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    start_date = Column(Date)
+    end_date = Column(Date)
+    leave_type = Column(String) # 연차, 반차, 병가 등
+    status = Column(String, default="대기") # 대기, 승인, 반려
+    reason = Column(String)
+    approver_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+
+    employee = relationship("Employee", foreign_keys=[employee_id], back_populates="leave_requests")
+    approver = relationship("Employee", foreign_keys=[approver_id])
+
+class Payroll(Base):
+    __tablename__ = "payrolls"
+
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    payment_month = Column(String) # YYYY-MM 형태
+    base_salary = Column(Integer)
+    bonus = Column(Integer, default=0)
+    deductions = Column(Integer, default=0)
+    net_pay = Column(Integer)
+    payment_date = Column(Date)
+
+    employee = relationship("Employee", back_populates="payrolls")
+
+# Department -> Employee (부서장) 관계 명시
+Department.manager = relationship("Employee", foreign_keys=[Department.manager_id])
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    description = Column(String)
+
+    permissions = relationship("RolePermission", back_populates="role")
+    employees = relationship("EmployeeRole", back_populates="role")
+
+class Permission(Base):
+    __tablename__ = "permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    description = Column(String)
+
+    roles = relationship("RolePermission", back_populates="permission")
+
+class RolePermission(Base):
+    __tablename__ = "role_permissions"
+
+    role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True)
+    permission_id = Column(Integer, ForeignKey("permissions.id"), primary_key=True)
+
+    role = relationship("Role", back_populates="permissions")
+    permission = relationship("Permission", back_populates="roles")
+
+class EmployeeRole(Base):
+    __tablename__ = "employee_roles"
+
+    employee_id = Column(Integer, ForeignKey("employees.id"), primary_key=True)
+    role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True)
+
+    employee = relationship("Employee", back_populates="roles")
+    role = relationship("Role", back_populates="employees")
+
+class SystemAdmin(Base):
+    __tablename__ = "system_admins"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    password_hash = Column(String)
+    created_at = Column(DateTime)
+    last_login = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
