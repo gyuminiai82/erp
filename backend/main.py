@@ -1,15 +1,122 @@
-# FastAPI 모듈에서 FastAPI 클래스를 가져옵니다.
-# FastAPI는 파이썬 기반의 빠르고 현대적인 웹 프레임워크입니다.
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import auth
+import employees
+import roles
+import menus
+import settings
+import company_api
+import attendance_policies_api
+import system_admins_api
+import models
+from database import engine, SessionLocal
+import psutil
+import os
 
-# FastAPI 애플리케이션의 인스턴스를 생성합니다.
-# 이 'app' 객체가 전체 웹 애플리케이션의 중심 역할을 하며, 라우팅 및 서버 설정의 기준이 됩니다.
-app = FastAPI()
+app = FastAPI(title="Minstudio ERP Backend API")
 
-# HTTP GET 요청을 처리하는 라우팅 데코레이터입니다.
-# 클라이언트(웹 브라우저나 프론트엔드 등)가 "/api/hello" 경로로 GET 요청을 보내면 아래 정의된 함수가 실행됩니다.
+# 프론트엔드 도메인 허용
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Auth 라우터 등록
+app.include_router(auth.router)
+app.include_router(employees.router)
+app.include_router(roles.router)
+app.include_router(menus.router)
+app.include_router(settings.router)
+app.include_router(company_api.router)
+app.include_router(attendance_policies_api.router)
+app.include_router(system_admins_api.router)
+
+models.Base.metadata.create_all(bind=engine)
+
+@app.on_event("startup")
+def seed_data():
+    db = SessionLocal()
+    if db.query(models.Role).count() == 0:
+        roles = [
+            models.Role(name="admin", description="시스템 관리자"),
+            models.Role(name="hr_manager", description="인사 담당자"),
+            models.Role(name="dept_head", description="부서장"),
+            models.Role(name="employee", description="일반 사원"),
+        ]
+        db.add_all(roles)
+        db.commit()
+
+        dept_dev = models.Department(name="개발본부")
+        dept_hr = models.Department(name="인사팀")
+        db.add_all([dept_dev, dept_hr])
+        db.commit()
+
+        emp1 = models.Employee(emp_no="EMP23001", name="김철수", department_id=dept_dev.id)
+        emp2 = models.Employee(emp_no="EMP21045", name="이영희", department_id=dept_hr.id)
+        emp3 = models.Employee(emp_no="EMP19002", name="박지민", department_id=dept_dev.id)
+        emp4 = models.Employee(emp_no="EMP15001", name="관리자", department_id=dept_dev.id)
+        db.add_all([emp1, emp2, emp3, emp4])
+        db.commit()
+
+        db.add_all([
+            models.EmployeeRole(employee_id=emp1.id, role_id=roles[3].id),
+            models.EmployeeRole(employee_id=emp2.id, role_id=roles[1].id),
+            models.EmployeeRole(employee_id=emp3.id, role_id=roles[2].id),
+            models.EmployeeRole(employee_id=emp4.id, role_id=roles[0].id),
+        ])
+        db.commit()
+        
+    if db.query(models.Menu).count() == 0:
+        menus_seed = [
+            models.Menu(name="내 대시보드", url="/erp", icon="LayoutDashboard", sort_order=1),
+            models.Menu(name="인사 관리", url="/erp/employees", icon="Users", sort_order=2),
+            models.Menu(name="근태 현황", url="/erp/attendances", icon="Clock", sort_order=3),
+            models.Menu(name="휴가 신청", url="/erp/leaves", icon="Calendar", sort_order=4),
+            models.Menu(name="급여 명세서", url="/erp/payrolls", icon="FileText", sort_order=5)
+        ]
+        db.add_all(menus_seed)
+        db.commit()
+
+        # admin 권한 말고, employee 권한에 메뉴 매핑
+        employee_role = db.query(models.Role).filter(models.Role.name == "employee").first()
+        if employee_role:
+            db.add_all([models.RoleMenu(role_id=employee_role.id, menu_id=m.id) for m in menus_seed])
+            db.commit()
+            
+    db.close()
+
 @app.get("/api/hello")
 def read_root():
-    # 클라이언트에게 반환할 데이터입니다.
-    # 파이썬의 딕셔너리(Dictionary) 형태로 반환하면, FastAPI가 이를 자동으로 JSON 형식으로 변환하여 응답합니다.
     return {"message": "Hello from Python FastAPI Backend!"}
+
+@app.get("/api/system/metrics")
+def get_system_metrics():
+    # RAM conversion to GB
+    vm = psutil.virtual_memory()
+    ram_used = round(vm.used / (1024 ** 3), 1)
+    ram_total = round(vm.total / (1024 ** 3), 1)
+    
+    # Disk usage for the system drive
+    try:
+        disk_path = psutil.disk_partitions()[0].mountpoint
+        disk = psutil.disk_usage(disk_path)
+        disk_percent = disk.percent
+    except:
+        disk_percent = 0
+
+    return {
+        "cpu_percent": psutil.cpu_percent(interval=None),
+        "ram_used_gb": ram_used,
+        "ram_total_gb": ram_total,
+        "ram_percent": vm.percent,
+        "disk_percent": disk_percent
+    }
+

@@ -98,3 +98,22 @@ CREATE TABLE system_admins (
     last_login DATETIME COMMENT '최근 로그인',
     is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 여부'
 );
+
+
+CREATE TABLE menus (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL COMMENT '메뉴명',
+    url VARCHAR(255) COMMENT '이동 경로',
+    icon VARCHAR(100) COMMENT '아이콘 식별자',
+    parent_id INT COMMENT '상위 메뉴 ID',
+    sort_order INT DEFAULT 0 COMMENT '정렬 순서',
+    FOREIGN KEY (parent_id) REFERENCES menus(id)
+);
+
+CREATE TABLE role_menus (
+    role_id INT NOT NULL COMMENT '권한 ID',
+    menu_id INT NOT NULL COMMENT '메뉴 ID',
+    PRIMARY KEY (role_id, menu_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (menu_id) REFERENCES menus(id)
+);

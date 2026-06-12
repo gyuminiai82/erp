@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -17,8 +17,9 @@ class Position(Base):
     __tablename__ = "positions"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True) # 예: 사원, 대리, 과장
-    level = Column(Integer) # 권한 레벨
+    name = Column(String, unique=True, index=True)
+    level = Column(Integer, default=10)
+    description = Column(String)
 
     employees = relationship("Employee", back_populates="position")
 
@@ -29,12 +30,14 @@ class Employee(Base):
     emp_no = Column(String, unique=True, index=True)
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True)
-    password_hash = Column(String)
+    password_hash = Column(String, nullable=True)
     hire_date = Column(Date)
     status = Column(String, default="재직") # 재직, 휴직, 퇴사 등
+    is_active = Column(Boolean, default=True)
+    must_change_password = Column(Boolean, default=True)
     
     department_id = Column(Integer, ForeignKey("departments.id"))
-    position_id = Column(Integer, ForeignKey("positions.id"))
+    position_id = Column(Integer, ForeignKey("positions.id"), nullable=True)
 
     department = relationship("Department", foreign_keys=[department_id], back_populates="employees")
     position = relationship("Position", back_populates="employees")
@@ -97,6 +100,7 @@ class Role(Base):
 
     permissions = relationship("RolePermission", back_populates="role")
     employees = relationship("EmployeeRole", back_populates="role")
+    menus = relationship("RoleMenu", back_populates="role")
 
 class Permission(Base):
     __tablename__ = "permissions"
@@ -135,3 +139,66 @@ class SystemAdmin(Base):
     created_at = Column(DateTime)
     last_login = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True)
+
+class Menu(Base):
+    __tablename__ = "menus"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    url = Column(String, nullable=True)
+    icon = Column(String, nullable=True)
+    parent_id = Column(Integer, ForeignKey("menus.id"), nullable=True)
+    sort_order = Column(Integer, default=0)
+
+    roles = relationship("RoleMenu", back_populates="menu")
+    parent = relationship("Menu", remote_side=[id], backref="children")
+
+class RoleMenu(Base):
+    __tablename__ = "role_menus"
+
+    role_id = Column(Integer, ForeignKey("roles.id"), primary_key=True)
+    menu_id = Column(Integer, ForeignKey("menus.id"), primary_key=True)
+    
+    can_read = Column(Boolean, default=True)
+    can_write = Column(Boolean, default=False)
+    can_delete = Column(Boolean, default=False)
+    can_print = Column(Boolean, default=False)
+
+    role = relationship("Role", back_populates="menus")
+    menu = relationship("Menu", back_populates="roles")
+
+class SystemSetting(Base):
+    __tablename__ = "system_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    emp_no_prefix = Column(String, default="EMP")
+    emp_no_year_format = Column(String, default="YY")
+    emp_no_length = Column(Integer, default=3)
+
+class CompanyInfo(Base):
+    __tablename__ = "company_info"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    registration_number = Column(String)
+    representative = Column(String)
+    address = Column(String)
+    contact_email = Column(String)
+    contact_phone = Column(String)
+    logo_url = Column(String)
+
+class AttendancePolicy(Base):
+    __tablename__ = "attendance_policies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    policy_type = Column(String, default="FIXED")
+    work_start_time = Column(Time, nullable=True)
+    work_end_time = Column(Time, nullable=True)
+    break_start_time = Column(Time, nullable=True)
+    break_end_time = Column(Time, nullable=True)
+    break_time_mins = Column(Integer, default=60)
+    core_time_start = Column(Time, nullable=True)
+    core_time_end = Column(Time, nullable=True)
+    required_work_hours = Column(Integer, default=8)
+    is_default = Column(Boolean, default=False)
