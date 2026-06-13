@@ -64,15 +64,6 @@ def inject_menus():
                     {"name": "기안 작성", "url": "/drafts"},
                     {"name": "결재함", "url": "/approvals"}
                 ]
-            },
-            {
-                "name": "시스템 설정",
-                "icon": "Settings",
-                "submenus": [
-                    {"name": "기본 환경설정", "url": "/settings/basic"},
-                    {"name": "사용자 및 권한", "url": "/settings/users"},
-                    {"name": "시스템 로그", "url": "/settings/logs"}
-                ]
             }
         ]
 
