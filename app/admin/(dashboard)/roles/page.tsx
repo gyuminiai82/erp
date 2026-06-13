@@ -62,7 +62,7 @@ export default function RolesPage() {
 
   const renderIcon = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName] || Icons.Circle;
-    return <IconComponent className="w-4 h-4 text-gray-500 mr-2" />;
+    return <IconComponent className="w-4 h-4 text-gray-500" />;
   };
 
   return (
