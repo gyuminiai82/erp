@@ -9,7 +9,12 @@ import { usePathname } from 'next/navigation';
 export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [menus, setMenus] = useState<any[]>([]);
+  const [openMenuIds, setOpenMenuIds] = useState<number[]>([]);
   const pathname = usePathname();
+
+  const toggleMenu = (id: number) => {
+    setOpenMenuIds(prev => prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]);
+  };
 
   // HMR 강제 리로드를 위한 주석 추가
   useEffect(() => {
@@ -57,17 +62,54 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
           {Array.isArray(menus) && menus.length === 0 ? (
             <div className="px-3 py-2 text-sm text-gray-400 animate-pulse">Loading menus...</div>
           ) : Array.isArray(menus) ? (
-            menus.map((menu: any) => {
-              const isActive = pathname === menu.url || pathname?.startsWith(`${menu.url}/`);
+            menus.filter((m: any) => m.parent_id === null).map((parentMenu: any) => {
+              const childMenus = menus.filter((m: any) => m.parent_id === parentMenu.id);
+              const hasChildren = childMenus.length > 0;
+              const isChildActive = childMenus.some((child: any) => pathname === child.url || pathname?.startsWith(`${child.url}/`));
+              const isParentActive = pathname === parentMenu.url || pathname?.startsWith(`${parentMenu.url}/`);
+              const isActive = isParentActive || isChildActive;
+              const isOpen = openMenuIds.includes(parentMenu.id) || isChildActive;
+
               return (
-                <Link 
-                  key={menu.id} 
-                  href={menu.url || "#"} 
-                  className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
-                >
-                  {renderIcon(menu.icon || 'Circle')}
-                  {menu.name}
-                </Link>
+                <div key={parentMenu.id} className="mb-1">
+                  {hasChildren ? (
+                    <button 
+                      onClick={() => toggleMenu(parentMenu.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
+                    >
+                      <div className="flex items-center">
+                        {renderIcon(parentMenu.icon || 'Circle')}
+                        {parentMenu.name}
+                      </div>
+                      <Icons.ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  ) : (
+                    <Link 
+                      href={parentMenu.url || "#"} 
+                      className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
+                    >
+                      {renderIcon(parentMenu.icon || 'Circle')}
+                      {parentMenu.name}
+                    </Link>
+                  )}
+                  
+                  {hasChildren && isOpen && (
+                    <div className="mt-1 ml-9 pl-1 border-l-2 border-gray-100 space-y-1">
+                      {childMenus.map((childMenu: any) => {
+                        const isChildUrlActive = pathname === childMenu.url || pathname?.startsWith(`${childMenu.url}/`);
+                        return (
+                          <Link
+                            key={childMenu.id}
+                            href={childMenu.url || "#"}
+                            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${isChildUrlActive ? 'text-[#107C41] bg-white shadow-sm border border-gray-100' : 'text-gray-500 hover:text-[#107C41] hover:bg-white/60'}`}
+                          >
+                            {childMenu.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })
           ) : null}
