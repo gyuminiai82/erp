@@ -164,6 +164,7 @@ export default function RoleManagementPage() {
               <tr>
                 <th className="px-6 py-4">사번</th>
                 <th className="px-6 py-4">이름</th>
+                <th className="px-6 py-4">이메일</th>
                 <th className="px-6 py-4">소속 부서</th>
                 <th className="px-6 py-4">현재 시스템 권한</th>
                 <th className="px-6 py-4 text-center">권한 설정</th>
@@ -178,6 +179,7 @@ export default function RoleManagementPage() {
                   <tr key={emp.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4 font-medium text-gray-600">{emp.emp_no}</td>
                     <td className="px-6 py-4 text-gray-900 font-semibold">{emp.name}</td>
+                    <td className="px-6 py-4 text-gray-500">{emp.email || '-'}</td>
                     <td className="px-6 py-4 text-gray-500">{emp.department}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeColor(roleInfo.color)}`}>
