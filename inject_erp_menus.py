@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from models import Menu, Role, RoleMenu
 
-engine = sqlalchemy.create_engine("postgresql://postgres:postgresql@localhost/erp")
+engine = sqlalchemy.create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:postgresql@localhost/erp"))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def inject_menus():
@@ -77,6 +77,7 @@ def inject_menus():
         ]
 
         admin_role = db.query(Role).filter(Role.name == "admin").first()
+        employee_role = db.query(Role).filter(Role.name == "employee").first()
 
         sort_order = 10
         for parent_data in menus_data:
@@ -88,6 +89,8 @@ def inject_menus():
             
             if admin_role:
                 db.add(RoleMenu(role_id=admin_role.id, menu_id=parent_menu.id))
+            if employee_role:
+                db.add(RoleMenu(role_id=employee_role.id, menu_id=parent_menu.id))
 
             sub_sort_order = 10
             for sub_data in parent_data["submenus"]:
@@ -104,6 +107,8 @@ def inject_menus():
                 
                 if admin_role:
                     db.add(RoleMenu(role_id=admin_role.id, menu_id=sub_menu.id))
+                if employee_role:
+                    db.add(RoleMenu(role_id=employee_role.id, menu_id=sub_menu.id))
                     
         db.commit()
         print("Standard ERP menus injected successfully!")
