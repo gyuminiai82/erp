@@ -2,13 +2,23 @@ import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
+  variant?: 'default' | 'outline' | 'danger' | 'ghost';
 }
 
-export function Button({ loading = false, children, className = "", ...props }: ButtonProps) {
+export function Button({ loading = false, variant = 'default', children, className = "", ...props }: ButtonProps) {
+  let variantClass = "text-white bg-[#107C41] hover:bg-[#0c5c30] border-transparent focus:ring-[#107C41]";
+  if (variant === 'outline') {
+    variantClass = "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-[#107C41]";
+  } else if (variant === 'danger') {
+    variantClass = "text-white bg-red-600 hover:bg-red-700 border-transparent focus:ring-red-600";
+  } else if (variant === 'ghost') {
+    variantClass = "text-gray-700 bg-transparent hover:bg-gray-100 border-transparent focus:ring-gray-500";
+  }
+
   return (
     <button
       disabled={loading || props.disabled}
-      className={`w-full flex justify-center py-2 px-4 border border-transparent text-sm font-semibold rounded-[4px] text-white bg-[#107C41] hover:bg-[#0c5c30] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#107C41] transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm ${className}`}
+      className={`flex justify-center py-2 px-4 border text-sm font-semibold rounded-[4px] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm ${variantClass} ${className}`}
       {...props}
     >
       {loading ? (
