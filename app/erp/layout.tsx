@@ -10,6 +10,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [menus, setMenus] = useState<any[]>([]);
   const [openMenuIds, setOpenMenuIds] = useState<number[]>([]);
+  const [userInfo, setUserInfo] = useState<{name: string, email: string, role_name: string} | null>(null);
   const pathname = usePathname();
 
   const toggleMenu = (id: number) => {
@@ -19,7 +20,19 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   // HMR 강제 리로드를 위한 주석 추가
   useEffect(() => {
     // 일반 사원(employee) 기준으로 메뉴를 불러옵니다.
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
+    
+    if (token) {
+      fetch("http://localhost:8000/api/auth/me", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setUserInfo(data);
+      })
+      .catch(err => console.error(err));
+    }
+
     fetch("http://localhost:8000/api/menus/my?role_name=employee", {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -146,11 +159,11 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
                 <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#107C41] to-green-400 text-white flex items-center justify-center font-semibold shadow-sm hover:shadow-md transition-shadow">
-                  U
+                  {userInfo ? userInfo.name.charAt(0) : 'U'}
                 </div>
                 <div className="ml-3 hidden sm:block">
-                  <p className="text-sm font-medium text-gray-700 leading-tight hover:text-[#107C41] transition-colors">Hong Gildong</p>
-                  <p className="text-xs text-gray-500">Employee</p>
+                  <p className="text-sm font-medium text-gray-700 leading-tight hover:text-[#107C41] transition-colors">{userInfo?.name || 'Loading...'}</p>
+                  <p className="text-xs text-gray-500">{userInfo?.role_name || ''}</p>
                 </div>
               </div>
 
@@ -160,8 +173,8 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
                   <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
                   <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 z-50 overflow-hidden transform origin-top-right animate-in fade-in zoom-in-95 duration-100">
                     <div className="p-3 border-b border-gray-50">
-                      <p className="text-sm font-semibold text-gray-900">Hong Gildong</p>
-                      <p className="text-xs text-gray-500 truncate">hong@company.com</p>
+                      <p className="text-sm font-semibold text-gray-900">{userInfo?.name || 'Loading...'}</p>
+                      <p className="text-xs text-gray-500 truncate">{userInfo?.email || ''}</p>
                     </div>
                     <div className="p-1">
                       <Link href="/login" className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group">

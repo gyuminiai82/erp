@@ -91,3 +91,24 @@ def change_password(payload: ChangePasswordRequest, db: Session = Depends(get_db
     user.must_change_password = False
     db.commit()
     return {"message": "비밀번호가 성공적으로 변경되었습니다."}
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+security = HTTPBearer()
+
+@router.get("/me")
+def get_current_user_info(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        role = payload.get("role")
+        if role == "admin":
+            return {"name": "System Admin", "email": email, "role_name": "시스템 관리자"}
+        else:
+            user = db.query(models.Employee).filter(models.Employee.email == email).first()
+            if user:
+                role_record = db.query(models.EmployeeRole).filter(models.EmployeeRole.employee_id == user.id).first()
+                role_desc = role_record.role.description if role_record and role_record.role else "일반 사원"
+                return {"name": user.name, "email": user.email, "role_name": role_desc}
+            return {"name": "Unknown", "email": email, "role_name": "Unknown"}
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
