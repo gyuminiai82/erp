@@ -7,8 +7,8 @@ import os
 # PostgreSQL 데이터베이스 URL
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgresql@localhost/erp")
 
-# engine 생성
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+# engine 생성 (echo=True로 설정하여 실행되는 SQL 쿼리를 콘솔에 출력)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 
 # 세션 생성기
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
