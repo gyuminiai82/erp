@@ -11,9 +11,15 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [menus, setMenus] = useState<any[]>([]);
   const pathname = usePathname();
 
+  // HMR 강제 리로드를 위한 주석 추가
   useEffect(() => {
     // 일반 사원(employee) 기준으로 메뉴를 불러옵니다.
-    fetch("http://localhost:8000/api/menus/my?role_name=employee")
+    const token = localStorage.getItem('token');
+    fetch("http://localhost:8000/api/menus/my?role_name=employee", {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
