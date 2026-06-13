@@ -1,11 +1,54 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { LayoutDashboard, Menu as MenuIcon, ShieldCheck, FileText, Settings, LogOut, Bell, Search, Users, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const WebSocketContext = createContext<{
+  activeSessions: number;
+  systemMetrics: any;
+}>({ activeSessions: 0, systemMetrics: null });
+
+export const useWebSocket = () => useContext(WebSocketContext);
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [activeSessions, setActiveSessions] = useState(0);
+  const [systemMetrics, setSystemMetrics] = useState<any>(null);
+
+  useEffect(() => {
+    let ws: WebSocket;
+    let reconnectTimer: NodeJS.Timeout;
+
+    const connect = () => {
+      ws = new WebSocket('ws://localhost:8000/api/ws');
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'active_sessions') {
+            setActiveSessions(data.count);
+          } else if (data.type === 'system_metrics') {
+            setSystemMetrics(data.data);
+          }
+        } catch (e) {
+          console.error("WS message error", e);
+        }
+      };
+
+      ws.onclose = () => {
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      clearTimeout(reconnectTimer);
+      if (ws) ws.close();
+    };
+  }, []);
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
 
@@ -115,9 +158,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc] p-6">
-          {children}
-        </div>
+        <WebSocketContext.Provider value={{ activeSessions, systemMetrics }}>
+          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc] p-6">
+            {children}
+          </main>
+        </WebSocketContext.Provider>
       </main>
     </div>
   );

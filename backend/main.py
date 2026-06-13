@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+import json
+import asyncio
+from typing import List
 import auth
 import employees
 import roles
@@ -8,6 +11,8 @@ import settings
 import company_api
 import attendance_policies_api
 import system_admins_api
+import departments_api
+import positions_api
 import models
 from database import engine, SessionLocal
 import psutil
@@ -38,8 +43,86 @@ app.include_router(settings.router)
 app.include_router(company_api.router)
 app.include_router(attendance_policies_api.router)
 app.include_router(system_admins_api.router)
+app.include_router(departments_api.router)
+app.include_router(positions_api.router)
 
 models.Base.metadata.create_all(bind=engine)
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+        await self.broadcast_sessions()
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast_sessions(self):
+        count = len(self.active_connections)
+        message = json.dumps({"type": "active_sessions", "count": count})
+        for connection in self.active_connections.copy():
+            try:
+                await connection.send_text(message)
+            except Exception:
+                pass
+
+manager = ConnectionManager()
+
+async def broadcast_metrics_task():
+    while True:
+        try:
+            if manager.active_connections:
+                import psutil
+                vm = psutil.virtual_memory()
+                ram_used = round(vm.used / (1024 ** 3), 1)
+                ram_total = round(vm.total / (1024 ** 3), 1)
+                try:
+                    disk_path = psutil.disk_partitions()[0].mountpoint
+                    disk = psutil.disk_usage(disk_path)
+                    disk_percent = disk.percent
+                except:
+                    disk_percent = 0
+                
+                metrics = {
+                    "type": "system_metrics",
+                    "data": {
+                        "cpu_percent": psutil.cpu_percent(interval=None),
+                        "ram_used_gb": ram_used,
+                        "ram_total_gb": ram_total,
+                        "ram_percent": vm.percent,
+                        "disk_percent": disk_percent
+                    }
+                }
+                message = json.dumps(metrics)
+                for connection in manager.active_connections.copy():
+                    try:
+                        await connection.send_text(message)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        await asyncio.sleep(1)
+
+@app.websocket("/api/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast_sessions()
+    except Exception:
+        manager.disconnect(websocket)
+        await manager.broadcast_sessions()
+
+@app.on_event("startup")
+async def start_background_tasks():
+    asyncio.create_task(broadcast_metrics_task())
 
 @app.on_event("startup")
 def seed_data():

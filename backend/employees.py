@@ -21,6 +21,7 @@ class EmployeeCreateRequest(BaseModel):
     name: str
     email: str
     department_id: int
+    position_id: int = None
     role_id: str = "employee"
 
 @router.get("/departments")
@@ -66,15 +67,22 @@ def get_employees(db: Session = Depends(get_db)):
         role_record = db.query(models.EmployeeRole).filter(models.EmployeeRole.employee_id == emp.id).first()
         role_id = role_record.role.name if role_record and role_record.role else "employee"
         
-        # Get department name
+        # Get department and position names
         dept_name = emp.department.name if emp.department else "부서 미지정"
+        pos_name = emp.position.name if emp.position else "직급 미지정"
         
         result.append({
             "id": emp.id,
             "emp_no": emp.emp_no,
             "name": emp.name,
+            "email": emp.email,
             "department": dept_name,
-            "role": role_id
+            "department_id": emp.department_id,
+            "position": pos_name,
+            "position_id": emp.position_id,
+            "role": role_id,
+            "status": emp.status,
+            "hire_date": str(emp.hire_date) if emp.hire_date else None
         })
     return result
 
@@ -133,8 +141,10 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         name=payload.name,
         email=payload.email,
         department_id=payload.department_id,
+        position_id=payload.position_id,
         password_hash=get_password_hash("1234"),
-        must_change_password=True
+        must_change_password=True,
+        hire_date=datetime.now().date()
     )
     db.add(new_emp)
     db.commit()
