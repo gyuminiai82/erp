@@ -48,9 +48,9 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 ml-2">Main Menu</div>
           
-          {menus.length === 0 ? (
+          {Array.isArray(menus) && menus.length === 0 ? (
             <div className="px-3 py-2 text-sm text-gray-400 animate-pulse">Loading menus...</div>
-          ) : (
+          ) : Array.isArray(menus) ? (
             menus.map((menu: any) => {
               const isActive = pathname === menu.url || pathname?.startsWith(`${menu.url}/`);
               return (
@@ -64,7 +64,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })
-          )}
+          ) : null}
         </nav>
       </aside>
 
