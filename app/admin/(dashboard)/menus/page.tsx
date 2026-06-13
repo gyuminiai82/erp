@@ -216,7 +216,7 @@ export default function MenusPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
-                <th className="px-6 py-4 font-semibold text-center w-24">순서</th>
+                <th className="px-6 py-4 font-semibold text-center w-16">이동</th>
                 <th className="px-6 py-4 font-semibold w-20">아이콘</th>
               <th className="px-6 py-4 font-semibold">메뉴명</th>
               <th className="px-6 py-4 font-semibold">경로 (URL)</th>
@@ -237,7 +237,6 @@ export default function MenusPage() {
                 >
                   <td className="px-6 py-4 text-sm text-gray-500 font-medium text-center cursor-grab active:cursor-grabbing group-hover:text-gray-700">
                     <Icons.GripVertical className="w-4 h-4 mx-auto text-gray-300 group-hover:text-[#107C41] transition-colors" />
-                    <div className="text-[10px] mt-1">{parent.sort_order}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="p-2 bg-gray-100 rounded-lg inline-flex items-center justify-center group-hover:bg-green-50 group-hover:text-green-600 transition-colors">
@@ -270,7 +269,6 @@ export default function MenusPage() {
                   >
                     <td className="px-6 py-3 text-sm text-gray-400 font-medium text-center cursor-grab active:cursor-grabbing group-hover:text-gray-600">
                       <Icons.GripVertical className="w-3.5 h-3.5 mx-auto text-gray-300 group-hover:text-[#107C41] transition-colors" />
-                      <div className="text-[10px] mt-0.5">{child.sort_order}</div>
                     </td>
                     <td className="px-6 py-3"></td>
                     <td className="px-6 py-3 pl-10 text-sm font-medium text-gray-700 flex items-center">

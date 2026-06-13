@@ -20,7 +20,7 @@ class EmployeeCreateRequest(BaseModel):
     emp_no: str = None  # Frontend might send it, but we'll override it
     name: str
     email: str
-    department_id: int
+    department_id: int = None
     position_id: int = None
     role_id: str = "employee"
 

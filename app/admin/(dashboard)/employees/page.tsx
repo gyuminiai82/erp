@@ -67,7 +67,7 @@ export default function RoleManagementPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmp.emp_no || !newEmp.name || !newEmp.email || !newEmp.department_id) {
+    if (!newEmp.emp_no || !newEmp.name || !newEmp.email) {
       alert("모든 필드를 입력해주세요.");
       return;
     }
@@ -77,7 +77,7 @@ export default function RoleManagementPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newEmp,
-          department_id: parseInt(newEmp.department_id)
+          department_id: null
         })
       });
       const data = await res.json();
@@ -272,19 +272,7 @@ export default function RoleManagementPage() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">소속 부서</label>
-                <select 
-                  required
-                  value={newEmp.department_id} onChange={e => setNewEmp({...newEmp, department_id: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all bg-white"
-                >
-                  <option value="">부서를 선택하세요</option>
-                  {departments.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
-                </select>
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">접근 권한</label>
                 <select 

@@ -19,6 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     let ws: WebSocket;
     let reconnectTimer: NodeJS.Timeout;
+    let isUnmounted = false;
 
     const connect = () => {
       ws = new WebSocket('ws://localhost:8000/api/ws');
@@ -37,15 +38,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       };
 
       ws.onclose = () => {
-        reconnectTimer = setTimeout(connect, 3000);
+        if (!isUnmounted) {
+          reconnectTimer = setTimeout(connect, 3000);
+        }
       };
     };
 
     connect();
 
     return () => {
+      isUnmounted = true;
       clearTimeout(reconnectTimer);
-      if (ws) ws.close();
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
     };
   }, []);
 
