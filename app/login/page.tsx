@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, User, Lock, Activity } from 'lucide-react';
 
@@ -10,6 +10,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberEmail, setRememberEmail] = useState(false);
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('saved_email');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberEmail(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +26,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      if (rememberEmail) {
+        localStorage.setItem('saved_email', email);
+      } else {
+        localStorage.removeItem('saved_email');
+      }
+
       const formData = new URLSearchParams();
       formData.append('username', email);
       formData.append('password', password);
@@ -129,6 +144,18 @@ export default function LoginPage() {
                     placeholder="비밀번호 입력"
                   />
                 </div>
+              </div>
+
+              <div className="flex items-center">
+                <label className="flex items-center space-x-2 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    checked={rememberEmail} 
+                    onChange={(e) => setRememberEmail(e.target.checked)} 
+                    className="w-4 h-4 text-[#107C41] border-gray-300 rounded focus:ring-[#107C41] cursor-pointer" 
+                  />
+                  <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">이메일 계정 저장</span>
+                </label>
               </div>
             </div>
 
