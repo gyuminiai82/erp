@@ -9,9 +9,9 @@ export default function AdminDashboardPage() {
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/audit-logs')
+    fetch('http://localhost:8000/api/audit-logs?size=5')
       .then(res => res.json())
-      .then(data => setAuditLogs(data))
+      .then(data => setAuditLogs(data.items || []))
       .catch(err => console.error(err));
   }, []);
 
