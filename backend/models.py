@@ -97,6 +97,7 @@ class Role(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
     description = Column(String)
+    sort_order = Column(Integer, default=0)
 
     permissions = relationship("RolePermission", back_populates="role")
     employees = relationship("EmployeeRole", back_populates="role")

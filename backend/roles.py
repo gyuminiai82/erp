@@ -12,9 +12,21 @@ class RoleResponse(BaseModel):
     id: int
     name: str
     description: str
+    sort_order: int = 0
 
     class Config:
         from_attributes = True
+
+class RoleCreate(BaseModel):
+    name: str
+    description: str
+
+class RoleSortUpdate(BaseModel):
+    id: int
+    sort_order: int
+
+class RoleBatchSortUpdate(BaseModel):
+    roles: List[RoleSortUpdate]
 
 class RoleMenuPermUpdate(BaseModel):
     menu_id: int
@@ -28,7 +40,29 @@ class RoleMenuUpdate(BaseModel):
 
 @router.get("", response_model=List[RoleResponse])
 def get_roles(db: Session = Depends(get_db)):
-    return db.query(models.Role).all()
+    return db.query(models.Role).order_by(models.Role.sort_order).all()
+
+@router.post("", response_model=RoleResponse)
+def create_role(payload: RoleCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Role).filter(models.Role.name == payload.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Role name already exists")
+    
+    max_sort = db.query(models.Role).order_by(models.Role.sort_order.desc()).first()
+    next_sort = (max_sort.sort_order + 1) if max_sort and max_sort.sort_order is not None else 0
+    
+    new_role = models.Role(name=payload.name, description=payload.description, sort_order=next_sort)
+    db.add(new_role)
+    db.commit()
+    db.refresh(new_role)
+    return new_role
+
+@router.put("/batch-sort")
+def batch_update_role_sort(payload: RoleBatchSortUpdate, db: Session = Depends(get_db)):
+    for item in payload.roles:
+        db.query(models.Role).filter(models.Role.id == item.id).update({"sort_order": item.sort_order})
+    db.commit()
+    return {"message": "Sort orders updated successfully"}
 
 @router.get("/{role_id}/menus")
 def get_role_menus(role_id: int, db: Session = Depends(get_db)):

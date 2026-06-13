@@ -2,6 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableRoleItem({ role, selectedRole, setSelectedRole }: any) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: role.id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <li
+      ref={setNodeRef} style={style} {...attributes} {...listeners}
+      onClick={() => setSelectedRole(role.id)}
+      className={`px-4 py-4 cursor-pointer hover:bg-gray-50 transition-all flex items-center justify-between ${selectedRole === role.id ? 'bg-[#f0fdf4] border-l-4 border-[#107C41]' : 'border-l-4 border-transparent'}`}
+    >
+      <div>
+        <p className={`text-sm font-semibold ${selectedRole === role.id ? 'text-[#107C41]' : 'text-gray-800'}`}>{role.name}</p>
+        <p className="text-xs text-gray-500 mt-1">{role.description}</p>
+      </div>
+      <Icons.GripVertical className="w-4 h-4 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing" />
+    </li>
+  );
+}
 
 export default function RolesPage() {
   const [roles, setRoles] = useState<any[]>([]);
@@ -9,6 +30,18 @@ export default function RolesPage() {
   const [selectedRole, setSelectedRole] = useState<number | null>(null);
   const [roleMenus, setRoleMenus] = useState<any[]>([]);
   const [isLoadingMenus, setIsLoadingMenus] = useState(false);
+
+  // Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  const [newRoleDesc, setNewRoleDesc] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetch("http://localhost:8000/api/roles")
@@ -60,6 +93,49 @@ export default function RolesPage() {
     }
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      setRoles((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over?.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // update backend
+        const payload = newItems.map((item, idx) => ({ id: item.id, sort_order: idx }));
+        fetch("http://localhost:8000/api/roles/batch-sort", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roles: payload })
+        });
+        
+        return newItems;
+      });
+    }
+  };
+
+  const handleAddRole = async () => {
+    if (!newRoleName) return;
+    try {
+      const res = await fetch("http://localhost:8000/api/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newRoleName, description: newRoleDesc })
+      });
+      if (res.ok) {
+        const addedRole = await res.json();
+        setRoles([...roles, addedRole]);
+        setIsAddModalOpen(false);
+        setNewRoleName('');
+        setNewRoleDesc('');
+      } else {
+        alert("Failed to add role. Name might already exist.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const renderIcon = (iconName: string) => {
     const IconComponent = (Icons as any)[iconName] || Icons.Circle;
     return <IconComponent className="w-4 h-4 text-gray-500" />;
@@ -78,22 +154,16 @@ export default function RolesPage() {
         <div className="col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-[600px]">
           <div className="px-4 py-4 bg-gray-50 border-b border-gray-100 font-semibold text-sm text-gray-700 flex items-center justify-between">
             <span>직급 목록</span>
-            <button className="text-[#107C41] hover:underline text-xs font-medium">추가</button>
+            <button onClick={() => setIsAddModalOpen(true)} className="text-[#107C41] hover:underline text-xs font-medium">추가</button>
           </div>
           <ul className="divide-y divide-gray-100 overflow-y-auto flex-1">
-            {roles.map(role => (
-              <li 
-                key={role.id}
-                onClick={() => setSelectedRole(role.id)}
-                className={`px-4 py-4 cursor-pointer hover:bg-gray-50 transition-all flex items-center justify-between ${selectedRole === role.id ? 'bg-[#f0fdf4] border-l-4 border-[#107C41]' : 'border-l-4 border-transparent'}`}
-              >
-                <div>
-                  <p className={`text-sm font-semibold ${selectedRole === role.id ? 'text-[#107C41]' : 'text-gray-800'}`}>{role.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">{role.description}</p>
-                </div>
-                <Icons.ChevronRight className={`w-4 h-4 ${selectedRole === role.id ? 'text-[#107C41]' : 'text-gray-300'}`} />
-              </li>
-            ))}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={roles.map(r => r.id)} strategy={verticalListSortingStrategy}>
+                {roles.map(role => (
+                  <SortableRoleItem key={role.id} role={role} selectedRole={selectedRole} setSelectedRole={setSelectedRole} />
+                ))}
+              </SortableContext>
+            </DndContext>
           </ul>
         </div>
 
@@ -183,6 +253,45 @@ export default function RolesPage() {
           )}
         </div>
       </div>
+
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">새 직급 추가</h3>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <Icons.X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">직급 코드 (영문)</label>
+                <input 
+                  type="text" 
+                  value={newRoleName} 
+                  onChange={e => setNewRoleName(e.target.value)} 
+                  placeholder="예: manager" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">직급명 (한글 설명)</label>
+                <input 
+                  type="text" 
+                  value={newRoleDesc} 
+                  onChange={e => setNewRoleDesc(e.target.value)} 
+                  placeholder="예: 과장" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41]"
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-2">
+              <button onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">취소</button>
+              <button onClick={handleAddRole} className="px-4 py-2 text-sm font-medium text-white bg-[#107C41] hover:bg-[#0c5c30] rounded-lg transition-colors shadow-sm">추가하기</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

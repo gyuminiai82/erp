@@ -4,8 +4,8 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -800,
-    "scrollLeft": -514.8248,
+    "scrollTop": -512,
+    "scrollLeft": 0,
     "zoomLevel": 0.88,
     "show": 431,
     "database": 4,
@@ -276,23 +276,25 @@
         "columnIds": [
           "c6775524f50a4cfebe8bdfe55c200748",
           "94fbcd5836314e6b9aa674bd2ca40f02",
-          "f87467de121e4908b4f1e198b764ab53"
+          "f87467de121e4908b4f1e198b764ab53",
+          "f3e9c85a258e4e379af4763f8420fe6a"
         ],
         "seqColumnIds": [
           "c6775524f50a4cfebe8bdfe55c200748",
           "94fbcd5836314e6b9aa674bd2ca40f02",
-          "f87467de121e4908b4f1e198b764ab53"
+          "f87467de121e4908b4f1e198b764ab53",
+          "f3e9c85a258e4e379af4763f8420fe6a"
         ],
         "ui": {
-          "x": 518.1444,
-          "y": 770.2934,
+          "x": 439.7353,
+          "y": 732.7934,
           "zIndex": 1,
           "widthName": 60,
           "widthComment": 85,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781333556960,
+          "updateAt": 1781349403521,
           "createAt": 1781228564121
         }
       },
@@ -311,15 +313,15 @@
           "7322197b40b3490ea165dd8e4326afe8"
         ],
         "ui": {
-          "x": 496.985,
-          "y": 1166.6168,
+          "x": 45.8487,
+          "y": 899.5713,
           "zIndex": 1,
           "widthName": 65,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781334115922,
+          "updateAt": 1781349414793,
           "createAt": 1781228564121
         }
       },
@@ -336,15 +338,15 @@
           "0509f2b86a9949fe84b0d9df0732545d"
         ],
         "ui": {
-          "x": 565.8543,
-          "y": 972.0451,
+          "x": 616.9908,
+          "y": 931.136,
           "zIndex": 1,
           "widthName": 90,
           "widthComment": 93,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781334119019,
+          "updateAt": 1781349406409,
           "createAt": 1781228564121
         }
       },
@@ -2210,6 +2212,26 @@
           "updateAt": 1781249140005,
           "createAt": 1781249140005
         }
+      },
+      "f3e9c85a258e4e379af4763f8420fe6a": {
+        "id": "f3e9c85a258e4e379af4763f8420fe6a",
+        "tableId": "39cd720c5fbd4d3d91086c056da31fd4",
+        "name": "sort_order",
+        "comment": "정렬 순서",
+        "dataType": "INT",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781351590010,
+          "createAt": 1781351590010
+        }
       }
     },
     "relationshipEntities": {
@@ -2419,8 +2441,8 @@
           "columnIds": [
             "c6775524f50a4cfebe8bdfe55c200748"
           ],
-          "x": 711.6444,
-          "y": 898.2934,
+          "x": 633.2353,
+          "y": 860.7934,
           "direction": 8
         },
         "end": {
@@ -2428,9 +2450,9 @@
           "columnIds": [
             "352d95603e0744a48853659080a3ab5b"
           ],
-          "x": 755.8543,
-          "y": 972.0451,
-          "direction": 4
+          "x": 616.9908,
+          "y": 957.136,
+          "direction": 1
         },
         "meta": {
           "updateAt": 1781228564121,
@@ -2447,18 +2469,18 @@
           "columnIds": [
             "b2fd656d7c824aa492b3660f1d0f139a"
           ],
-          "x": 690.485,
-          "y": 1166.6168,
-          "direction": 4
+          "x": 432.8487,
+          "y": 963.5713,
+          "direction": 2
         },
         "end": {
           "tableId": "5aa3407f17174231ba8bab72c265c931",
           "columnIds": [
             "0509f2b86a9949fe84b0d9df0732545d"
           ],
-          "x": 755.8543,
-          "y": 1076.0451,
-          "direction": 8
+          "x": 616.9908,
+          "y": 1009.136,
+          "direction": 1
         },
         "meta": {
           "updateAt": 1781228564121,
@@ -2503,8 +2525,8 @@
           "columnIds": [
             "c6775524f50a4cfebe8bdfe55c200748"
           ],
-          "x": 905.1444,
-          "y": 802.2934,
+          "x": 826.7353,
+          "y": 764.7934,
           "direction": 2
         },
         "end": {
@@ -2559,8 +2581,8 @@
           "columnIds": [
             "c6775524f50a4cfebe8bdfe55c200748"
           ],
-          "x": 905.1444,
-          "y": 866.2934,
+          "x": 826.7353,
+          "y": 828.7934,
           "direction": 2
         },
         "end": {
