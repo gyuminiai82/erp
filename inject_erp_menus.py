@@ -22,48 +22,48 @@ def inject_menus():
                 "name": "인사/조직 관리",
                 "icon": "Users",
                 "submenus": [
-                    {"name": "사원 관리", "url": "/erp/employees", "roles": ["admin", "hr_manager"]},
-                    {"name": "부서 관리", "url": "/erp/departments", "roles": ["admin", "hr_manager"]},
-                    {"name": "인사 발령", "url": "/erp/appointments", "roles": ["admin", "hr_manager"]}
+                    {"name": "사원 관리", "url": "/erp/employees", "roles": ["master", "hr_manager"]},
+                    {"name": "부서 관리", "url": "/erp/departments", "roles": ["master", "hr_manager"]},
+                    {"name": "인사 발령", "url": "/erp/appointments", "roles": ["master", "hr_manager"]}
                 ]
             },
             {
                 "name": "근태/급여 관리",
                 "icon": "Clock",
                 "submenus": [
-                    {"name": "전체 근태 현황", "url": "/erp/attendance/all", "roles": ["admin", "hr_manager"]},
-                    {"name": "내 근태 현황", "url": "/erp/attendance/my", "roles": ["admin", "hr_manager", "dept_head", "employee"]},
-                    {"name": "휴가 결재(관리자)", "url": "/erp/leaves/approvals", "roles": ["admin", "hr_manager", "dept_head"]},
-                    {"name": "휴가 신청(개인)", "url": "/erp/leaves/my", "roles": ["admin", "hr_manager", "dept_head", "employee"]},
-                    {"name": "급여 대장", "url": "/erp/payroll", "roles": ["admin", "hr_manager"]},
-                    {"name": "내 급여 명세서", "url": "/erp/payslips", "roles": ["admin", "hr_manager", "dept_head", "employee"]}
+                    {"name": "전체 근태 현황", "url": "/erp/attendance/all", "roles": ["master", "hr_manager"]},
+                    {"name": "내 근태 현황", "url": "/erp/attendance/my", "roles": ["master", "hr_manager", "dept_head", "employee"]},
+                    {"name": "휴가 결재(관리자)", "url": "/erp/leaves/approvals", "roles": ["master", "hr_manager", "dept_head"]},
+                    {"name": "휴가 신청(개인)", "url": "/erp/leaves/my", "roles": ["master", "hr_manager", "dept_head", "employee"]},
+                    {"name": "급여 대장", "url": "/erp/payroll", "roles": ["master", "hr_manager"]},
+                    {"name": "내 급여 명세서", "url": "/erp/payslips", "roles": ["master", "hr_manager", "dept_head", "employee"]}
                 ]
             },
             {
                 "name": "회계/재무 관리",
                 "icon": "Calculator",
                 "submenus": [
-                    {"name": "전표 관리", "url": "/erp/vouchers", "roles": ["admin"]},
-                    {"name": "계정과목", "url": "/erp/accounts", "roles": ["admin"]},
-                    {"name": "자금 현황", "url": "/erp/funds", "roles": ["admin"]},
-                    {"name": "재무제표", "url": "/erp/statements", "roles": ["admin"]}
+                    {"name": "전표 관리", "url": "/erp/vouchers", "roles": ["master"]},
+                    {"name": "계정과목", "url": "/erp/accounts", "roles": ["master"]},
+                    {"name": "자금 현황", "url": "/erp/funds", "roles": ["master"]},
+                    {"name": "재무제표", "url": "/erp/statements", "roles": ["master"]}
                 ]
             },
             {
                 "name": "영업/물류 관리",
                 "icon": "Truck",
                 "submenus": [
-                    {"name": "거래처 관리", "url": "/erp/clients", "roles": ["admin"]},
-                    {"name": "수주/발주 등록", "url": "/erp/orders", "roles": ["admin"]},
-                    {"name": "재고 현황", "url": "/erp/inventory", "roles": ["admin"]}
+                    {"name": "거래처 관리", "url": "/erp/clients", "roles": ["master"]},
+                    {"name": "수주/발주 등록", "url": "/erp/orders", "roles": ["master"]},
+                    {"name": "재고 현황", "url": "/erp/inventory", "roles": ["master"]}
                 ]
             },
             {
                 "name": "전자결재",
                 "icon": "FileSignature",
                 "submenus": [
-                    {"name": "기안 작성", "url": "/erp/drafts", "roles": ["admin", "hr_manager", "dept_head", "employee"]},
-                    {"name": "결재함", "url": "/erp/approvals", "roles": ["admin", "hr_manager", "dept_head"]}
+                    {"name": "기안 작성", "url": "/erp/drafts", "roles": ["master", "hr_manager", "dept_head", "employee"]},
+                    {"name": "결재함", "url": "/erp/approvals", "roles": ["master", "hr_manager", "dept_head"]}
                 ]
             }
         ]
