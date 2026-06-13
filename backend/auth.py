@@ -102,13 +102,14 @@ def get_current_user_info(credentials: HTTPAuthorizationCredentials = Depends(se
         email = payload.get("sub")
         role = payload.get("role")
         if role == "admin":
-            return {"name": "System Admin", "email": email, "role_name": "시스템 관리자"}
+            return {"name": "System Admin", "email": email, "role_name": "시스템 관리자", "role_code": "admin"}
         else:
             user = db.query(models.Employee).filter(models.Employee.email == email).first()
             if user:
                 role_record = db.query(models.EmployeeRole).filter(models.EmployeeRole.employee_id == user.id).first()
+                role_code = role_record.role.name if role_record and role_record.role else "employee"
                 role_desc = role_record.role.description if role_record and role_record.role else "일반 사원"
-                return {"name": user.name, "email": user.email, "role_name": role_desc}
-            return {"name": "Unknown", "email": email, "role_name": "Unknown"}
+                return {"name": user.name, "email": user.email, "role_name": role_desc, "role_code": role_code}
+            return {"name": "Unknown", "email": email, "role_name": "Unknown", "role_code": "unknown"}
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")

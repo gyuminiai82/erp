@@ -17,9 +17,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
     setOpenMenuIds(prev => prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]);
   };
 
-  // HMR 강제 리로드를 위한 주석 추가
   useEffect(() => {
-    // 일반 사원(employee) 기준으로 메뉴를 불러옵니다.
     const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
     
     if (token) {
@@ -28,25 +26,25 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
       })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
-        if (data) setUserInfo(data);
-      })
-      .catch(err => console.error(err));
-    }
-
-    fetch("http://localhost:8000/api/menus/my?role_name=employee", {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setMenus(data);
-        } else {
-          console.error("메뉴 응답 오류:", data);
+        if (data) {
+          setUserInfo(data);
+          
+          fetch(`http://localhost:8000/api/menus/my?role_name=${data.role_code || 'employee'}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          .then(res => res.json())
+          .then(menuData => {
+            if (Array.isArray(menuData)) {
+              setMenus(menuData);
+            }
+          })
+          .catch(err => console.error(err));
         }
       })
       .catch(err => console.error(err));
+    }
   }, []);
 
   const renderIcon = (iconName: string) => {
