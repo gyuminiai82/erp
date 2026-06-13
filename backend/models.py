@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time, func
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -203,3 +203,14 @@ class AttendancePolicy(Base):
     core_time_end = Column(Time, nullable=True)
     required_work_hours = Column(Integer, default=8)
     is_default = Column(Boolean, default=False)
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    created_at = Column(DateTime, default=func.now(), index=True)
+    event_title = Column(String, index=True)
+    event_desc = Column(String)
+    user_email = Column(String, index=True)
+    ip_address = Column(String)
+    severity = Column(String, index=True)  # INFO, WARNING, HIGH, SYSTEM

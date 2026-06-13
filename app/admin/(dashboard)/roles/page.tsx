@@ -5,21 +5,27 @@ import * as Icons from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
 
 function SortableRoleItem({ role, selectedRole, setSelectedRole }: any) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: role.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
   return (
     <li
-      ref={setNodeRef} style={style} {...attributes} {...listeners}
-      onClick={() => setSelectedRole(role.id)}
+      ref={setNodeRef} style={style}
       className={`px-4 py-4 cursor-pointer hover:bg-gray-50 transition-all flex items-center justify-between ${selectedRole === role.id ? 'bg-[#f0fdf4] border-l-4 border-[#107C41]' : 'border-l-4 border-transparent'}`}
     >
-      <div>
+      <div 
+        className="flex-1 h-full flex flex-col justify-center" 
+        onClick={() => setSelectedRole(role.id)}
+        onPointerDown={() => setSelectedRole(role.id)}
+      >
         <p className={`text-sm font-semibold ${selectedRole === role.id ? 'text-[#107C41]' : 'text-gray-800'}`}>{role.name}</p>
         <p className="text-xs text-gray-500 mt-1">{role.description}</p>
       </div>
-      <Icons.GripVertical className="w-4 h-4 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing" />
+      <div {...attributes} {...listeners} className="p-2 -mr-2 cursor-grab active:cursor-grabbing flex items-center justify-center rounded hover:bg-gray-100">
+        <Icons.GripVertical className="w-4 h-4 text-gray-400" />
+      </div>
     </li>
   );
 }
@@ -37,7 +43,11 @@ export default function RolesPage() {
   const [newRoleDesc, setNewRoleDesc] = useState('');
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -82,6 +92,36 @@ export default function RolesPage() {
         newRoleMenus = newRoleMenus.filter(rm => rm.menu_id !== menuId);
       }
     }
+    setRoleMenus(newRoleMenus);
+    
+    if (selectedRole) {
+      fetch(`http://localhost:8000/api/roles/${selectedRole}/menus`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menus: newRoleMenus })
+      });
+    }
+  };
+
+  const handleToggleGroup = (childMenuIds: number[], turnOn: boolean) => {
+    let newRoleMenus = [...roleMenus];
+    
+    if (turnOn) {
+      childMenuIds.forEach(menuId => {
+        let menuPerm = newRoleMenus.find(rm => rm.menu_id === menuId);
+        if (!menuPerm) {
+          newRoleMenus.push({ menu_id: menuId, can_read: true, can_write: true, can_delete: true, can_print: true });
+        } else {
+          menuPerm.can_read = true;
+          menuPerm.can_write = true;
+          menuPerm.can_delete = true;
+          menuPerm.can_print = true;
+        }
+      });
+    } else {
+      newRoleMenus = newRoleMenus.filter(rm => !childMenuIds.includes(rm.menu_id));
+    }
+    
     setRoleMenus(newRoleMenus);
     
     if (selectedRole) {
@@ -145,19 +185,24 @@ export default function RolesPage() {
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">롤(권한) 설정</h1>
-          <p className="text-sm text-gray-500 mt-1">시스템 직급별로 접근 가능한 사이드바 메뉴를 매핑합니다.</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">권한 설정</h1>
+          <p className="text-sm text-gray-500 mt-1">시스템 권한별로 접근 가능한 사이드바 메뉴를 매핑합니다.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="col-span-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-[600px]">
           <div className="px-4 py-4 bg-gray-50 border-b border-gray-100 font-semibold text-sm text-gray-700 flex items-center justify-between">
-            <span>직급 목록</span>
+            <span>권한 목록</span>
             <button onClick={() => setIsAddModalOpen(true)} className="text-[#107C41] hover:underline text-xs font-medium">추가</button>
           </div>
           <ul className="divide-y divide-gray-100 overflow-y-auto flex-1">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <DndContext 
+              sensors={sensors} 
+              collisionDetection={closestCenter} 
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            >
               <SortableContext items={roles.map(r => r.id)} strategy={verticalListSortingStrategy}>
                 {roles.map(role => (
                   <SortableRoleItem key={role.id} role={role} selectedRole={selectedRole} setSelectedRole={setSelectedRole} />
@@ -176,7 +221,7 @@ export default function RolesPage() {
                     <span className="text-[#107C41] font-bold mr-1">{roles.find(r => r.id === selectedRole)?.name}</span> 
                     권한 설정
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">해당 직급의 상세 메뉴 접근 권한을 관리합니다. (자동 저장)</p>
+                  <p className="text-xs text-gray-500 mt-1">해당 권한의 상세 메뉴 접근 권한을 관리합니다. (자동 저장)</p>
                 </div>
               </div>
               <div className="p-6 space-y-6 overflow-y-auto relative">
@@ -194,11 +239,38 @@ export default function RolesPage() {
                   
                   return (
                     <div key={parent.id} className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
-                      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center">
-                        <div className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center mr-3 shadow-sm">
-                          {renderIcon(parent.icon)}
+                      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center mr-3 shadow-sm">
+                            {renderIcon(parent.icon)}
+                          </div>
+                          <h4 className="font-bold text-gray-800 text-sm">{parent.name}</h4>
                         </div>
-                        <h4 className="font-bold text-gray-800 text-sm">{parent.name}</h4>
+                        
+                        {(() => {
+                          const childMenuIds = childMenus.map(m => m.id);
+                          const isAllChecked = childMenuIds.every(id => {
+                            const rm = roleMenus.find(r => r.menu_id === id);
+                            return rm && rm.can_read && rm.can_write && rm.can_delete && rm.can_print;
+                          });
+                          const isSomeChecked = !isAllChecked && childMenuIds.some(id => {
+                            const rm = roleMenus.find(r => r.menu_id === id);
+                            return rm && (rm.can_read || rm.can_write || rm.can_delete || rm.can_print);
+                          });
+
+                          return (
+                            <label className="flex items-center space-x-2 cursor-pointer group bg-white border border-gray-200 px-2 py-1 rounded-md shadow-sm hover:bg-gray-100 transition-colors">
+                              <input 
+                                type="checkbox" 
+                                checked={isAllChecked} 
+                                ref={el => { if (el) el.indeterminate = isSomeChecked; }}
+                                onChange={(e) => handleToggleGroup(childMenuIds, e.target.checked)} 
+                                className="w-4 h-4 text-[#107C41] border-gray-300 rounded focus:ring-[#107C41] cursor-pointer" 
+                              />
+                              <span className="text-xs font-semibold text-gray-700">전체 선택</span>
+                            </label>
+                          );
+                        })()}
                       </div>
                       <div className="divide-y divide-gray-100">
                         {childMenus.map(menu => {
@@ -247,8 +319,8 @@ export default function RolesPage() {
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100 shadow-sm">
                 <Icons.ShieldAlert className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-gray-900 font-semibold mb-1">직급을 선택해주세요</h3>
-              <p className="text-gray-500 text-sm">좌측에서 직급을 선택하면<br/>접근 가능한 메뉴 권한을 설정할 수 있습니다.</p>
+              <h3 className="text-gray-900 font-semibold mb-1">권한을 선택해주세요</h3>
+              <p className="text-gray-500 text-sm">좌측에서 권한을 선택하면<br/>접근 가능한 메뉴 권한을 설정할 수 있습니다.</p>
             </div>
           )}
         </div>
@@ -258,14 +330,14 @@ export default function RolesPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-bold text-gray-900">새 직급 추가</h3>
+              <h3 className="font-bold text-gray-900">새 권한 추가</h3>
               <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <Icons.X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">직급 코드 (영문)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">권한 코드 (영문)</label>
                 <input 
                   type="text" 
                   value={newRoleName} 
@@ -275,7 +347,7 @@ export default function RolesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">직급명 (한글 설명)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">권한명 (한글 설명)</label>
                 <input 
                   type="text" 
                   value={newRoleDesc} 

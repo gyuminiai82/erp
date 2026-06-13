@@ -1,11 +1,46 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, ShieldAlert, Activity, Database, HardDrive, AlertTriangle, Cpu, Terminal } from 'lucide-react';
 import { useWebSocket } from './layout';
 
 export default function AdminDashboardPage() {
   const { activeSessions, systemMetrics } = useWebSocket();
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/audit-logs')
+      .then(res => res.json())
+      .then(data => setAuditLogs(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  const getSeverityUI = (severity: string) => {
+    switch(severity) {
+      case 'HIGH':
+        return { icon: <ShieldAlert className="w-4 h-4 text-red-500 mr-2" />, badge: 'bg-red-100 text-red-700', label: 'HIGH' };
+      case 'WARNING':
+        return { icon: <AlertTriangle className="w-4 h-4 text-amber-500 mr-2" />, badge: 'bg-amber-100 text-amber-700', label: 'WARN' };
+      case 'SYSTEM':
+        return { icon: <Database className="w-4 h-4 text-indigo-400 mr-2" />, badge: 'bg-gray-100 text-gray-600', label: 'SYS' };
+      default:
+        return { icon: <Terminal className="w-4 h-4 text-gray-400 mr-2" />, badge: 'bg-blue-100 text-blue-700', label: 'INFO' };
+    }
+  };
+
+  const formatTimeAgo = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    return `${diffDays}일 전`;
+  };
   
   // Use websocket metrics if available, otherwise fallback to 0
   const metrics = systemMetrics || {
@@ -42,70 +77,29 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                <tr className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-gray-500">10분 전</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <Terminal className="w-4 h-4 text-gray-400 mr-2" />
-                      <span className="font-medium text-gray-900">계정 권한 변경</span>
-                    </div>
-                    <div className="text-xs text-gray-500 ml-6">EMP23001 사원의 권한을 '부서장'으로 변경</div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">admin@minstudio.com</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wider">
-                      INFO
-                    </span>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-gray-500">45분 전</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <ShieldAlert className="w-4 h-4 text-red-500 mr-2" />
-                      <span className="font-medium text-gray-900">비밀번호 연속 실패</span>
-                    </div>
-                    <div className="text-xs text-gray-500 ml-6">EMP19002 계정으로 로그인 실패 5회 초과</div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500 text-red-600">203.0.113.45 (미확인 IP)</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">
-                      HIGH
-                    </span>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-gray-500">2시간 전</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <Database className="w-4 h-4 text-indigo-400 mr-2" />
-                      <span className="font-medium text-gray-900">데이터베이스 자동 백업 완료</span>
-                    </div>
-                    <div className="text-xs text-gray-500 ml-6">정기 백업(erp_backup_260612.sql) 생성됨</div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">System</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 uppercase tracking-wider">
-                      SYS
-                    </span>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-gray-500">3시간 전</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 mr-2" />
-                      <span className="font-medium text-gray-900">외부 API 호출 한도 근접</span>
-                    </div>
-                    <div className="text-xs text-gray-500 ml-6">SMS 발송 API 일일 한도의 90% 도달</div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500">System</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">
-                      WARN
-                    </span>
-                  </td>
-                </tr>
+                {auditLogs.map((log) => {
+                  const ui = getSeverityUI(log.severity);
+                  return (
+                    <tr key={log.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 text-gray-500">{formatTimeAgo(log.created_at)}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          {ui.icon}
+                          <span className="font-medium text-gray-900">{log.event_title}</span>
+                        </div>
+                        <div className="text-xs text-gray-500 ml-6">{log.event_desc}</div>
+                      </td>
+                      <td className={`px-6 py-4 ${log.severity === 'HIGH' ? 'text-red-600' : 'text-gray-500'}`}>
+                        {log.user_email === 'unknown' ? `${log.ip_address} (미확인 IP)` : log.user_email}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ui.badge}`}>
+                          {ui.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
