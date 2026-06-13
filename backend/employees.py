@@ -60,7 +60,7 @@ def get_next_emp_no(db: Session = Depends(get_db)):
 
 @router.get("")
 def get_employees(db: Session = Depends(get_db)):
-    employees = db.query(models.Employee).all()
+    employees = db.query(models.Employee).order_by(models.Employee.emp_no).all()
     result = []
     for emp in employees:
         # Get primary role
