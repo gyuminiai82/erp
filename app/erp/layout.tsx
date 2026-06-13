@@ -15,7 +15,13 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
     // 일반 사원(employee) 기준으로 메뉴를 불러옵니다.
     fetch("http://localhost:8000/api/menus/my?role_name=employee")
       .then(res => res.json())
-      .then(data => setMenus(data))
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMenus(data);
+        } else {
+          console.error("메뉴 응답 오류:", data);
+        }
+      })
       .catch(err => console.error(err));
   }, []);
 
