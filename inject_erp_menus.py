@@ -4,7 +4,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text
 from models import Menu, Role, RoleMenu
 
 engine = sqlalchemy.create_engine(os.getenv("DATABASE_URL", "postgresql://postgres:postgresql@localhost/erp"))
@@ -23,65 +22,71 @@ def inject_menus():
                 "name": "인사/조직 관리",
                 "icon": "Users",
                 "submenus": [
-                    {"name": "사원 관리", "url": "/employees"},
-                    {"name": "부서 관리", "url": "/departments"},
-                    {"name": "인사 발령", "url": "/appointments"}
+                    {"name": "사원 관리", "url": "/erp/employees", "roles": ["admin", "hr_manager"]},
+                    {"name": "부서 관리", "url": "/erp/departments", "roles": ["admin", "hr_manager"]},
+                    {"name": "인사 발령", "url": "/erp/appointments", "roles": ["admin", "hr_manager"]}
                 ]
             },
             {
                 "name": "근태/급여 관리",
                 "icon": "Clock",
                 "submenus": [
-                    {"name": "근태 현황", "url": "/attendance"},
-                    {"name": "휴가 결재", "url": "/leaves"},
-                    {"name": "급여 대장", "url": "/payroll"},
-                    {"name": "개인 급여 명세", "url": "/payslips"}
+                    {"name": "전체 근태 현황", "url": "/erp/attendance/all", "roles": ["admin", "hr_manager"]},
+                    {"name": "내 근태 현황", "url": "/erp/attendance/my", "roles": ["admin", "hr_manager", "dept_head", "employee"]},
+                    {"name": "휴가 결재(관리자)", "url": "/erp/leaves/approvals", "roles": ["admin", "hr_manager", "dept_head"]},
+                    {"name": "휴가 신청(개인)", "url": "/erp/leaves/my", "roles": ["admin", "hr_manager", "dept_head", "employee"]},
+                    {"name": "급여 대장", "url": "/erp/payroll", "roles": ["admin", "hr_manager"]},
+                    {"name": "내 급여 명세서", "url": "/erp/payslips", "roles": ["admin", "hr_manager", "dept_head", "employee"]}
                 ]
             },
             {
                 "name": "회계/재무 관리",
                 "icon": "Calculator",
                 "submenus": [
-                    {"name": "전표 관리", "url": "/vouchers"},
-                    {"name": "계정과목", "url": "/accounts"},
-                    {"name": "자금 현황", "url": "/funds"},
-                    {"name": "재무제표", "url": "/statements"}
+                    {"name": "전표 관리", "url": "/erp/vouchers", "roles": ["admin"]},
+                    {"name": "계정과목", "url": "/erp/accounts", "roles": ["admin"]},
+                    {"name": "자금 현황", "url": "/erp/funds", "roles": ["admin"]},
+                    {"name": "재무제표", "url": "/erp/statements", "roles": ["admin"]}
                 ]
             },
             {
                 "name": "영업/물류 관리",
                 "icon": "Truck",
                 "submenus": [
-                    {"name": "거래처 관리", "url": "/clients"},
-                    {"name": "수주/발주 등록", "url": "/orders"},
-                    {"name": "재고 현황", "url": "/inventory"}
+                    {"name": "거래처 관리", "url": "/erp/clients", "roles": ["admin"]},
+                    {"name": "수주/발주 등록", "url": "/erp/orders", "roles": ["admin"]},
+                    {"name": "재고 현황", "url": "/erp/inventory", "roles": ["admin"]}
                 ]
             },
             {
                 "name": "전자결재",
                 "icon": "FileSignature",
                 "submenus": [
-                    {"name": "기안 작성", "url": "/drafts"},
-                    {"name": "결재함", "url": "/approvals"}
+                    {"name": "기안 작성", "url": "/erp/drafts", "roles": ["admin", "hr_manager", "dept_head", "employee"]},
+                    {"name": "결재함", "url": "/erp/approvals", "roles": ["admin", "hr_manager", "dept_head"]}
                 ]
             }
         ]
 
-        admin_role = db.query(Role).filter(Role.name == "admin").first()
-        employee_role = db.query(Role).filter(Role.name == "employee").first()
+        all_roles = db.query(Role).all()
+        role_map = {r.name: r for r in all_roles}
 
         sort_order = 10
         for parent_data in menus_data:
+            parent_roles = set()
+            for sub_data in parent_data["submenus"]:
+                for r_name in sub_data["roles"]:
+                    parent_roles.add(r_name)
+
             parent_menu = Menu(name=parent_data["name"], icon=parent_data["icon"], sort_order=sort_order)
             db.add(parent_menu)
             db.commit()
             db.refresh(parent_menu)
             sort_order += 10
             
-            if admin_role:
-                db.add(RoleMenu(role_id=admin_role.id, menu_id=parent_menu.id))
-            if employee_role:
-                db.add(RoleMenu(role_id=employee_role.id, menu_id=parent_menu.id))
+            for r_name in parent_roles:
+                if r_name in role_map:
+                    db.add(RoleMenu(role_id=role_map[r_name].id, menu_id=parent_menu.id))
 
             sub_sort_order = 10
             for sub_data in parent_data["submenus"]:
@@ -96,13 +101,12 @@ def inject_menus():
                 db.refresh(sub_menu)
                 sub_sort_order += 10
                 
-                if admin_role:
-                    db.add(RoleMenu(role_id=admin_role.id, menu_id=sub_menu.id))
-                if employee_role:
-                    db.add(RoleMenu(role_id=employee_role.id, menu_id=sub_menu.id))
+                for r_name in sub_data["roles"]:
+                    if r_name in role_map:
+                        db.add(RoleMenu(role_id=role_map[r_name].id, menu_id=sub_menu.id))
                     
         db.commit()
-        print("Standard ERP menus injected successfully!")
+        print("Role-based ERP menus injected successfully!")
         
     except Exception as e:
         print(f"Error: {e}")
