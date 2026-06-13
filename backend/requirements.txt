@@ -7,3 +7,4 @@ python-multipart
 psutil
 pydantic
 passlib
+psycopg2-binary

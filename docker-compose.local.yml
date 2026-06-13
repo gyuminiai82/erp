@@ -25,3 +25,4 @@ services:
       - ./backend:/app
     environment:
       - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:postgresql@host.docker.internal/erp

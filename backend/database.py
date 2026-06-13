@@ -2,8 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import os
+
 # PostgreSQL 데이터베이스 URL
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgresql@localhost/erp"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgresql@localhost/erp")
 
 # engine 생성
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
