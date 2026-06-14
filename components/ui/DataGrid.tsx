@@ -23,8 +23,8 @@ export interface DataGridProps {
 export function DataGrid({
   columns,
   data,
-  rowHeight = 24, // Excel-like dense row height
-  headerHeight = 28,
+  rowHeight = 32, // slightly taller row height
+  headerHeight = 36,
   onDataChange,
   className = "",
   style
@@ -333,7 +333,7 @@ export function DataGrid({
                 
                 {/* Resizer Handle */}
                 <div 
-                  className={`absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 transition-colors ${resizingCol === i ? 'bg-blue-500 opacity-100' : 'bg-gray-300 opacity-0 group-hover:opacity-100 hover:bg-blue-400'}`}
+                  className={`absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-gray-400 transition-colors ${resizingCol === i ? 'bg-gray-400' : 'bg-transparent'}`}
                   onMouseDown={(e) => handleResizeStart(i, e)}
                 />
               </div>
