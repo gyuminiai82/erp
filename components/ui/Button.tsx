@@ -26,7 +26,7 @@ export function Button({ loading = false, variant = 'default', size = 'default',
   return (
     <button
       disabled={loading || props.disabled}
-      className={`flex justify-center border font-semibold rounded-[4px] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm ${variantClass} ${sizeClass} ${className}`}
+      className={`flex items-center justify-center border font-semibold rounded-[4px] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm ${variantClass} ${sizeClass} ${className}`}
       {...props}
     >
       {loading ? (
