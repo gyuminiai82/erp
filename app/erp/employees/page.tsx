@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, UserPlus, FileDown } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -73,6 +74,39 @@ export default function EmployeesPage() {
     }
   };
 
+  const columns: ColumnDef[] = [
+    { field: 'emp_no', headerName: '사번', width: 120 },
+    { field: 'name', headerName: '이름', width: 120, editable: true },
+    { 
+      field: 'department', 
+      headerName: '부서', 
+      width: 150,
+      renderCell: (val: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{val}</span>
+    },
+    { 
+      field: 'position', 
+      headerName: '직급', 
+      width: 100,
+      renderCell: (val: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">{val}</span>
+    },
+    { field: 'phone', headerName: '연락처', width: 150, editable: true },
+    { field: 'employment_type', headerName: '고용형태', width: 120, editable: true },
+    { 
+      field: 'status', 
+      headerName: '상태', 
+      width: 100,
+      renderCell: (val: any) => <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${val === '재직' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{val}</span>
+    },
+    { field: 'hire_date', headerName: '입사일', width: 120 }
+  ];
+
+  const handleDataChange = (rowIndex: number, field: string, newValue: any) => {
+    const updated = [...employees];
+    updated[rowIndex] = { ...updated[rowIndex], [field]: newValue };
+    setEmployees(updated);
+    // TODO: 연동을 원하시면 별도 PUT API 호출을 여기에 추가합니다.
+  };
+
   if (loading) return <div className="p-8 text-gray-500 text-center">직원 데이터를 불러오는 중...</div>;
 
   return (
@@ -110,54 +144,13 @@ export default function EmployeesPage() {
           </select>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                <th className="py-3 px-6 font-semibold">사번</th>
-                <th className="py-3 px-6 font-semibold">이름</th>
-                <th className="py-3 px-6 font-semibold">부서</th>
-                <th className="py-3 px-6 font-semibold">직급</th>
-                <th className="py-3 px-6 font-semibold">연락처</th>
-                <th className="py-3 px-6 font-semibold">고용형태</th>
-                <th className="py-3 px-6 font-semibold">상태</th>
-                <th className="py-3 px-6 font-semibold">입사일</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              {employees.map((emp) => (
-                <tr key={emp.id} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors">
-                  <td className="py-4 px-6 text-gray-600 font-medium">{emp.emp_no}</td>
-                  <td className="py-4 px-6 font-bold text-gray-900">{emp.name}</td>
-                  <td className="py-4 px-6 text-gray-600">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {emp.department}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-gray-600">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                      {emp.position}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-gray-500">{emp.phone || '-'}</td>
-                  <td className="py-4 px-6 text-gray-500">{emp.employment_type || '-'}</td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                      emp.status === '재직' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {emp.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-gray-500">{emp.hire_date || '-'}</td>
-                </tr>
-              ))}
-              {employees.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-gray-500">등록된 사원이 없습니다.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="overflow-hidden flex flex-col h-[600px] border-t border-gray-100">
+          <DataGrid 
+            columns={columns} 
+            data={employees} 
+            onDataChange={handleDataChange} 
+            className="flex-1 border-none"
+          />
         </div>
       </div>
 
