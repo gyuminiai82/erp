@@ -83,8 +83,7 @@ export default function EmployeesPage() {
       width: 150,
       editable: true,
       editType: 'select',
-      options: departments.map(d => ({ label: d.name, value: d.name })),
-      renderCell: (val: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{val}</span>
+      options: departments.map(d => ({ label: d.name, value: d.name }))
     },
     { 
       field: 'position', 
@@ -92,8 +91,7 @@ export default function EmployeesPage() {
       width: 100,
       editable: true,
       editType: 'select',
-      options: positions.map(p => ({ label: p.name, value: p.name })),
-      renderCell: (val: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">{val}</span>
+      options: positions.map(p => ({ label: p.name, value: p.name }))
     },
     { field: 'phone', headerName: '연락처', width: 150, editable: true },
     { 
@@ -120,8 +118,7 @@ export default function EmployeesPage() {
         { label: '재직', value: '재직' },
         { label: '휴직', value: '휴직' },
         { label: '퇴사', value: '퇴사' }
-      ],
-      renderCell: (val: any) => <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${val === '재직' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{val}</span>
+      ]
     },
     { field: 'hire_date', headerName: '입사일', width: 120 }
   ];
