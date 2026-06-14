@@ -117,5 +117,6 @@ def get_current_user_info(credentials: HTTPAuthorizationCredentials = Depends(se
                 role_desc = role_record.role.description if role_record and role_record.role else "일반 사원"
                 return {"name": user.name, "email": user.email, "role_name": role_desc, "role_code": role_code}
             return {"name": "Unknown", "email": email, "role_name": "Unknown", "role_code": "unknown"}
-    except JWTError:
+    except JWTError as e:
+        print(f"JWTError: {e}")
         raise HTTPException(status_code=401, detail="Invalid token")

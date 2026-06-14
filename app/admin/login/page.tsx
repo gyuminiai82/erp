@@ -45,6 +45,7 @@ export default function AdminLogin() {
       const data = await response.json();
       
       localStorage.setItem("erp_access_token", data.access_token);
+      localStorage.setItem("erp_token", data.access_token);
       localStorage.setItem("erp_user_role", data.role);
 
       router.push(data.role === "admin" ? "/admin" : "/erp");

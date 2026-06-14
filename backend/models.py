@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time, func
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time, func, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -263,3 +263,14 @@ class Appointment(Base):
     after_dept = relationship("Department", foreign_keys=[after_dept_id])
     before_pos = relationship("Position", foreign_keys=[before_pos_id])
     after_pos = relationship("Position", foreign_keys=[after_pos_id])
+
+class LeaveBalance(Base):
+    __tablename__ = "leave_balances"
+
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    year = Column(Integer, nullable=False)
+    total_days = Column(Float, default=0.0)
+    used_days = Column(Float, default=0.0)
+
+    employee = relationship("Employee")

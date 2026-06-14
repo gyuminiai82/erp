@@ -20,38 +20,40 @@ class RoleUpdateRequest(BaseModel):
 class EmployeeBulkDeleteRequest(BaseModel):
     employee_ids: List[int]
 
+from typing import List, Optional
+
 class EmployeeUpdateRequest(BaseModel):
     id: int
-    name: str = None
-    email: str = None
-    department: str = None
-    position: str = None
-    phone: str = None
-    birth_date: str = None
-    gender: str = None
-    address: str = None
-    employment_type: str = None
-    resident_num: str = None
-    status: str = None
-    hire_date: str = None
+    name: Optional[str] = None
+    email: Optional[str] = None
+    department: Optional[str] = None
+    position: Optional[str] = None
+    phone: Optional[str] = None
+    birth_date: Optional[str] = None
+    gender: Optional[str] = None
+    address: Optional[str] = None
+    employment_type: Optional[str] = None
+    resident_num: Optional[str] = None
+    status: Optional[str] = None
+    hire_date: Optional[str] = None
 
 class EmployeeBulkUpdateRequest(BaseModel):
     employees: List[EmployeeUpdateRequest]
 
 class EmployeeCreateRequest(BaseModel):
-    emp_no: str = None  # Frontend might send it, but we'll override it
+    emp_no: Optional[str] = None  # Frontend might send it, but we'll override it
     name: str
     email: str
-    department_id: int = None
-    position_id: int = None
+    department_id: Optional[int] = None
+    position_id: Optional[int] = None
     role_id: str = "employee"
-    phone: str = None
-    birth_date: str = None
-    gender: str = None
-    address: str = None
+    phone: Optional[str] = None
+    birth_date: Optional[str] = None
+    gender: Optional[str] = None
+    address: Optional[str] = None
     employment_type: str = "정규직"
-    resident_num: str = None
-    profile_image_url: str = None
+    resident_num: Optional[str] = None
+    profile_image_url: Optional[str] = None
 
 @router.get("/departments")
 def get_departments(db: Session = Depends(get_db)):
@@ -117,7 +119,7 @@ def get_employees(db: Session = Depends(get_db)):
             "gender": emp.gender,
             "address": emp.address,
             "employment_type": emp.employment_type,
-            "resident_num": crypto.mask_resident_num(emp.resident_num),
+            "resident_num": crypto.decrypt_data(emp.resident_num),
             "profile_image_url": emp.profile_image_url
         })
     return result

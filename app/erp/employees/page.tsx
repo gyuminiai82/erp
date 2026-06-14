@@ -65,6 +65,15 @@ export default function EmployeesPage() {
     fetchData();
   }, []);
 
+  const formatApiError = (detail: any, defaultMsg: string) => {
+    if (Array.isArray(detail)) {
+      return detail.map((e: any) => `${e.loc?.join('.')} - ${e.msg}`).join('\n');
+    }
+    if (typeof detail === 'string') return detail;
+    if (detail) return JSON.stringify(detail);
+    return defaultMsg;
+  };
+
   const handleCreate = async () => {
     try {
       const res = await fetch("http://localhost:8000/api/employees", {
@@ -91,7 +100,7 @@ export default function EmployeesPage() {
         fetchData();
       } else {
         const data = await res.json();
-        await showAlert(data.detail || "생성 실패", { type: "error" });
+        await showAlert(formatApiError(data.detail, "생성 실패"), { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -135,7 +144,7 @@ export default function EmployeesPage() {
         });
         if (!delRes.ok) {
           const data = await delRes.json();
-          throw new Error(data.detail || "삭제 실패");
+          throw new Error(formatApiError(data.detail, "삭제 실패"));
         }
       }
 
@@ -165,7 +174,7 @@ export default function EmployeesPage() {
         });
         if (!upRes.ok) {
           const data = await upRes.json();
-          throw new Error(data.detail || "수정 실패");
+          throw new Error(formatApiError(data.detail, "수정 실패"));
         }
       }
 
@@ -181,7 +190,7 @@ export default function EmployeesPage() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('사원목록');
 
-    worksheet.columns = [
+    const defaultCols = [
       { header: '사번', key: 'emp_no', width: 12 },
       { header: '이름', key: 'name', width: 10 },
       { header: '소속 부서', key: 'department', width: 15 },
@@ -196,6 +205,27 @@ export default function EmployeesPage() {
       { header: '주소', key: 'address', width: 40 },
       { header: '고용형태', key: 'employment_type', width: 12 },
     ];
+
+    try {
+      const saved = localStorage.getItem("erp_employees_grid_columns");
+      if (saved) {
+        const savedFields = JSON.parse(saved);
+        const orderedCols: any[] = [];
+        const added: any[] = [];
+        savedFields.forEach((field: string) => {
+          const col = defaultCols.find(c => c.key === field);
+          if (col) orderedCols.push(col);
+        });
+        defaultCols.forEach(c => {
+          if (!orderedCols.includes(c)) added.push(c);
+        });
+        worksheet.columns = [...orderedCols, ...added];
+      } else {
+        worksheet.columns = defaultCols;
+      }
+    } catch (e) {
+      worksheet.columns = defaultCols;
+    }
 
     employees.forEach(emp => {
       worksheet.addRow({
@@ -234,7 +264,8 @@ export default function EmployeesPage() {
           };
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         } else {
-          if (colNumber === 7 || colNumber === 12) {
+          const colKey = worksheet.columns[colNumber - 1].key;
+          if (colKey === 'email' || colKey === 'address') {
             cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
           } else {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -256,6 +287,13 @@ export default function EmployeesPage() {
     if (!confirmed) return;
     setSelectedRowIndices([]);
     fetchData(); // Refetch from server to clear all local changes
+  };
+
+  const maskResidentNum = (v: any) => {
+    if (!v || typeof v !== 'string') return v;
+    if (v.length === 14 && v[6] === '-') return v.substring(0, 8) + '******';
+    if (v.length === 13) return v.substring(0, 7) + '******';
+    return v;
   };
 
   const columns: ColumnDef[] = [
@@ -315,7 +353,7 @@ export default function EmployeesPage() {
       editType: 'select',
       options: [{ label: '남성', value: '남성' }, { label: '여성', value: '여성' }]
     },
-    { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true },
+    { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true, renderCell: (v) => maskResidentNum(v) },
     { field: 'address', headerName: '주소', width: 250, editable: true }
   ];
 
@@ -372,68 +410,71 @@ export default function EmployeesPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col xl:flex-row justify-end items-start xl:items-center gap-4">
-          <div className="flex space-x-4 w-full xl:w-auto items-center">
-            <div className="relative flex-1 xl:w-[250px]">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-              <Input 
-                value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
-                onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
-                className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
-                placeholder="이름, 사번, 이메일 검색..." 
-              />
-            </div>
-            <select 
-              value={searchDept}
-              onChange={e => setSearchDept(e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent w-32"
-            >
-              <option value="">모든 부서</option>
-              {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
-            </select>
-            <select 
-              value={searchPos}
-              onChange={e => setSearchPos(e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent w-32"
-            >
-              <option value="">모든 직급</option>
-              {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
-            </select>
-            <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10">
-              검색
-            </Button>
-          </div>
-        </div>
-
-        <div className="p-6 bg-gray-50/50">
-          <div className="flex justify-end mb-3 gap-2">
-            {employees.some(e => e._state === 'D' || e._state === 'U') && (
-              <>
-                <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all">
-                  <Undo2 className="w-4 h-4 mr-2" />
-                  변경 취소
-                </Button>
-                <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200">
-                  <Save className="w-4 h-4 mr-2" />
-                  변경사항 저장
-                </Button>
-              </>
-            )}
-            {selectedRowIndices.length > 0 && (
-              <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent">
-                <Trash2 className="w-4 h-4 mr-2" />
-                선택 삭제 ({selectedRowIndices.length})
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
+            
+            {/* Left side: Search inputs */}
+            <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+              <div className="relative flex-1 min-w-[200px] xl:w-[250px]">
+                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                <Input 
+                  value={searchKeyword}
+                  onChange={e => setSearchKeyword(e.target.value)}
+                  onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
+                  className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
+                  placeholder="이름, 사번, 이메일 검색..." 
+                />
+              </div>
+              <select 
+                value={searchDept}
+                onChange={e => setSearchDept(e.target.value)}
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+              >
+                <option value="">모든 부서</option>
+                {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+              </select>
+              <select 
+                value={searchPos}
+                onChange={e => setSearchPos(e.target.value)}
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+              >
+                <option value="">모든 직급</option>
+                {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+              </select>
+              <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10 shrink-0">
+                검색
               </Button>
-            )}
-            <Button variant="outline" className="text-gray-700 bg-white" onClick={handleExcelDownload}>
-              <FileDown className="w-4 h-4 mr-2" />
-              엑셀 다운로드
-            </Button>
-            <Button onClick={() => setIsModalOpen(true)}>
-              <UserPlus className="w-4 h-4 mr-2" />
-              신규 사원 등록
-            </Button>
+            </div>
+
+            {/* Right side: Action buttons */}
+            <div className="flex flex-wrap justify-start xl:justify-end gap-2 w-full xl:w-auto">
+              {employees.some(e => e._state === 'D' || e._state === 'U') && (
+                <>
+                  <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
+                    <Undo2 className="w-4 h-4 mr-2" />
+                    변경 취소
+                  </Button>
+                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200 shrink-0">
+                    <Save className="w-4 h-4 mr-2" />
+                    변경사항 저장
+                  </Button>
+                </>
+              )}
+              {selectedRowIndices.length > 0 && (
+                <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent shrink-0">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  선택 삭제 ({selectedRowIndices.length})
+                </Button>
+              )}
+              <Button variant="outline" className="text-gray-700 bg-white shrink-0" onClick={handleExcelDownload}>
+                <FileDown className="w-4 h-4 mr-2" />
+                엑셀 다운로드
+              </Button>
+              <Button onClick={() => setIsModalOpen(true)} className="shrink-0">
+                <UserPlus className="w-4 h-4 mr-2" />
+                신규 사원 등록
+              </Button>
+            </div>
           </div>
           
           <div className="flex flex-col h-[600px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
@@ -445,6 +486,7 @@ export default function EmployeesPage() {
                 showCheckboxes={true}
                 selectedRowIndices={selectedRowIndices}
                 onSelectionChange={setSelectedRowIndices}
+                storageKey="erp_employees_grid_columns"
               />
             </div>
           </div>

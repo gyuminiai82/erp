@@ -60,7 +60,6 @@ function SortablePosRow({ pos, setEditingPos, setPosForm, setIsPosModalOpen, han
       <td className="py-3 px-4 w-10 text-gray-400 cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
         <GripVertical className="w-4 h-4" />
       </td>
-      <td className="py-3 px-6 text-gray-500">{pos.level}</td>
       <td className="py-3 px-6 font-medium text-gray-900">{pos.name}</td>
       <td className="py-3 px-6 text-gray-500">{pos.description || '-'}</td>
       <td className="py-3 px-6 text-right space-x-2">
@@ -331,7 +330,6 @@ export default function DepartmentsPage() {
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
                   <th className="py-3 px-4 w-10"></th>
-                  <th className="py-3 px-6 font-semibold w-24">레벨</th>
                   <th className="py-3 px-6 font-semibold">직급명</th>
                   <th className="py-3 px-6 font-semibold">설명</th>
                   <th className="py-3 px-6 font-semibold text-right">관리</th>

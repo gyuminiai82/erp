@@ -21,6 +21,7 @@ export interface DataGridProps {
   showCheckboxes?: boolean;
   selectedRowIndices?: number[];
   onSelectionChange?: (indices: number[]) => void;
+  storageKey?: string;
 }
 
 export function DataGrid({
@@ -33,7 +34,8 @@ export function DataGrid({
   style,
   showCheckboxes = false,
   selectedRowIndices = [],
-  onSelectionChange
+  onSelectionChange,
+  storageKey
 }: DataGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -80,6 +82,85 @@ export function DataGrid({
     setResizingCol(colIndex);
     setStartX(e.clientX);
     setStartWidth(colWidths[colIndex]);
+  };
+
+  // Column Reordering
+  const [colOrder, setColOrder] = useState<number[]>([]);
+  const colSignature = useMemo(() => columns.map(c => c.field).join(','), [columns]);
+  
+  useEffect(() => {
+    setColOrder(prev => {
+      if (storageKey) {
+        try {
+           const saved = localStorage.getItem(storageKey);
+           if (saved) {
+              const savedFields: string[] = JSON.parse(saved);
+              const newOrder: number[] = [];
+              const added: number[] = [];
+              savedFields.forEach(field => {
+                const idx = columns.findIndex(c => c.field === field);
+                if (idx !== -1) newOrder.push(idx);
+              });
+              columns.forEach((c, idx) => {
+                if (!newOrder.includes(idx)) added.push(idx);
+              });
+              const next = [...newOrder, ...added];
+              if (prev.length === next.length && prev.every((v, i) => v === next[i])) return prev;
+              return next;
+           }
+        } catch(e) {}
+      }
+      const next = columns.map((_, i) => i);
+      if (prev.length === next.length && prev.every((v, i) => v === next[i])) return prev;
+      return next;
+    });
+  }, [colSignature, storageKey]);
+
+  const [draggedColIndex, setDraggedColIndex] = useState<number | null>(null);
+  const [draggedOverColIndex, setDraggedOverColIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, displayIndex: number) => {
+    setDraggedColIndex(displayIndex);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', displayIndex.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, displayIndex: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (draggedOverColIndex !== displayIndex) {
+      setDraggedOverColIndex(displayIndex);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only clear if leaving the header element entirely, but for simplicity
+    // we can just clear it on drop or drag end. Actually, it's better to clear it
+    // if we want. But since we just want an indicator, setting it to null on DragEnd/Drop is enough.
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedColIndex(null);
+    setDraggedOverColIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, displayIndex: number) => {
+    e.preventDefault();
+    setDraggedOverColIndex(null);
+    if (draggedColIndex === null || draggedColIndex === displayIndex) return;
+
+    setColOrder(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(draggedColIndex, 1);
+      next.splice(displayIndex, 0, moved);
+      
+      if (storageKey) {
+        const savedFields = next.map(idx => columns[idx].field);
+        localStorage.setItem(storageKey, JSON.stringify(savedFields));
+      }
+      return next;
+    });
+    setDraggedColIndex(null);
   };
 
   // Selection state
@@ -280,8 +361,8 @@ export function DataGrid({
       else if (e.key === 'ArrowDown' && row < data.length - 1) row++;
       else if (e.key === 'ArrowLeft' && col > 0) col--;
       else if (e.key === 'ArrowRight' && col < columns.length - 1) col++;
-      else if (e.key === 'Enter' && columns[col].editable) {
-        handleDoubleClick(row, col, data[row][columns[col].field]);
+      else if (e.key === 'Enter' && columns[colOrder[col]].editable) {
+        handleDoubleClick(row, colOrder[col], data[row][columns[colOrder[col]].field]);
         e.preventDefault();
         return;
       }
@@ -323,6 +404,8 @@ export function DataGrid({
   };
 
   const rowHeaderWidth = 40;
+  const checkboxLeft = 20;
+  const rowHeaderLeft = showCheckboxes ? 60 : 20;
 
   return (
     <div 
@@ -344,11 +427,12 @@ export function DataGrid({
           style={{ height: headerHeight, minWidth: 'min-content' }}
         >
           {/* State Column Header */}
-          <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]" />
+          <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] sticky left-0 z-[50]" />
           {/* Checkbox Header */}
           {showCheckboxes && (
             <div 
-              className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] w-[40px]"
+              className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] w-[40px] sticky z-[50]"
+              style={{ left: checkboxLeft }}
             >
               <input 
                 type="checkbox"
@@ -367,24 +451,36 @@ export function DataGrid({
           )}
           {/* Corner Cell (Empty) */}
           <div 
-            className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
-            style={{ width: rowHeaderWidth }}
+            className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] sticky z-[50]"
+            style={{ width: rowHeaderWidth, left: rowHeaderLeft }}
           />
           {/* Column Headers */}
-          {columns.map((col, i) => {
-            const selected = isColHeaderSelected(i);
+          {colOrder.map((originalIndex, displayIndex) => {
+            const col = columns[originalIndex];
+            const selected = isColHeaderSelected(displayIndex);
             const isSorted = sortConfig?.field === col.field;
             return (
               <div 
-                key={i} 
+                key={col.field} 
+                draggable
+                onDragStart={(e) => handleDragStart(e, displayIndex)}
+                onDragOver={(e) => handleDragOver(e, displayIndex)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, displayIndex)}
+                onDragEnd={handleDragEnd}
                 className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-pointer relative group select-none"
                 style={{ 
-                  width: colWidths[i],
-                  backgroundColor: selected ? '#e6ebf5' : '#f3f3f3',
+                  width: colWidths[originalIndex],
+                  backgroundColor: draggedColIndex === displayIndex ? '#e2e8f0' : (selected ? '#e6ebf5' : '#f3f3f3'),
                   fontWeight: 'normal',
                 }}
                 onClick={() => handleSort(col.field)}
               >
+                {/* Drop Indicator */}
+                {draggedOverColIndex === displayIndex && draggedColIndex !== null && draggedColIndex !== displayIndex && (
+                  <div className={`absolute ${draggedColIndex < displayIndex ? 'right-0' : 'left-0'} top-0 bottom-0 w-[4px] bg-slate-800 z-20 pointer-events-none`} />
+                )}
+                
                 {col.headerName}
                 {isSorted && (
                   <span className="ml-1 text-[10px] text-gray-500 font-bold">
@@ -395,8 +491,13 @@ export function DataGrid({
                 {/* Resizer Handle */}
                 <div 
                   className="absolute right-[-2px] top-0 bottom-0 w-2.5 cursor-col-resize z-10"
-                  onMouseDown={(e) => handleResizeStart(i, e)}
+                  onMouseDown={(e) => handleResizeStart(originalIndex, e)}
                   onClick={(e) => e.stopPropagation()}
+                  draggable
+                  onDragStart={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
                 />
               </div>
             );
@@ -419,7 +520,7 @@ export function DataGrid({
                   }}
                 >
                   {/* State Indicator */}
-                  <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 flex items-center justify-center bg-[#f3f3f3]">
+                  <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 flex items-center justify-center bg-[#f3f3f3] sticky left-0 z-[40]">
                     {row._state === 'U' && <span className="text-[10px] text-blue-600 font-bold" title="수정됨">U</span>}
                     {row._state === 'C' && <span className="text-[10px] text-green-600 font-bold" title="추가됨">I</span>}
                     {row._state === 'D' && <span className="text-[10px] text-red-600 font-bold" title="삭제됨">D</span>}
@@ -428,9 +529,10 @@ export function DataGrid({
                   {/* Checkbox Cell */}
                   {showCheckboxes && (
                     <div 
-                      className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 w-[40px]"
+                      className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 w-[40px] sticky z-[40]"
                       style={{ 
-                        backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3' 
+                        backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3',
+                        left: checkboxLeft
                       }}
                     >
                       <input 
@@ -451,11 +553,12 @@ export function DataGrid({
 
                   {/* Row Header (Numbers) */}
                   <div 
-                    className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
+                    className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default sticky z-[40]"
                     style={{ 
                       width: rowHeaderWidth,
                       backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3',
-                      color: rowSelected ? '#000' : '#444'
+                      color: rowSelected ? '#000' : '#444',
+                      left: rowHeaderLeft
                     }}
                     onMouseDown={(e) => handleRowHeaderMouseDown(actualRowIndex, e)}
                     onMouseEnter={() => handleRowHeaderMouseEnter(actualRowIndex)}
@@ -464,24 +567,27 @@ export function DataGrid({
                   </div>
 
                   {/* Row Cells */}
-                  {columns.map((col, colIndex) => {
+                  {colOrder.map((originalIndex, displayIndex) => {
+                    const col = columns[originalIndex];
                     const value = row[col.field];
-                    const selected = isCellSelected(actualRowIndex, colIndex);
-                    const inRange = isCellInRange(actualRowIndex, colIndex);
-                    const isEditing = editingCell?.row === actualRowIndex && editingCell?.col === colIndex;
+                    const selected = isCellSelected(actualRowIndex, displayIndex);
+                    const inRange = isCellInRange(actualRowIndex, displayIndex);
+                    const isEditing = editingCell?.row === actualRowIndex && editingCell?.col === originalIndex;
+                    const stateBgColor = row._state === 'D' ? '#fee2e2' : row._state === 'U' ? '#eff6ff' : row._state === 'C' ? '#f0fdf4' : '#fff';
+                    const bgColor = selected ? stateBgColor : (inRange ? '#e6ebf5' : stateBgColor);
                     
                     return (
                         <div
-                          key={colIndex}
-                          className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm`}
+                          key={col.field}
+                          className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm ${row._state === 'D' ? 'text-red-900 line-through opacity-70' : ''}`}
                           style={{ 
-                            width: colWidths[colIndex],
-                            backgroundColor: selected ? '#fff' : (inRange ? '#e6ebf5' : '#fff'),
+                            width: colWidths[originalIndex],
+                            backgroundColor: bgColor,
                             zIndex: isEditing ? 50 : 20
                           }}
-                        onMouseDown={(e) => handleMouseDown(actualRowIndex, colIndex, e)}
-                        onMouseEnter={() => handleMouseEnter(actualRowIndex, colIndex)}
-                        onDoubleClick={(e) => handleDoubleClick(actualRowIndex, colIndex, value, e)}
+                        onMouseDown={(e) => handleMouseDown(actualRowIndex, displayIndex, e)}
+                        onMouseEnter={() => handleMouseEnter(actualRowIndex, displayIndex)}
+                        onDoubleClick={(e) => handleDoubleClick(actualRowIndex, originalIndex, value, e)}
                       >
                         {/* Excel Selection Borders (Black) */}
                         {inRange && (
@@ -489,8 +595,8 @@ export function DataGrid({
                                style={{
                                  borderTop: actualRowIndex === Math.min(selectionRange!.startRow, selectionRange!.endRow) ? '2px solid #000' : 'none',
                                  borderBottom: actualRowIndex === Math.max(selectionRange!.startRow, selectionRange!.endRow) ? '2px solid #000' : 'none',
-                                 borderLeft: colIndex === Math.min(selectionRange!.startCol, selectionRange!.endCol) ? '2px solid #000' : 'none',
-                                 borderRight: colIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) ? '2px solid #000' : 'none',
+                                 borderLeft: displayIndex === Math.min(selectionRange!.startCol, selectionRange!.endCol) ? '2px solid #000' : 'none',
+                                 borderRight: displayIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) ? '2px solid #000' : 'none',
                                }}
                           />
                         )}
@@ -498,7 +604,7 @@ export function DataGrid({
                         {/* Fill Handle (Black small square) */}
                         {inRange && 
                          actualRowIndex === Math.max(selectionRange!.startRow, selectionRange!.endRow) && 
-                         colIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) && (
+                         displayIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) && (
                           <div className="absolute -bottom-[3px] -right-[3px] w-[6px] h-[6px] bg-black border border-white cursor-crosshair z-30" />
                         )}
 
