@@ -67,7 +67,7 @@ export default function EmployeesPage() {
   if (loading) return <div className="p-8 text-gray-500 text-center">직원 데이터를 불러오는 중...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">사원 관리</h1>

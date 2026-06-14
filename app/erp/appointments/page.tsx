@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, ArrowRightLeft } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, ArrowRightLeft, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -21,6 +21,9 @@ export default function AppointmentsPage() {
     appointment_date: new Date().toISOString().split('T')[0],
     memo: ''
   });
+
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [statusTarget, setStatusTarget] = useState<{ id: number, status: string } | null>(null);
 
   const fetchData = async () => {
     try {
@@ -92,14 +95,13 @@ export default function AppointmentsPage() {
     }
   };
 
-  const handleStatusChange = async (id: number, status: string) => {
-    if (!confirm(`이 발령을 ${status} 처리하시겠습니까?${status === '승인' ? ' (승인 시 즉시 사원 정보에 반영됩니다.)' : ''}`)) return;
-    
+  const handleConfirmStatus = async () => {
+    if (!statusTarget) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/appointments/${id}/status`, {
+      const res = await fetch(`http://localhost:8000/api/appointments/${statusTarget.id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status: statusTarget.status })
       });
       
       if (res.ok) {
@@ -110,14 +112,15 @@ export default function AppointmentsPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setStatusTarget(null);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("발령 기록을 삭제하시겠습니까?")) return;
-    
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/appointments/${id}`, { method: "DELETE" });
+      const res = await fetch(`http://localhost:8000/api/appointments/${deleteTarget}`, { method: "DELETE" });
       if (res.ok) {
         fetchData();
       } else {
@@ -126,13 +129,15 @@ export default function AppointmentsPage() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
   if (loading) return <div className="p-8 text-gray-500 text-center">인사 발령 데이터를 불러오는 중...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">인사 발령 관리</h1>
@@ -148,12 +153,13 @@ export default function AppointmentsPage() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-              <th className="py-3 px-6 font-semibold w-24">발령일자</th>
-              <th className="py-3 px-6 font-semibold">대상자</th>
-              <th className="py-3 px-6 font-semibold">발령 구분</th>
-              <th className="py-3 px-6 font-semibold">변경 내역</th>
-              <th className="py-3 px-6 font-semibold w-24 text-center">상태</th>
-              <th className="py-3 px-6 font-semibold text-right">결재/관리</th>
+              <th className="py-3 px-6 font-semibold w-32 whitespace-nowrap">발령일자</th>
+              <th className="py-3 px-6 font-semibold whitespace-nowrap">대상자</th>
+              <th className="py-3 px-6 font-semibold whitespace-nowrap">발령 구분</th>
+              <th className="py-3 px-6 font-semibold min-w-[200px]">변경 내역</th>
+              <th className="py-3 px-6 font-semibold w-24 text-center whitespace-nowrap">상태</th>
+              <th className="py-3 px-6 font-semibold text-center whitespace-nowrap">결재</th>
+              <th className="py-3 px-6 font-semibold text-center w-16 whitespace-nowrap">관리</th>
             </tr>
           </thead>
           <tbody className="text-sm">
@@ -199,21 +205,37 @@ export default function AppointmentsPage() {
                     {app.status}
                   </span>
                 </td>
-                <td className="py-4 px-6 text-right space-x-2">
-                  {app.status === '대기' && (
-                    <>
-                      <button onClick={() => handleStatusChange(app.id, '승인')} className="text-green-600 hover:text-green-800 p-1 font-medium text-xs">승인</button>
-                      <button onClick={() => handleStatusChange(app.id, '반려')} className="text-red-600 hover:text-red-800 p-1 font-medium text-xs">반려</button>
-                    </>
-                  )}
-                  {app.status !== '승인' && (
-                    <button onClick={() => handleDelete(app.id)} className="text-gray-400 hover:text-gray-600 p-1 text-xs">삭제</button>
-                  )}
+                <td className="py-4 px-6">
+                  <div className="flex items-center justify-center space-x-2">
+                    {app.status === '대기' ? (
+                      <>
+                        <button onClick={() => setStatusTarget({ id: app.id, status: '승인' })} className="inline-flex items-center justify-center px-3 py-1.5 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300 rounded-md text-xs font-medium transition-colors shadow-sm whitespace-nowrap flex-shrink-0" title="승인">
+                          <CheckCircle className="w-3.5 h-3.5 mr-1 flex-shrink-0" /> 승인
+                        </button>
+                        <button onClick={() => setStatusTarget({ id: app.id, status: '반려' })} className="inline-flex items-center justify-center px-3 py-1.5 border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-300 rounded-md text-xs font-medium transition-colors shadow-sm whitespace-nowrap flex-shrink-0" title="반려">
+                          <XCircle className="w-3.5 h-3.5 mr-1 flex-shrink-0" /> 반려
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
+                  </div>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="flex items-center justify-center">
+                    {app.status !== '승인' ? (
+                      <button onClick={() => setDeleteTarget(app.id)} className="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors flex-shrink-0" title="삭제">
+                        <Trash2 className="w-4 h-4 flex-shrink-0" />
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-xs">-</span>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
             {appointments.length === 0 && (
-              <tr><td colSpan={6} className="py-12 text-center text-gray-500">등록된 발령 내역이 없습니다.</td></tr>
+              <tr><td colSpan={7} className="py-12 text-center text-gray-500">등록된 발령 내역이 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -303,6 +325,57 @@ export default function AppointmentsPage() {
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>취소</Button>
               <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white">등록 (대기 상태로 저장)</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">삭제 확인</h3>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-700">
+                정말 이 인사 발령 기록을 삭제하시겠습니까?
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
+              <Button variant="outline" onClick={() => setDeleteTarget(null)}>취소</Button>
+              <Button onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700 text-white">삭제</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Confirmation Modal */}
+      {statusTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">발령 {statusTarget.status}</h3>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-700">
+                이 발령을 <strong className={statusTarget.status === '승인' ? 'text-green-600' : 'text-red-600'}>{statusTarget.status}</strong> 처리하시겠습니까?
+                {statusTarget.status === '승인' && (
+                  <>
+                    <br />
+                    <span className="text-sm text-gray-500 mt-2 block">승인 시 변경 사항이 사원 정보에 즉시 반영되며 되돌릴 수 없습니다.</span>
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
+              <Button variant="outline" onClick={() => setStatusTarget(null)}>취소</Button>
+              <Button 
+                onClick={handleConfirmStatus} 
+                className={statusTarget.status === '승인' ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"}
+              >
+                {statusTarget.status}
+              </Button>
             </div>
           </div>
         </div>
