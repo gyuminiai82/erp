@@ -21,6 +21,7 @@ import models
 from database import engine, SessionLocal
 import psutil
 import os
+from pydantic import BaseModel
 
 app = FastAPI(title="Minstudio ERP Backend API")
 
@@ -142,11 +143,60 @@ def get_positions(db: Session = Depends(get_db)):
 
 @app.get("/api/common-codes")
 def get_common_codes(group: str = None, db: Session = Depends(get_db)):
-    query = db.query(models.CommonCode).filter(models.CommonCode.is_active == True)
+    query = db.query(models.CommonCode)
     if group:
         query = query.filter(models.CommonCode.group_code == group)
-    codes = query.order_by(models.CommonCode.sort_order).all()
-    return [{"code": c.code, "name": c.name, "group_code": c.group_code} for c in codes]
+    codes = query.order_by(models.CommonCode.group_code, models.CommonCode.sort_order).all()
+    return [{"id": c.id, "code": c.code, "name": c.name, "group_code": c.group_code, "sort_order": c.sort_order, "is_active": c.is_active} for c in codes]
+
+class CommonCodeCreate(BaseModel):
+    group_code: str
+    code: str
+    name: str
+    sort_order: int = 0
+    is_active: bool = True
+
+class CommonCodeUpdate(BaseModel):
+    from typing import Optional
+    group_code: Optional[str] = None
+    code: Optional[str] = None
+    name: Optional[str] = None
+    sort_order: Optional[int] = None
+    is_active: Optional[bool] = None
+
+@app.post("/api/common-codes")
+def create_common_code(item: CommonCodeCreate, db: Session = Depends(get_db)):
+    db_item = models.CommonCode(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return {"id": db_item.id, "code": db_item.code, "name": db_item.name, "group_code": db_item.group_code, "sort_order": db_item.sort_order, "is_active": db_item.is_active}
+
+@app.put("/api/common-codes/{code_id}")
+def update_common_code(code_id: int, item: CommonCodeUpdate, db: Session = Depends(get_db)):
+    from fastapi import HTTPException
+    db_item = db.query(models.CommonCode).filter(models.CommonCode.id == code_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Code not found")
+    
+    update_data = item.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+        
+    db.commit()
+    db.refresh(db_item)
+    return {"id": db_item.id, "code": db_item.code, "name": db_item.name, "group_code": db_item.group_code, "sort_order": db_item.sort_order, "is_active": db_item.is_active}
+
+@app.delete("/api/common-codes/{code_id}")
+def delete_common_code(code_id: int, db: Session = Depends(get_db)):
+    from fastapi import HTTPException
+    db_item = db.query(models.CommonCode).filter(models.CommonCode.id == code_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Code not found")
+        
+    db.delete(db_item)
+    db.commit()
+    return {"message": "Deleted successfully"}
 
 @app.on_event("startup")
 def seed_data():
