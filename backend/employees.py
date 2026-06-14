@@ -7,6 +7,7 @@ from datetime import datetime
 import models
 from database import get_db
 from auth import get_password_hash
+import crypto
 
 router = APIRouter(
     prefix="/api/employees",
@@ -116,7 +117,7 @@ def get_employees(db: Session = Depends(get_db)):
             "gender": emp.gender,
             "address": emp.address,
             "employment_type": emp.employment_type,
-            "resident_num": emp.resident_num,
+            "resident_num": crypto.mask_resident_num(emp.resident_num),
             "profile_image_url": emp.profile_image_url
         })
     return result
@@ -185,7 +186,7 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         gender=payload.gender,
         address=payload.address,
         employment_type=payload.employment_type,
-        resident_num=payload.resident_num,
+        resident_num=crypto.encrypt_data(payload.resident_num),
         profile_image_url=payload.profile_image_url
     )
     db.add(new_emp)
@@ -240,7 +241,7 @@ def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depe
             if emp_data.gender is not None: emp.gender = emp_data.gender
             if emp_data.address is not None: emp.address = emp_data.address
             if emp_data.employment_type is not None: emp.employment_type = emp_data.employment_type
-            if emp_data.resident_num is not None: emp.resident_num = emp_data.resident_num
+            if emp_data.resident_num is not None: emp.resident_num = crypto.encrypt_data(emp_data.resident_num)
             if emp_data.status is not None: emp.status = emp_data.status
             
             if emp_data.hire_date:
