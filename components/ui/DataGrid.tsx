@@ -294,7 +294,7 @@ export function DataGrid({
     return colIndex >= minCol && colIndex <= maxCol;
   };
 
-  const rowHeaderWidth = showCheckboxes ? 60 : 40;
+  const rowHeaderWidth = 40;
 
   return (
     <div 
@@ -317,12 +317,11 @@ export function DataGrid({
         >
           {/* State Column Header */}
           <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]" />
-          {/* Corner Cell (Empty or Checkbox) */}
-          <div 
-            className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
-            style={{ width: rowHeaderWidth }}
-          >
-            {showCheckboxes && (
+          {/* Checkbox Header */}
+          {showCheckboxes && (
+            <div 
+              className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] w-[40px]"
+            >
               <input 
                 type="checkbox"
                 checked={data.length > 0 && selectedRowIndices.length === data.length}
@@ -336,8 +335,13 @@ export function DataGrid({
                 }}
                 className="cursor-pointer"
               />
-            )}
-          </div>
+            </div>
+          )}
+          {/* Corner Cell (Empty) */}
+          <div 
+            className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
+            style={{ width: rowHeaderWidth }}
+          />
           {/* Column Headers */}
           {columns.map((col, i) => {
             const selected = isColHeaderSelected(i);
@@ -381,18 +385,14 @@ export function DataGrid({
                     {row._state === 'D' && <span className="text-[10px] text-red-600 font-bold" title="삭제됨">D</span>}
                   </div>
 
-                  {/* Row Header (Numbers & Checkbox) */}
-                  <div 
-                    className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
-                    style={{ 
-                      width: rowHeaderWidth,
-                      backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3',
-                      color: rowSelected ? '#000' : '#444'
-                    }}
-                    onMouseDown={(e) => handleRowHeaderMouseDown(actualRowIndex, e)}
-                    onMouseEnter={() => handleRowHeaderMouseEnter(actualRowIndex)}
-                  >
-                    {showCheckboxes && (
+                  {/* Checkbox Cell */}
+                  {showCheckboxes && (
+                    <div 
+                      className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 w-[40px]"
+                      style={{ 
+                        backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3' 
+                      }}
+                    >
                       <input 
                         type="checkbox"
                         checked={selectedRowIndices.includes(actualRowIndex)}
@@ -404,9 +404,22 @@ export function DataGrid({
                           onSelectionChange(next);
                         }}
                         onMouseDown={(e) => e.stopPropagation()}
-                        className="cursor-pointer mr-1.5"
+                        className="cursor-pointer"
                       />
-                    )}
+                    </div>
+                  )}
+
+                  {/* Row Header (Numbers) */}
+                  <div 
+                    className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
+                    style={{ 
+                      width: rowHeaderWidth,
+                      backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3',
+                      color: rowSelected ? '#000' : '#444'
+                    }}
+                    onMouseDown={(e) => handleRowHeaderMouseDown(actualRowIndex, e)}
+                    onMouseEnter={() => handleRowHeaderMouseEnter(actualRowIndex)}
+                  >
                     {actualRowIndex + 1}
                   </div>
 
