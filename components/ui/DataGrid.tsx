@@ -29,7 +29,7 @@ export function DataGrid({
   rowHeight = 32, // slightly taller row height
   headerHeight = 36,
   onDataChange,
-  className = "",
+  className = "h-full w-full",
   style,
   showCheckboxes = false,
   selectedRowIndices = [],

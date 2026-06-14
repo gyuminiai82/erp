@@ -78,8 +78,8 @@ def get_employees(db: Session = Depends(get_db)):
         role_id = role_record.role.name if role_record and role_record.role else "employee"
         
         # Get department and position names
-        dept_name = emp.department.name if emp.department else "부서 미지정"
-        pos_name = emp.position.name if emp.position else "직급 미지정"
+        dept_name = emp.department.name if emp.department else ""
+        pos_name = emp.position.name if emp.position else ""
         
         result.append({
             "id": emp.id,

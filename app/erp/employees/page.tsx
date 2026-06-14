@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, UserPlus, FileDown, Trash2 } from 'lucide-react';
+import { Plus, Search, UserPlus, FileDown, Trash2, Save } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
@@ -84,14 +84,30 @@ export default function EmployeesPage() {
   };
 
   const handleBulkDelete = async () => {
-    if (selectedRowIndices.length === 0) {
-      await showAlert("삭제할 사원을 선택해주세요.", { type: "warning" });
+    if (selectedRowIndices.length === 0) return;
+    
+    // Instead of immediate API call, just mark row as 'D'
+    const updated = [...employees];
+    selectedRowIndices.forEach(idx => {
+      updated[idx] = { ...updated[idx], _state: 'D' };
+    });
+    setEmployees(updated);
+    setSelectedRowIndices([]);
+  };
+
+  const handleSave = async () => {
+    // Collect rows to delete
+    const rowsToDelete = employees.filter(e => e._state === 'D');
+    
+    if (rowsToDelete.length === 0) {
+      await showAlert("저장할 변경사항이 없습니다.", { type: "info" });
       return;
     }
-    const confirmed = await showConfirm(`정말 선택한 ${selectedRowIndices.length}명의 사원을 삭제하시겠습니까? (Soft Delete)`, { type: "error" });
+
+    const confirmed = await showConfirm(`삭제 예정인 ${rowsToDelete.length}명의 사원 데이터를 완전히 삭제하시겠습니까? (저장 시 복구 불가)`, { type: "error" });
     if (!confirmed) return;
     
-    const idsToDelete = selectedRowIndices.map(idx => employees[idx].id);
+    const idsToDelete = rowsToDelete.map(e => e.id);
     
     try {
       const res = await fetch(`http://localhost:8000/api/employees/bulk-delete`, { 
@@ -100,14 +116,15 @@ export default function EmployeesPage() {
         body: JSON.stringify({ employee_ids: idsToDelete })
       });
       if (res.ok) {
-        setSelectedRowIndices([]);
+        await showAlert("변경사항이 성공적으로 저장되었습니다.", { type: "success" });
         fetchData();
       } else {
         const data = await res.json();
-        await showAlert(data.detail || "삭제 실패", { type: "error" });
+        await showAlert(data.detail || "저장 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
+      await showAlert("오류가 발생했습니다.", { type: "error" });
     }
   };
 
@@ -191,6 +208,12 @@ export default function EmployeesPage() {
           <p className="text-gray-500">전체 임직원 목록 조회 및 신규 사원 등록을 관리합니다.</p>
         </div>
         <div className="flex space-x-2">
+          {employees.some(e => e._state === 'D' || e._state === 'U') && (
+            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200">
+              <Save className="w-4 h-4 mr-2" />
+              변경사항 저장
+            </Button>
+          )}
           {selectedRowIndices.length > 0 && (
             <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent">
               <Trash2 className="w-4 h-4 mr-2" />
