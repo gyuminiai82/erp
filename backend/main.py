@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from database import engine, SessionLocal, get_db
 import json
 import asyncio
-from typing import List
+from typing import List, Optional
 import auth
 import employees
 import roles
