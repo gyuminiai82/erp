@@ -110,7 +110,6 @@ export default function AdminDashboardPage() {
           
           {/* Stat Card: Active Users */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-500"></div>
             <div className="flex items-center justify-between relative z-10">
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-1">현재 활성 세션</p>
