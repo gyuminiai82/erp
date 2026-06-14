@@ -180,3 +180,16 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         db.commit()
 
     return {"message": "사원이 성공적으로 등록되었습니다.", "id": new_emp.id}
+
+@router.delete("/{emp_id}")
+def delete_employee(emp_id: int, db: Session = Depends(get_db)):
+    emp = db.query(models.Employee).filter(models.Employee.id == emp_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+        
+    # Delete related role mapping
+    db.query(models.EmployeeRole).filter(models.EmployeeRole.employee_id == emp_id).delete()
+    
+    db.delete(emp)
+    db.commit()
+    return {"message": "사원이 삭제되었습니다."}

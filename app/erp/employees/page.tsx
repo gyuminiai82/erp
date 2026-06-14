@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, UserPlus, FileDown } from 'lucide-react';
+import { Plus, Search, UserPlus, FileDown, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
@@ -80,6 +80,21 @@ export default function EmployeesPage() {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm("정말 이 사원을 삭제하시겠습니까?")) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/employees/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const data = await res.json();
+        alert(data.detail || "삭제 실패");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const columns: ColumnDef[] = [
     { field: 'emp_no', headerName: '사번', width: 120 },
     { field: 'name', headerName: '이름', width: 120, editable: true },
@@ -138,7 +153,19 @@ export default function EmployeesPage() {
       options: [{ label: '남성', value: '남성' }, { label: '여성', value: '여성' }]
     },
     { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true },
-    { field: 'address', headerName: '주소', width: 250, editable: true }
+    { field: 'address', headerName: '주소', width: 250, editable: true },
+    { 
+      field: 'actions', 
+      headerName: '관리', 
+      width: 80,
+      renderCell: (val: any, row: any) => (
+        <div className="flex justify-center">
+          <button onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }} className="p-1 text-gray-400 hover:text-red-600 rounded" title="삭제">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )
+    }
   ];
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {
