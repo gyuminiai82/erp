@@ -232,36 +232,6 @@ export function DataGrid({
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
-      {/* Header */}
-      <div 
-        className="flex border-b border-[#d4d4d4] text-xs text-[#444] select-none z-20 sticky top-0"
-        style={{ height: headerHeight, minWidth: 'min-content' }}
-      >
-        {/* State Column Header */}
-        <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]" />
-        {/* Corner Cell (Empty) */}
-        <div 
-          className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
-          style={{ width: rowHeaderWidth }}
-        />
-        {/* Column Headers */}
-        {columns.map((col, i) => {
-          const selected = isColHeaderSelected(i);
-          return (
-            <div 
-              key={i} 
-              className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-default"
-              style={{ 
-                width: col.width || 150,
-                backgroundColor: selected ? '#f5c276' : '#f3f3f3',
-                color: selected ? '#000' : '#444'
-              }}
-            >
-              {col.headerName}
-            </div>
-          );
-        })}
-      </div>
 
       {/* Body / Virtual Scroll Container */}
       <div 
@@ -269,6 +239,36 @@ export function DataGrid({
         className="flex-1 overflow-auto bg-white select-none relative"
         onScroll={handleScroll}
       >
+        {/* Header */}
+        <div 
+          className="flex border-b border-[#d4d4d4] text-xs text-[#444] select-none z-30 sticky top-0"
+          style={{ height: headerHeight, minWidth: 'min-content' }}
+        >
+          {/* State Column Header */}
+          <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]" />
+          {/* Corner Cell (Empty) */}
+          <div 
+            className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
+            style={{ width: rowHeaderWidth }}
+          />
+          {/* Column Headers */}
+          {columns.map((col, i) => {
+            const selected = isColHeaderSelected(i);
+            return (
+              <div 
+                key={i} 
+                className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-default"
+                style={{ 
+                  width: col.width || 150,
+                  backgroundColor: selected ? '#f5c276' : '#f3f3f3',
+                  color: selected ? '#000' : '#444'
+                }}
+              >
+                {col.headerName}
+              </div>
+            );
+          })}
+        </div>
         <div style={{ height: totalHeight, minWidth: 'min-content', position: 'relative' }}>
           <div style={{ transform: `translateY(${startIndex * rowHeight}px)`, position: 'absolute', left: 0, right: 0 }}>
             {visibleData.map((row, i) => {
