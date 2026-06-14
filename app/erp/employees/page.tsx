@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, UserPlus, FileDown, Trash2, Save } from 'lucide-react';
+import { Plus, Search, UserPlus, FileDown, Trash2, Save, Undo2 } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
@@ -128,6 +128,13 @@ export default function EmployeesPage() {
     }
   };
 
+  const handleCancel = async () => {
+    const confirmed = await showConfirm("변경사항을 취소하고 처음 상태로 되돌리시겠습니까?", { type: "warning" });
+    if (!confirmed) return;
+    setSelectedRowIndices([]);
+    fetchData(); // Refetch from server to clear all local changes
+  };
+
   const columns: ColumnDef[] = [
     { field: 'emp_no', headerName: '사번', width: 120 },
     { field: 'name', headerName: '이름', width: 120, editable: true },
@@ -209,10 +216,16 @@ export default function EmployeesPage() {
         </div>
         <div className="flex space-x-2">
           {employees.some(e => e._state === 'D' || e._state === 'U') && (
-            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200">
-              <Save className="w-4 h-4 mr-2" />
-              변경사항 저장
-            </Button>
+            <>
+              <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all">
+                <Undo2 className="w-4 h-4 mr-2" />
+                변경 취소
+              </Button>
+              <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200">
+                <Save className="w-4 h-4 mr-2" />
+                변경사항 저장
+              </Button>
+            </>
           )}
           {selectedRowIndices.length > 0 && (
             <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent">

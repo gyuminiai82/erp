@@ -343,7 +343,7 @@ export default function CommonCodesPage() {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center justify-end space-x-1">
                                 <button onClick={() => startEditingCode(code)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded"><Edit2 className="w-4 h-4" /></button>
                                 <button onClick={() => handleDeleteCode(code.id)} className="p-1.5 text-gray-400 hover:text-red-600 rounded"><Trash2 className="w-4 h-4" /></button>
                               </div>
