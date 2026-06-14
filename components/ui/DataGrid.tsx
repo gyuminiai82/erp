@@ -342,7 +342,7 @@ export function DataGrid({
                         {isEditing ? (
                           col.editType === 'select' && col.options ? (
                             <div
-                              className="absolute inset-0 w-full h-full ring-2 ring-inset ring-black z-50 bg-white outline-none"
+                              className="absolute inset-0 w-full h-full z-50 outline-none"
                               tabIndex={0}
                               ref={inputRef as any}
                               onBlur={(e) => {
@@ -351,7 +351,10 @@ export function DataGrid({
                                 }
                               }}
                             >
-                              <div className="w-full h-full flex items-center px-1.5 truncate">{editValue}</div>
+                              <div className="absolute inset-0 ring-2 ring-inset ring-black bg-white pointer-events-none" />
+                              <div className="relative w-full h-full flex items-center px-1.5">
+                                <div className="w-full truncate">{editValue}</div>
+                              </div>
                               {(() => {
                                 const isNearBottom = (actualRowIndex * rowHeight - scrollTop + 200) > containerHeight;
                                 return (
@@ -377,14 +380,18 @@ export function DataGrid({
                               })()}
                             </div>
                           ) : (
-                            <input
-                              ref={inputRef as React.RefObject<HTMLInputElement>}
-                              type="text"
-                              className="absolute inset-0 w-full h-full ring-2 ring-inset ring-black border-none px-1.5 outline-none z-40 text-sm bg-white"
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={finishEditing}
-                            />
+                            <div className="absolute inset-0 w-full h-full z-40 bg-white">
+                              <div className="absolute inset-0 ring-2 ring-inset ring-black pointer-events-none" />
+                              <input
+                                ref={inputRef as React.RefObject<HTMLInputElement>}
+                                type="text"
+                                className="relative w-full h-full border-none outline-none px-1.5 py-0 m-0 bg-transparent text-sm leading-none"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={finishEditing}
+                                style={{ lineHeight: 'inherit' }}
+                              />
+                            </div>
                           )
                         ) : (
                           <div className="w-full truncate">
