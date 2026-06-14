@@ -67,11 +67,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-64 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col shadow-xl hidden md:flex">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <div className="flex items-center text-white font-bold text-xl tracking-tight">
-            <div className="w-8 h-8 rounded-md bg-blue-600 text-white flex items-center justify-center mr-2 shadow-md shadow-blue-600/20">
-              S
+          <div className="flex items-center tracking-tight">
+            <div className="w-8 h-8 rounded-md bg-[#107C41] text-white font-bold text-xl flex items-center justify-center mr-2 shadow-md shadow-green-500/20">
+              M
             </div>
-            System Admin
+            <div className="flex flex-col justify-center">
+              <span className="text-white font-bold text-lg leading-tight">MINSTUDIO ERP</span>
+              <span className="text-slate-400 text-[10px] font-semibold tracking-widest leading-none mt-0.5 ml-0.5">ADMIN</span>
+            </div>
           </div>
         </div>
 
