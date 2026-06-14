@@ -2,11 +2,19 @@ from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Bool
 from sqlalchemy.orm import relationship
 from database import Base
 
+class CommonCodeGroup(Base):
+    __tablename__ = "common_code_groups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, unique=True, index=True) # e.g. 'EMP_STATUS'
+    name = Column(String) # e.g. '고용 상태'
+    description = Column(String, nullable=True)
+
 class CommonCode(Base):
     __tablename__ = "common_codes"
 
     id = Column(Integer, primary_key=True, index=True)
-    group_code = Column(String, index=True) # e.g. 'EMP_STATUS', 'EMP_TYPE'
+    group_code = Column(String, ForeignKey("common_code_groups.code"), index=True) # e.g. 'EMP_STATUS'
     code = Column(String, index=True) # e.g. '재직', '정규직'
     name = Column(String) # e.g. '재직', '정규직'
     sort_order = Column(Integer, default=0)

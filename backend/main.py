@@ -141,6 +141,59 @@ def get_positions(db: Session = Depends(get_db)):
     positions = db.query(models.Position).order_by(models.Position.level).all()
     return [{"id": p.id, "name": p.name} for p in positions]
 
+class CommonCodeGroupCreate(BaseModel):
+    code: str
+    name: str
+    description: Optional[str] = None
+
+class CommonCodeGroupUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+@app.get("/api/common-code-groups")
+def get_common_code_groups(db: Session = Depends(get_db)):
+    groups = db.query(models.CommonCodeGroup).order_by(models.CommonCodeGroup.code).all()
+    return [{"id": g.id, "code": g.code, "name": g.name, "description": g.description} for g in groups]
+
+@app.post("/api/common-code-groups")
+def create_common_code_group(item: CommonCodeGroupCreate, db: Session = Depends(get_db)):
+    db_item = models.CommonCodeGroup(**item.dict())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return {"id": db_item.id, "code": db_item.code, "name": db_item.name, "description": db_item.description}
+
+@app.put("/api/common-code-groups/{group_id}")
+def update_common_code_group(group_id: int, item: CommonCodeGroupUpdate, db: Session = Depends(get_db)):
+    from fastapi import HTTPException
+    db_item = db.query(models.CommonCodeGroup).filter(models.CommonCodeGroup.id == group_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    update_data = item.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+        
+    db.commit()
+    db.refresh(db_item)
+    return {"id": db_item.id, "code": db_item.code, "name": db_item.name, "description": db_item.description}
+
+@app.delete("/api/common-code-groups/{group_id}")
+def delete_common_code_group(group_id: int, db: Session = Depends(get_db)):
+    from fastapi import HTTPException
+    db_item = db.query(models.CommonCodeGroup).filter(models.CommonCodeGroup.id == group_id).first()
+    if not db_item:
+        raise HTTPException(status_code=404, detail="Group not found")
+        
+    # Check if there are codes under this group
+    codes_count = db.query(models.CommonCode).filter(models.CommonCode.group_code == db_item.code).count()
+    if codes_count > 0:
+        raise HTTPException(status_code=400, detail="Cannot delete group with existing codes")
+        
+    db.delete(db_item)
+    db.commit()
+    return {"message": "Deleted successfully"}
+
 @app.get("/api/common-codes")
 def get_common_codes(group: str = None, db: Session = Depends(get_db)):
     query = db.query(models.CommonCode)
