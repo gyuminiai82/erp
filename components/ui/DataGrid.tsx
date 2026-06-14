@@ -342,7 +342,7 @@ export function DataGrid({
                         {isEditing ? (
                           col.editType === 'select' && col.options ? (
                             <div
-                              className="absolute inset-0 w-full h-full border-2 border-black z-50 bg-white outline-none"
+                              className="absolute inset-0 w-full h-full ring-2 ring-inset ring-black z-50 bg-white outline-none"
                               tabIndex={0}
                               ref={inputRef as any}
                               onBlur={(e) => {
@@ -380,7 +380,7 @@ export function DataGrid({
                             <input
                               ref={inputRef as React.RefObject<HTMLInputElement>}
                               type="text"
-                              className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
+                              className="absolute inset-0 w-full h-full ring-2 ring-inset ring-black border-none px-1.5 outline-none z-40 text-sm bg-white"
                               value={editValue}
                               onChange={(e) => setEditValue(e.target.value)}
                               onBlur={finishEditing}
