@@ -144,7 +144,7 @@ export default function EmployeesPage() {
           </select>
         </div>
 
-        <div className="flex flex-col h-[600px] border border-gray-300 shadow-sm rounded-lg overflow-hidden">
+        <div className="flex flex-col h-[600px] border border-gray-300 shadow-sm overflow-hidden">
           <DataGrid 
             columns={columns} 
             data={employees} 
