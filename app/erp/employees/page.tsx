@@ -12,7 +12,10 @@ export default function EmployeesPage() {
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newEmp, setNewEmp] = useState({ name: '', email: '', department_id: '', position_id: '' });
+  const [newEmp, setNewEmp] = useState({ 
+    name: '', email: '', department_id: '', position_id: '',
+    phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: ''
+  });
 
   const fetchData = async () => {
     try {
@@ -47,13 +50,19 @@ export default function EmployeesPage() {
           email: newEmp.email,
           department_id: Number(newEmp.department_id),
           position_id: newEmp.position_id ? Number(newEmp.position_id) : null,
-          role_id: "employee" // Default role
+          role_id: "employee", // Default role
+          phone: newEmp.phone || null,
+          birth_date: newEmp.birth_date || null,
+          gender: newEmp.gender || null,
+          address: newEmp.address || null,
+          employment_type: newEmp.employment_type || "정규직",
+          resident_num: newEmp.resident_num || null,
         })
       });
       
       if (res.ok) {
         setIsModalOpen(false);
-        setNewEmp({ name: '', email: '', department_id: '', position_id: '' });
+        setNewEmp({ name: '', email: '', department_id: '', position_id: '', phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '' });
         fetchData();
       } else {
         const data = await res.json();
@@ -109,7 +118,8 @@ export default function EmployeesPage() {
                 <th className="py-3 px-6 font-semibold">이름</th>
                 <th className="py-3 px-6 font-semibold">부서</th>
                 <th className="py-3 px-6 font-semibold">직급</th>
-                <th className="py-3 px-6 font-semibold">이메일</th>
+                <th className="py-3 px-6 font-semibold">연락처</th>
+                <th className="py-3 px-6 font-semibold">고용형태</th>
                 <th className="py-3 px-6 font-semibold">상태</th>
                 <th className="py-3 px-6 font-semibold">입사일</th>
               </tr>
@@ -129,7 +139,8 @@ export default function EmployeesPage() {
                       {emp.position}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-gray-500">{emp.email}</td>
+                  <td className="py-4 px-6 text-gray-500">{emp.phone || '-'}</td>
+                  <td className="py-4 px-6 text-gray-500">{emp.employment_type || '-'}</td>
                   <td className="py-4 px-6">
                     <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
                       emp.status === '재직' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
@@ -142,7 +153,7 @@ export default function EmployeesPage() {
               ))}
               {employees.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-gray-500">등록된 사원이 없습니다.</td>
+                  <td colSpan={8} className="py-12 text-center text-gray-500">등록된 사원이 없습니다.</td>
                 </tr>
               )}
             </tbody>
@@ -152,40 +163,95 @@ export default function EmployeesPage() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
               <h3 className="text-lg font-bold text-gray-900">신규 사원 등록</h3>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 overflow-y-auto space-y-6">
+              
+              {/* 기본 정보 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
-                <Input value={newEmp.name} onChange={e => setNewEmp({...newEmp, name: e.target.value})} placeholder="홍길동" />
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 border-b pb-2">기본 정보</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                    <Input value={newEmp.name} onChange={e => setNewEmp({...newEmp, name: e.target.value})} placeholder="홍길동" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+                    <Input type="email" value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})} placeholder="hong@minstudio.com" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
+                    <Input value={newEmp.phone} onChange={e => setNewEmp({...newEmp, phone: e.target.value})} placeholder="010-0000-0000" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
+                    <Input type="date" value={newEmp.birth_date} onChange={e => setNewEmp({...newEmp, birth_date: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">성별</label>
+                    <select 
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      value={newEmp.gender}
+                      onChange={e => setNewEmp({...newEmp, gender: e.target.value})}
+                    >
+                      <option value="남성">남성</option>
+                      <option value="여성">여성</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
+                    <Input value={newEmp.resident_num} onChange={e => setNewEmp({...newEmp, resident_num: e.target.value})} placeholder="900101-1******" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
+                    <Input value={newEmp.address} onChange={e => setNewEmp({...newEmp, address: e.target.value})} placeholder="서울시 강남구..." />
+                  </div>
+                </div>
               </div>
+
+              {/* 인사 정보 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
-                <Input type="email" value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})} placeholder="hong@minstudio.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">부서 지정</label>
-                <select 
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={newEmp.department_id}
-                  onChange={e => setNewEmp({...newEmp, department_id: e.target.value})}
-                >
-                  <option value="">부서 선택</option>
-                  {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">직급 지정</label>
-                <select 
-                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={newEmp.position_id}
-                  onChange={e => setNewEmp({...newEmp, position_id: e.target.value})}
-                >
-                  <option value="">직급 선택</option>
-                  {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 border-b pb-2">인사 정보</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">부서 지정</label>
+                    <select 
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      value={newEmp.department_id}
+                      onChange={e => setNewEmp({...newEmp, department_id: e.target.value})}
+                    >
+                      <option value="">부서 선택</option>
+                      {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">직급 지정</label>
+                    <select 
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      value={newEmp.position_id}
+                      onChange={e => setNewEmp({...newEmp, position_id: e.target.value})}
+                    >
+                      <option value="">직급 선택</option>
+                      {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">고용 형태</label>
+                    <select 
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      value={newEmp.employment_type}
+                      onChange={e => setNewEmp({...newEmp, employment_type: e.target.value})}
+                    >
+                      <option value="정규직">정규직</option>
+                      <option value="계약직">계약직</option>
+                      <option value="아르바이트">아르바이트</option>
+                      <option value="인턴">인턴</option>
+                      <option value="프리랜서">프리랜서</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">

@@ -23,6 +23,13 @@ class EmployeeCreateRequest(BaseModel):
     department_id: int = None
     position_id: int = None
     role_id: str = "employee"
+    phone: str = None
+    birth_date: str = None
+    gender: str = None
+    address: str = None
+    employment_type: str = "정규직"
+    resident_num: str = None
+    profile_image_url: str = None
 
 @router.get("/departments")
 def get_departments(db: Session = Depends(get_db)):
@@ -82,7 +89,14 @@ def get_employees(db: Session = Depends(get_db)):
             "position_id": emp.position_id,
             "role": role_id,
             "status": emp.status,
-            "hire_date": str(emp.hire_date) if emp.hire_date else None
+            "hire_date": str(emp.hire_date) if emp.hire_date else None,
+            "phone": emp.phone,
+            "birth_date": str(emp.birth_date) if emp.birth_date else None,
+            "gender": emp.gender,
+            "address": emp.address,
+            "employment_type": emp.employment_type,
+            "resident_num": emp.resident_num,
+            "profile_image_url": emp.profile_image_url
         })
     return result
 
@@ -144,7 +158,14 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         position_id=payload.position_id,
         password_hash=get_password_hash("1234"),
         must_change_password=True,
-        hire_date=datetime.now().date()
+        hire_date=datetime.now().date(),
+        phone=payload.phone,
+        birth_date=datetime.strptime(payload.birth_date, "%Y-%m-%d").date() if payload.birth_date else None,
+        gender=payload.gender,
+        address=payload.address,
+        employment_type=payload.employment_type,
+        resident_num=payload.resident_num,
+        profile_image_url=payload.profile_image_url
     )
     db.add(new_emp)
     db.commit()

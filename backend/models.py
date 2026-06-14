@@ -36,6 +36,14 @@ class Employee(Base):
     is_active = Column(Boolean, default=True)
     must_change_password = Column(Boolean, default=True)
     
+    phone = Column(String, nullable=True)
+    birth_date = Column(Date, nullable=True)
+    gender = Column(String, nullable=True)
+    address = Column(String, nullable=True)
+    employment_type = Column(String, default="정규직")
+    resident_num = Column(String, nullable=True)
+    profile_image_url = Column(String, nullable=True)
+    
     department_id = Column(Integer, ForeignKey("departments.id"))
     position_id = Column(Integer, ForeignKey("positions.id"), nullable=True)
 
