@@ -277,7 +277,7 @@ export function DataGrid({
                     return (
                       <div
                         key={colIndex}
-                        className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative truncate text-sm`}
+                        className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm`}
                         style={{ 
                           width: col.width || 150,
                           backgroundColor: selected ? '#fff' : (inRange ? '#e6ebf5' : '#fff'),
