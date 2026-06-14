@@ -5,6 +5,8 @@ export interface ColumnDef {
   headerName: string;
   width?: number;
   editable?: boolean;
+  editType?: 'text' | 'select';
+  options?: { label: string; value: string | number }[];
   renderCell?: (value: any, row: any) => React.ReactNode;
 }
 
@@ -294,14 +296,29 @@ export function DataGrid({
                         )}
 
                         {isEditing ? (
-                          <input
-                            ref={inputRef}
-                            type="text"
-                            className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onBlur={finishEditing}
-                          />
+                          col.editType === 'select' && col.options ? (
+                            <select
+                              className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={finishEditing}
+                              autoFocus
+                            >
+                              <option value="">선택하세요</option>
+                              {col.options.map((opt, idx) => (
+                                <option key={idx} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              ref={inputRef}
+                              type="text"
+                              className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={finishEditing}
+                            />
+                          )
                         ) : (
                           <div className="w-full truncate">
                             {col.renderCell ? col.renderCell(value, row) : value}

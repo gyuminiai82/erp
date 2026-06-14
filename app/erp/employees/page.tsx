@@ -81,20 +81,46 @@ export default function EmployeesPage() {
       field: 'department', 
       headerName: '부서', 
       width: 150,
+      editable: true,
+      editType: 'select',
+      options: departments.map(d => ({ label: d.name, value: d.name })),
       renderCell: (val: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{val}</span>
     },
     { 
       field: 'position', 
       headerName: '직급', 
       width: 100,
+      editable: true,
+      editType: 'select',
+      options: positions.map(p => ({ label: p.name, value: p.name })),
       renderCell: (val: any) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">{val}</span>
     },
     { field: 'phone', headerName: '연락처', width: 150, editable: true },
-    { field: 'employment_type', headerName: '고용형태', width: 120, editable: true },
+    { 
+      field: 'employment_type', 
+      headerName: '고용형태', 
+      width: 120, 
+      editable: true,
+      editType: 'select',
+      options: [
+        { label: '정규직', value: '정규직' },
+        { label: '계약직', value: '계약직' },
+        { label: '아르바이트', value: '아르바이트' },
+        { label: '인턴', value: '인턴' },
+        { label: '프리랜서', value: '프리랜서' }
+      ]
+    },
     { 
       field: 'status', 
       headerName: '상태', 
       width: 100,
+      editable: true,
+      editType: 'select',
+      options: [
+        { label: '재직', value: '재직' },
+        { label: '휴직', value: '휴직' },
+        { label: '퇴사', value: '퇴사' }
+      ],
       renderCell: (val: any) => <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${val === '재직' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{val}</span>
     },
     { field: 'hire_date', headerName: '입사일', width: 120 }
