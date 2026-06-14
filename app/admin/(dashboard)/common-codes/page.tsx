@@ -230,7 +230,7 @@ export default function CommonCodesPage() {
               <div 
                 key={group.id}
                 onClick={() => setSelectedGroup(group)}
-                className={`p-3 rounded-lg cursor-pointer flex justify-between items-center transition-colors ${
+                className={`group p-3 rounded-lg cursor-pointer flex justify-between items-center transition-colors ${
                   selectedGroup?.id === group.id 
                     ? 'bg-blue-50 border border-blue-100 shadow-sm' 
                     : 'hover:bg-gray-50 border border-transparent'
