@@ -33,6 +33,49 @@ export function DataGrid({
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
 
+  // Column Resizing
+  const [colWidths, setColWidths] = useState<number[]>(columns.map(c => c.width || 150));
+  const [resizingCol, setResizingCol] = useState<number | null>(null);
+  const [startX, setStartX] = useState(0);
+  const [startWidth, setStartWidth] = useState(0);
+
+  useEffect(() => {
+    setColWidths(columns.map(c => c.width || 150));
+  }, [columns]);
+
+  useEffect(() => {
+    if (resizingCol === null) return;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      const delta = e.clientX - startX;
+      const newWidth = Math.max(50, startWidth + delta); // min width 50px
+      setColWidths(prev => {
+        const next = [...prev];
+        next[resizingCol] = newWidth;
+        return next;
+      });
+    };
+    
+    const handleMouseUp = () => {
+      setResizingCol(null);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [resizingCol, startX, startWidth]);
+
+  const handleResizeStart = (colIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setResizingCol(colIndex);
+    setStartX(e.clientX);
+    setStartWidth(colWidths[colIndex]);
+  };
+
   // Selection state
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [selectionRange, setSelectionRange] = useState<{ startRow: number; endRow: number; startCol: number; endCol: number } | null>(null);
@@ -98,6 +141,28 @@ export function DataGrid({
       ...selectionRange,
       endRow: rowIndex,
       endCol: colIndex
+    });
+  };
+
+  const handleRowHeaderMouseDown = (rowIndex: number, e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    
+    if (editingCell) {
+      finishEditing();
+    }
+    
+    setSelectedCell({ row: rowIndex, col: 0 });
+    setSelectionRange({ startRow: rowIndex, endRow: rowIndex, startCol: 0, endCol: columns.length - 1 });
+    setIsDragging(true);
+  };
+
+  const handleRowHeaderMouseEnter = (rowIndex: number) => {
+    if (!isDragging || !selectionRange) return;
+    setSelectionRange({
+      ...selectionRange,
+      endRow: rowIndex,
+      startCol: 0,
+      endCol: columns.length - 1
     });
   };
 
@@ -257,14 +322,20 @@ export function DataGrid({
             return (
               <div 
                 key={i} 
-                className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-default"
+                className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-default relative group"
                 style={{ 
-                  width: col.width || 150,
-                  backgroundColor: selected ? '#f5c276' : '#f3f3f3',
-                  color: selected ? '#000' : '#444'
+                  width: colWidths[i],
+                  backgroundColor: selected ? '#e6ebf5' : '#f3f3f3',
+                  fontWeight: 'normal',
                 }}
               >
                 {col.headerName}
+                
+                {/* Resizer Handle */}
+                <div 
+                  className={`absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 transition-colors ${resizingCol === i ? 'bg-blue-500 opacity-100' : 'bg-gray-300 opacity-0 group-hover:opacity-100 hover:bg-blue-400'}`}
+                  onMouseDown={(e) => handleResizeStart(i, e)}
+                />
               </div>
             );
           })}
@@ -293,9 +364,11 @@ export function DataGrid({
                     className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
                     style={{ 
                       width: rowHeaderWidth,
-                      backgroundColor: rowSelected ? '#f5c276' : '#f3f3f3',
+                      backgroundColor: rowSelected ? '#a9c4eb' : '#f3f3f3',
                       color: rowSelected ? '#000' : '#444'
                     }}
+                    onMouseDown={(e) => handleRowHeaderMouseDown(actualRowIndex, e)}
+                    onMouseEnter={() => handleRowHeaderMouseEnter(actualRowIndex)}
                   >
                     {actualRowIndex + 1}
                   </div>
@@ -310,11 +383,11 @@ export function DataGrid({
                     return (
                       <div
                         key={colIndex}
-                        className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm`}
+                        className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm truncate`}
                         style={{ 
-                          width: col.width || 150,
+                          width: colWidths[colIndex],
                           backgroundColor: selected ? '#fff' : (inRange ? '#e6ebf5' : '#fff'),
-                          zIndex: selected || inRange ? 10 : 1
+                          zIndex: 20
                         }}
                         onMouseDown={(e) => handleMouseDown(actualRowIndex, colIndex, e)}
                         onMouseEnter={() => handleMouseEnter(actualRowIndex, colIndex)}
