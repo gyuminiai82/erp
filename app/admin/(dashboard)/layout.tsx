@@ -101,7 +101,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <Link href="/admin/roles" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/admin/roles') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
             <ShieldCheck className="w-5 h-5 mr-3" />
-            사용자 롤 관리
+            권한 관리
           </Link>
 
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 ml-2 mt-8">Audit & Config</div>

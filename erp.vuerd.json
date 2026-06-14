@@ -47,7 +47,8 @@
       "2ecd546bf05b4909bf614d6a1d123950",
       "79312f4ae4d94a739610b203ab594dbf",
       "c58592137b0a4bd9b6a0db39cdb64d9d",
-      "3f0c81e1fbaf434f8ac6d9bb11861c43"
+      "3f0c81e1fbaf434f8ac6d9bb11861c43",
+      "77941bfc94a1417eb1b5e23be46142f9"
     ],
     "relationshipIds": [
       "10f12f2983c448e2b0bf92591481be3d",
@@ -605,6 +606,47 @@
         "meta": {
           "updateAt": 1781352868079,
           "createAt": 1781352868079
+        }
+      },
+      "77941bfc94a1417eb1b5e23be46142f9": {
+        "id": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "appointments",
+        "comment": "인사 발령",
+        "columnIds": [
+          "24deb22de4e84cbcb9d6b09cda610a5f",
+          "53f4466b27ae45b7aaf91652547d6bdd",
+          "60c83b7f7d184908a3fc8d788b7b5826",
+          "6d91de429cc0489992891fb8b627562a",
+          "e786108092454607aba9be6a1e973430",
+          "dc824d79891a45fab030d418f84c8c1d",
+          "93ff2016dc51409991f9f7d9ede34396",
+          "c9007162ce284afaabc4877be0d553c9",
+          "48118e66d46c4d5bac7d2bcfdfe8658b",
+          "f97bb813ef0b4653945926095b661068"
+        ],
+        "seqColumnIds": [
+          "24deb22de4e84cbcb9d6b09cda610a5f",
+          "53f4466b27ae45b7aaf91652547d6bdd",
+          "60c83b7f7d184908a3fc8d788b7b5826",
+          "6d91de429cc0489992891fb8b627562a",
+          "e786108092454607aba9be6a1e973430",
+          "dc824d79891a45fab030d418f84c8c1d",
+          "93ff2016dc51409991f9f7d9ede34396",
+          "c9007162ce284afaabc4877be0d553c9",
+          "48118e66d46c4d5bac7d2bcfdfe8658b",
+          "f97bb813ef0b4653945926095b661068"
+        ],
+        "ui": {
+          "x": 100,
+          "y": 100,
+          "zIndex": 2,
+          "widthName": 80,
+          "widthComment": 80,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
         }
       }
     },
@@ -2407,6 +2449,206 @@
         "meta": {
           "updateAt": 1781352868079,
           "createAt": 1781352868079
+        }
+      },
+      "24deb22de4e84cbcb9d6b09cda610a5f": {
+        "id": "24deb22de4e84cbcb9d6b09cda610a5f",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "id",
+        "comment": "발령 고유 ID",
+        "dataType": "INT",
+        "default": "",
+        "options": 11,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "53f4466b27ae45b7aaf91652547d6bdd": {
+        "id": "53f4466b27ae45b7aaf91652547d6bdd",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "employee_id",
+        "comment": "대상 사원 ID",
+        "dataType": "INT",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "60c83b7f7d184908a3fc8d788b7b5826": {
+        "id": "60c83b7f7d184908a3fc8d788b7b5826",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "type",
+        "comment": "발령 유형",
+        "dataType": "VARCHAR(50)",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "6d91de429cc0489992891fb8b627562a": {
+        "id": "6d91de429cc0489992891fb8b627562a",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "before_dept_id",
+        "comment": "이전 부서 ID",
+        "dataType": "INT",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "e786108092454607aba9be6a1e973430": {
+        "id": "e786108092454607aba9be6a1e973430",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "after_dept_id",
+        "comment": "이동 부서 ID",
+        "dataType": "INT",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "dc824d79891a45fab030d418f84c8c1d": {
+        "id": "dc824d79891a45fab030d418f84c8c1d",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "before_pos_id",
+        "comment": "이전 직급 ID",
+        "dataType": "INT",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "93ff2016dc51409991f9f7d9ede34396": {
+        "id": "93ff2016dc51409991f9f7d9ede34396",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "after_pos_id",
+        "comment": "이동 직급 ID",
+        "dataType": "INT",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "c9007162ce284afaabc4877be0d553c9": {
+        "id": "c9007162ce284afaabc4877be0d553c9",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "appointment_date",
+        "comment": "발령 일자",
+        "dataType": "DATE",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "48118e66d46c4d5bac7d2bcfdfe8658b": {
+        "id": "48118e66d46c4d5bac7d2bcfdfe8658b",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "status",
+        "comment": "상태(대기, 승인 등)",
+        "dataType": "VARCHAR(20)",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
+        }
+      },
+      "f97bb813ef0b4653945926095b661068": {
+        "id": "f97bb813ef0b4653945926095b661068",
+        "tableId": "77941bfc94a1417eb1b5e23be46142f9",
+        "name": "memo",
+        "comment": "메모",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781399281252,
+          "createAt": 1781399281252
         }
       }
     },

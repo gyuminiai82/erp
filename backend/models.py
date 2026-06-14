@@ -214,3 +214,23 @@ class AuditLog(Base):
     user_email = Column(String, index=True)
     ip_address = Column(String)
     severity = Column(String, index=True)  # INFO, WARNING, HIGH, SYSTEM
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    type = Column(String) # 부서이동, 승진, 강등, 등
+    before_dept_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+    after_dept_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+    before_pos_id = Column(Integer, ForeignKey("positions.id"), nullable=True)
+    after_pos_id = Column(Integer, ForeignKey("positions.id"), nullable=True)
+    appointment_date = Column(Date)
+    status = Column(String, default="대기") # 대기, 승인, 반려
+    memo = Column(String, nullable=True)
+
+    employee = relationship("Employee", foreign_keys=[employee_id])
+    before_dept = relationship("Department", foreign_keys=[before_dept_id])
+    after_dept = relationship("Department", foreign_keys=[after_dept_id])
+    before_pos = relationship("Position", foreign_keys=[before_pos_id])
+    after_pos = relationship("Position", foreign_keys=[after_pos_id])
