@@ -12,6 +12,7 @@ services:
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true # Next.js 핫 리로드 지원을 위해 추가
+      - CHOKIDAR_USEPOLLING=true
 
   backend:
     build:
