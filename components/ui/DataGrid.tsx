@@ -21,8 +21,8 @@ export interface DataGridProps {
 export function DataGrid({
   columns,
   data,
-  rowHeight = 40,
-  headerHeight = 40,
+  rowHeight = 24, // Excel-like dense row height
+  headerHeight = 28,
   onDataChange,
   className = "",
   style
@@ -103,7 +103,6 @@ export function DataGrid({
     if (!columns[colIndex].editable) return;
     setEditingCell({ row: rowIndex, col: colIndex });
     setEditValue(value !== null && value !== undefined ? String(value) : "");
-    // focus input is handled in effect
   };
 
   useEffect(() => {
@@ -154,8 +153,6 @@ export function DataGrid({
       if (row !== selectedCell.row || col !== selectedCell.col) {
         setSelectedCell({ row, col });
         setSelectionRange({ startRow: row, endRow: row, startCol: col, endCol: col });
-        
-        // Scroll into view logic could be added here
         e.preventDefault();
       }
     }
@@ -175,44 +172,56 @@ export function DataGrid({
     return rowIndex >= minRow && rowIndex <= maxRow && colIndex >= minCol && colIndex <= maxCol;
   };
 
-  const getBorderClasses = (rowIndex: number, colIndex: number) => {
-    if (!selectionRange) return "";
+  const isRowHeaderSelected = (rowIndex: number) => {
+    if (!selectionRange) return false;
     const minRow = Math.min(selectionRange.startRow, selectionRange.endRow);
     const maxRow = Math.max(selectionRange.startRow, selectionRange.endRow);
+    return rowIndex >= minRow && rowIndex <= maxRow;
+  };
+
+  const isColHeaderSelected = (colIndex: number) => {
+    if (!selectionRange) return false;
     const minCol = Math.min(selectionRange.startCol, selectionRange.endCol);
     const maxCol = Math.max(selectionRange.startCol, selectionRange.endCol);
-    
-    if (!isCellInRange(rowIndex, colIndex)) return "";
-    
-    let classes = "border-blue-500 ";
-    if (rowIndex === minRow) classes += "border-t-2 ";
-    if (rowIndex === maxRow) classes += "border-b-2 ";
-    if (colIndex === minCol) classes += "border-l-2 ";
-    if (colIndex === maxCol) classes += "border-r-2 ";
-    return classes;
+    return colIndex >= minCol && colIndex <= maxCol;
   };
+
+  const rowHeaderWidth = 40;
 
   return (
     <div 
-      className={`relative border border-gray-300 bg-white overflow-hidden flex flex-col focus:outline-none ${className}`}
-      style={style}
+      className={`relative border border-[#d4d4d4] bg-white overflow-hidden flex flex-col focus:outline-none ${className}`}
+      style={{ ...style, fontFamily: 'Arial, sans-serif' }}
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
       {/* Header */}
       <div 
-        className="flex bg-gray-100 border-b border-gray-300 font-semibold text-sm text-gray-700 select-none z-10 relative"
+        className="flex border-b border-[#d4d4d4] text-xs text-[#444] select-none z-20 sticky top-0"
         style={{ height: headerHeight, minWidth: 'min-content' }}
       >
-        {columns.map((col, i) => (
-          <div 
-            key={i} 
-            className="flex items-center px-2 border-r border-gray-300 flex-shrink-0 truncate"
-            style={{ width: col.width || 150 }}
-          >
-            {col.headerName}
-          </div>
-        ))}
+        {/* Top-Left empty corner cell */}
+        <div 
+          className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
+          style={{ width: rowHeaderWidth }}
+        />
+        {/* Column Headers */}
+        {columns.map((col, i) => {
+          const selected = isColHeaderSelected(i);
+          return (
+            <div 
+              key={i} 
+              className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-default"
+              style={{ 
+                width: col.width || 150,
+                backgroundColor: selected ? '#f5c276' : '#f3f3f3',
+                color: selected ? '#000' : '#444'
+              }}
+            >
+              {col.headerName}
+            </div>
+          );
+        })}
       </div>
 
       {/* Body / Virtual Scroll Container */}
@@ -225,12 +234,27 @@ export function DataGrid({
           <div style={{ transform: `translateY(${startIndex * rowHeight}px)`, position: 'absolute', left: 0, right: 0 }}>
             {visibleData.map((row, i) => {
               const actualRowIndex = row._originalIndex;
+              const rowSelected = isRowHeaderSelected(actualRowIndex);
+
               return (
                 <div 
                   key={actualRowIndex} 
-                  className="flex border-b border-gray-200 hover:bg-gray-50/50"
+                  className="flex border-b border-[#d4d4d4]"
                   style={{ height: rowHeight }}
                 >
+                  {/* Row Header (Numbers) */}
+                  <div 
+                    className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
+                    style={{ 
+                      width: rowHeaderWidth,
+                      backgroundColor: rowSelected ? '#f5c276' : '#f3f3f3',
+                      color: rowSelected ? '#000' : '#444'
+                    }}
+                  >
+                    {actualRowIndex + 1}
+                  </div>
+
+                  {/* Row Cells */}
                   {columns.map((col, colIndex) => {
                     const value = row[col.field];
                     const selected = isCellSelected(actualRowIndex, colIndex);
@@ -240,37 +264,40 @@ export function DataGrid({
                     return (
                       <div
                         key={colIndex}
-                        className={`px-2 flex items-center border-r border-gray-200 flex-shrink-0 relative truncate text-sm
-                          ${inRange && !selected ? 'bg-blue-50/50' : ''}
-                          ${selected ? 'bg-white z-10' : ''}
-                        `}
-                        style={{ width: col.width || 150 }}
+                        className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative truncate text-sm`}
+                        style={{ 
+                          width: col.width || 150,
+                          backgroundColor: selected ? '#fff' : (inRange ? '#e6ebf5' : '#fff'),
+                          zIndex: selected || inRange ? 10 : 1
+                        }}
                         onMouseDown={(e) => handleMouseDown(actualRowIndex, colIndex, e)}
                         onMouseEnter={() => handleMouseEnter(actualRowIndex, colIndex)}
                         onDoubleClick={() => handleDoubleClick(actualRowIndex, colIndex, value)}
                       >
-                        {/* Excel Selection Borders */}
+                        {/* Excel Selection Borders (Black) */}
                         {inRange && (
-                          <div className={`absolute inset-0 pointer-events-none border-blue-500 z-10
-                            ${actualRowIndex === Math.min(selectionRange!.startRow, selectionRange!.endRow) ? 'border-t-2' : ''}
-                            ${actualRowIndex === Math.max(selectionRange!.startRow, selectionRange!.endRow) ? 'border-b-2' : ''}
-                            ${colIndex === Math.min(selectionRange!.startCol, selectionRange!.endCol) ? 'border-l-2' : ''}
-                            ${colIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) ? 'border-r-2' : ''}
-                          `} />
+                          <div className={`absolute inset-0 pointer-events-none z-20`}
+                               style={{
+                                 borderTop: actualRowIndex === Math.min(selectionRange!.startRow, selectionRange!.endRow) ? '2px solid #000' : 'none',
+                                 borderBottom: actualRowIndex === Math.max(selectionRange!.startRow, selectionRange!.endRow) ? '2px solid #000' : 'none',
+                                 borderLeft: colIndex === Math.min(selectionRange!.startCol, selectionRange!.endCol) ? '2px solid #000' : 'none',
+                                 borderRight: colIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) ? '2px solid #000' : 'none',
+                               }}
+                          />
                         )}
 
-                        {/* Fill Handle (the little square) */}
+                        {/* Fill Handle (Black small square) */}
                         {inRange && 
                          actualRowIndex === Math.max(selectionRange!.startRow, selectionRange!.endRow) && 
                          colIndex === Math.max(selectionRange!.startCol, selectionRange!.endCol) && (
-                          <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-blue-500 border border-white cursor-crosshair z-20" />
+                          <div className="absolute -bottom-[3px] -right-[3px] w-[6px] h-[6px] bg-black border border-white cursor-crosshair z-30" />
                         )}
 
                         {isEditing ? (
                           <input
                             ref={inputRef}
                             type="text"
-                            className="absolute inset-0 w-full h-full border-2 border-blue-500 px-2 outline-none z-30 text-sm bg-white"
+                            className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
                             onBlur={finishEditing}
@@ -290,7 +317,7 @@ export function DataGrid({
         </div>
         
         {data.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+          <div className="absolute inset-0 flex items-center justify-center text-[#444]">
             데이터가 없습니다.
           </div>
         )}
