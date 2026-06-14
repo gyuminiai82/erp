@@ -108,6 +108,16 @@ CREATE TABLE menus (
     parent_id INT COMMENT '상위 메뉴 ID',
     sort_order INT DEFAULT 0 COMMENT '정렬 순서',
     FOREIGN KEY (parent_id) REFERENCES menus(id)
+
+
+CREATE TABLE menus (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL COMMENT '메뉴명',
+    url VARCHAR(255) COMMENT '이동 경로',
+    icon VARCHAR(100) COMMENT '아이콘 식별자',
+    parent_id INT COMMENT '상위 메뉴 ID',
+    sort_order INT DEFAULT 0 COMMENT '정렬 순서',
+    FOREIGN KEY (parent_id) REFERENCES menus(id)
 );
 
 CREATE TABLE role_menus (
@@ -116,4 +126,21 @@ CREATE TABLE role_menus (
     PRIMARY KEY (role_id, menu_id),
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (menu_id) REFERENCES menus(id)
+);
+
+CREATE TABLE common_code_groups (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(100) UNIQUE NOT NULL COMMENT '그룹 코드',
+    name VARCHAR(255) NOT NULL COMMENT '그룹명',
+    description TEXT COMMENT '설명'
+);
+
+CREATE TABLE common_codes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    group_code VARCHAR(100) NOT NULL COMMENT '그룹 코드',
+    code VARCHAR(100) NOT NULL COMMENT '코드 값',
+    name VARCHAR(255) NOT NULL COMMENT '이름(라벨)',
+    sort_order INT DEFAULT 0 COMMENT '정렬 순서',
+    is_active BOOLEAN DEFAULT TRUE COMMENT '사용 여부',
+    FOREIGN KEY (group_code) REFERENCES common_code_groups(code)
 );

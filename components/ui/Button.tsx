@@ -3,9 +3,10 @@ import React from "react";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   variant?: 'default' | 'outline' | 'danger' | 'ghost';
+  size?: 'default' | 'sm' | 'lg';
 }
 
-export function Button({ loading = false, variant = 'default', children, className = "", ...props }: ButtonProps) {
+export function Button({ loading = false, variant = 'default', size = 'default', children, className = "", ...props }: ButtonProps) {
   let variantClass = "text-white bg-[#107C41] hover:bg-[#0c5c30] border-transparent focus:ring-[#107C41]";
   if (variant === 'outline') {
     variantClass = "text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:ring-[#107C41]";
@@ -15,10 +16,17 @@ export function Button({ loading = false, variant = 'default', children, classNa
     variantClass = "text-gray-700 bg-transparent hover:bg-gray-100 border-transparent focus:ring-gray-500";
   }
 
+  let sizeClass = "py-2 px-4 text-sm";
+  if (size === 'sm') {
+    sizeClass = "py-1 px-3 text-xs";
+  } else if (size === 'lg') {
+    sizeClass = "py-3 px-6 text-base";
+  }
+
   return (
     <button
       disabled={loading || props.disabled}
-      className={`flex justify-center py-2 px-4 border text-sm font-semibold rounded-[4px] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm ${variantClass} ${className}`}
+      className={`flex justify-center border font-semibold rounded-[4px] focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed shadow-sm ${variantClass} ${sizeClass} ${className}`}
       {...props}
     >
       {loading ? (
