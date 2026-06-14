@@ -18,6 +18,9 @@ export interface DataGridProps {
   onDataChange?: (rowIndex: number, field: string, newValue: any) => void;
   className?: string;
   style?: React.CSSProperties;
+  showCheckboxes?: boolean;
+  selectedRowIndices?: number[];
+  onSelectionChange?: (indices: number[]) => void;
 }
 
 export function DataGrid({
@@ -27,7 +30,10 @@ export function DataGrid({
   headerHeight = 36,
   onDataChange,
   className = "",
-  style
+  style,
+  showCheckboxes = false,
+  selectedRowIndices = [],
+  onSelectionChange
 }: DataGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -288,7 +294,7 @@ export function DataGrid({
     return colIndex >= minCol && colIndex <= maxCol;
   };
 
-  const rowHeaderWidth = 40;
+  const rowHeaderWidth = showCheckboxes ? 60 : 40;
 
   return (
     <div 
@@ -311,11 +317,27 @@ export function DataGrid({
         >
           {/* State Column Header */}
           <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]" />
-          {/* Corner Cell (Empty) */}
+          {/* Corner Cell (Empty or Checkbox) */}
           <div 
             className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
             style={{ width: rowHeaderWidth }}
-          />
+          >
+            {showCheckboxes && (
+              <input 
+                type="checkbox"
+                checked={data.length > 0 && selectedRowIndices.length === data.length}
+                onChange={(e) => {
+                  if (!onSelectionChange) return;
+                  if (e.target.checked) {
+                    onSelectionChange(data.map((_, idx) => idx));
+                  } else {
+                    onSelectionChange([]);
+                  }
+                }}
+                className="cursor-pointer"
+              />
+            )}
+          </div>
           {/* Column Headers */}
           {columns.map((col, i) => {
             const selected = isColHeaderSelected(i);
@@ -359,7 +381,7 @@ export function DataGrid({
                     {row._state === 'D' && <span className="text-[10px] text-red-600 font-bold" title="삭제됨">D</span>}
                   </div>
 
-                  {/* Row Header (Numbers) */}
+                  {/* Row Header (Numbers & Checkbox) */}
                   <div 
                     className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
                     style={{ 
@@ -370,6 +392,21 @@ export function DataGrid({
                     onMouseDown={(e) => handleRowHeaderMouseDown(actualRowIndex, e)}
                     onMouseEnter={() => handleRowHeaderMouseEnter(actualRowIndex)}
                   >
+                    {showCheckboxes && (
+                      <input 
+                        type="checkbox"
+                        checked={selectedRowIndices.includes(actualRowIndex)}
+                        onChange={(e) => {
+                          if (!onSelectionChange) return;
+                          const next = e.target.checked
+                            ? [...selectedRowIndices, actualRowIndex]
+                            : selectedRowIndices.filter(idx => idx !== actualRowIndex);
+                          onSelectionChange(next);
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        className="cursor-pointer mr-1.5"
+                      />
+                    )}
                     {actualRowIndex + 1}
                   </div>
 

@@ -20,6 +20,7 @@ CREATE TABLE employees (
     status VARCHAR(50) DEFAULT '재직' COMMENT '상태',
     department_id INT COMMENT '부서 ID',
     position_id INT COMMENT '직급 ID',
+    deleted_at DATETIME NULL COMMENT '삭제 일시 (Soft Delete)',
     FOREIGN KEY (department_id) REFERENCES departments(id),
     FOREIGN KEY (position_id) REFERENCES positions(id)
 );

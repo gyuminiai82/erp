@@ -61,6 +61,7 @@ class Employee(Base):
     employment_type = Column(String, default="정규직")
     resident_num = Column(String, nullable=True)
     profile_image_url = Column(String, nullable=True)
+    deleted_at = Column(DateTime, nullable=True)
     
     department_id = Column(Integer, ForeignKey("departments.id"))
     position_id = Column(Integer, ForeignKey("positions.id"), nullable=True)

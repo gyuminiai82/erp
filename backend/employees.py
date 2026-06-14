@@ -16,6 +16,9 @@ router = APIRouter(
 class RoleUpdateRequest(BaseModel):
     role_id: str
 
+class EmployeeBulkDeleteRequest(BaseModel):
+    employee_ids: List[int]
+
 class EmployeeCreateRequest(BaseModel):
     emp_no: str = None  # Frontend might send it, but we'll override it
     name: str
@@ -67,7 +70,7 @@ def get_next_emp_no(db: Session = Depends(get_db)):
 
 @router.get("")
 def get_employees(db: Session = Depends(get_db)):
-    employees = db.query(models.Employee).order_by(models.Employee.emp_no).all()
+    employees = db.query(models.Employee).filter(models.Employee.deleted_at == None).order_by(models.Employee.emp_no).all()
     result = []
     for emp in employees:
         # Get primary role
@@ -181,15 +184,14 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
 
     return {"message": "사원이 성공적으로 등록되었습니다.", "id": new_emp.id}
 
-@router.delete("/{emp_id}")
-def delete_employee(emp_id: int, db: Session = Depends(get_db)):
-    emp = db.query(models.Employee).filter(models.Employee.id == emp_id).first()
-    if not emp:
-        raise HTTPException(status_code=404, detail="Employee not found")
+@router.post("/bulk-delete")
+def bulk_delete_employees(payload: EmployeeBulkDeleteRequest, db: Session = Depends(get_db)):
+    emps = db.query(models.Employee).filter(models.Employee.id.in_(payload.employee_ids)).all()
+    if not emps:
+        raise HTTPException(status_code=404, detail="No employees found")
         
-    # Delete related role mapping
-    db.query(models.EmployeeRole).filter(models.EmployeeRole.employee_id == emp_id).delete()
+    for emp in emps:
+        emp.deleted_at = datetime.now()
     
-    db.delete(emp)
     db.commit()
-    return {"message": "사원이 삭제되었습니다."}
+    return {"message": f"{len(emps)}명의 사원이 삭제되었습니다."}

@@ -15,6 +15,7 @@ export default function EmployeesPage() {
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [newEmp, setNewEmp] = useState({ 
     name: '', email: '', department_id: '', position_id: '',
     phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: ''
@@ -80,11 +81,23 @@ export default function EmployeesPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("정말 이 사원을 삭제하시겠습니까?")) return;
+  const handleBulkDelete = async () => {
+    if (selectedRowIndices.length === 0) {
+      alert("삭제할 사원을 선택해주세요.");
+      return;
+    }
+    if (!confirm(`정말 선택한 ${selectedRowIndices.length}명의 사원을 삭제하시겠습니까? (Soft Delete)`)) return;
+    
+    const idsToDelete = selectedRowIndices.map(idx => employees[idx].id);
+    
     try {
-      const res = await fetch(`http://localhost:8000/api/employees/${id}`, { method: "DELETE" });
+      const res = await fetch(`http://localhost:8000/api/employees/bulk-delete`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_ids: idsToDelete })
+      });
       if (res.ok) {
+        setSelectedRowIndices([]);
         fetchData();
       } else {
         const data = await res.json();
@@ -153,19 +166,7 @@ export default function EmployeesPage() {
       options: [{ label: '남성', value: '남성' }, { label: '여성', value: '여성' }]
     },
     { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true },
-    { field: 'address', headerName: '주소', width: 250, editable: true },
-    { 
-      field: 'actions', 
-      headerName: '관리', 
-      width: 80,
-      renderCell: (val: any, row: any) => (
-        <div className="flex justify-center">
-          <button onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }} className="p-1 text-gray-400 hover:text-red-600 rounded" title="삭제">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      )
-    }
+    { field: 'address', headerName: '주소', width: 250, editable: true }
   ];
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {
@@ -186,12 +187,18 @@ export default function EmployeesPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">사원 관리</h1>
           <p className="text-gray-500">전체 임직원 목록 조회 및 신규 사원 등록을 관리합니다.</p>
         </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700">
+        <div className="flex space-x-2">
+          {selectedRowIndices.length > 0 && (
+            <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent">
+              <Trash2 className="w-4 h-4 mr-2" />
+              선택 삭제 ({selectedRowIndices.length})
+            </Button>
+          )}
+          <Button variant="outline" className="text-gray-700 bg-white">
             <FileDown className="w-4 h-4 mr-2" />
             엑셀 다운로드
           </Button>
-          <Button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={() => setIsModalOpen(true)}>
             <UserPlus className="w-4 h-4 mr-2" />
             신규 사원 등록
           </Button>
@@ -216,12 +223,16 @@ export default function EmployeesPage() {
 
         <div className="p-6 bg-gray-50/50">
           <div className="flex flex-col h-[600px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-            <DataGrid 
-              columns={columns} 
-              data={employees} 
-              onDataChange={handleDataChange} 
-              className="flex-1"
-            />
+            <div className="h-[calc(100vh-280px)] min-h-[400px]">
+              <DataGrid 
+                columns={columns} 
+                data={employees} 
+                onDataChange={handleDataChange}
+                showCheckboxes={true}
+                selectedRowIndices={selectedRowIndices}
+                onSelectionChange={setSelectedRowIndices}
+              />
+            </div>
           </div>
         </div>
       </div>
