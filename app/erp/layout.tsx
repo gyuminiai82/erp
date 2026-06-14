@@ -60,9 +60,9 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
           <div className="flex items-center text-[#107C41] font-bold text-xl tracking-tight">
             <div className="w-8 h-8 rounded-md bg-[#107C41] text-white flex items-center justify-center mr-2 shadow-md shadow-green-500/20">
-              E
+              M
             </div>
-            Smart ERP
+            MINSTUDIO ERP
           </div>
         </div>
 

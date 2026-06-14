@@ -84,7 +84,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-5xl font-bold tracking-tight mb-6 leading-tight">
             Next-Gen<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-[#107C41]">Smart ERP</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-[#107C41]">MINSTUDIO ERP</span>
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed mb-8">
             인사, 근태, 급여부터 업무 성과까지. 데이터 기반의 투명하고 효율적인 회사 운영을 위한 스마트 인트라넷 솔루션입니다.
