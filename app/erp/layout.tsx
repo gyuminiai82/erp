@@ -45,6 +45,27 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
       })
       .catch(err => console.error(err));
     }
+
+    // Connect to WebSocket to track active sessions
+    let ws: WebSocket;
+    let reconnectTimer: NodeJS.Timeout;
+    let isUnmounted = false;
+
+    const connectWs = () => {
+      ws = new WebSocket('ws://localhost:8000/api/ws');
+      ws.onclose = () => {
+        if (!isUnmounted) {
+          reconnectTimer = setTimeout(connectWs, 5000);
+        }
+      };
+    };
+    connectWs();
+
+    return () => {
+      isUnmounted = true;
+      if (ws) ws.close();
+      clearTimeout(reconnectTimer);
+    };
   }, []);
 
   const renderIcon = (iconName: string) => {

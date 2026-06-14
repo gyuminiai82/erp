@@ -65,6 +65,13 @@ def inject_menus():
                     {"name": "기안 작성", "url": "/erp/drafts", "roles": ["master", "hr_manager", "dept_head", "employee"]},
                     {"name": "결재함", "url": "/erp/approvals", "roles": ["master", "hr_manager", "dept_head"]}
                 ]
+            },
+            {
+                "name": "시스템 관리",
+                "icon": "Settings",
+                "submenus": [
+                    {"name": "공통 코드 관리", "url": "/erp/system/common-codes", "roles": ["master"]}
+                ]
             }
         ]
 
