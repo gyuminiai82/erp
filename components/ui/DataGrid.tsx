@@ -333,7 +333,7 @@ export function DataGrid({
                 
                 {/* Resizer Handle */}
                 <div 
-                  className={`absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize z-10 hover:bg-gray-400 transition-colors ${resizingCol === i ? 'bg-gray-400' : 'bg-transparent'}`}
+                  className={`absolute right-[-2px] top-0 bottom-0 w-2.5 cursor-col-resize z-10 transition-colors ${resizingCol === i ? 'border-r-[3px] border-gray-600' : 'border-r-[3px] border-transparent hover:border-gray-400'}`}
                   onMouseDown={(e) => handleResizeStart(i, e)}
                 />
               </div>
