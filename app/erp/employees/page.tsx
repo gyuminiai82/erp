@@ -5,6 +5,7 @@ import { Plus, Search, UserPlus, FileDown, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -13,6 +14,7 @@ export default function EmployeesPage() {
   const [empTypes, setEmpTypes] = useState<any[]>([]);
   const [empStatuses, setEmpStatuses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showAlert, showConfirm } = useDialog();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
@@ -74,7 +76,7 @@ export default function EmployeesPage() {
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.detail || "생성 실패");
+        await showAlert(data.detail || "생성 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -83,10 +85,11 @@ export default function EmployeesPage() {
 
   const handleBulkDelete = async () => {
     if (selectedRowIndices.length === 0) {
-      alert("삭제할 사원을 선택해주세요.");
+      await showAlert("삭제할 사원을 선택해주세요.", { type: "warning" });
       return;
     }
-    if (!confirm(`정말 선택한 ${selectedRowIndices.length}명의 사원을 삭제하시겠습니까? (Soft Delete)`)) return;
+    const confirmed = await showConfirm(`정말 선택한 ${selectedRowIndices.length}명의 사원을 삭제하시겠습니까? (Soft Delete)`, { type: "error" });
+    if (!confirmed) return;
     
     const idsToDelete = selectedRowIndices.map(idx => employees[idx].id);
     
@@ -101,7 +104,7 @@ export default function EmployeesPage() {
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.detail || "삭제 실패");
+        await showAlert(data.detail || "삭제 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);

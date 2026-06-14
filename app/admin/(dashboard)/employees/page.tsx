@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shield, ShieldAlert, ShieldCheck, ShieldEllipsis, UserCheck, MoreVertical, Search, Check, Plus, X } from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 const ROLE_OPTIONS = [
   { id: 'master', name: '사내 총괄 관리자', color: 'red', desc: '회사 내 모든 데이터 열람 및 총괄 관리' },
@@ -18,6 +19,7 @@ export default function RoleManagementPage() {
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEmp, setNewEmp] = useState({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee' });
+  const { showAlert } = useDialog();
 
   const fetchEmployees = () => {
     fetch("http://localhost:8000/api/employees")
@@ -68,7 +70,7 @@ export default function RoleManagementPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmp.emp_no || !newEmp.name || !newEmp.email) {
-      alert("모든 필드를 입력해주세요.");
+      await showAlert("모든 필드를 입력해주세요.", { type: "warning" });
       return;
     }
     try {
@@ -83,12 +85,12 @@ export default function RoleManagementPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "등록 실패");
       
-      alert(data.message + "\n초기 비밀번호는 1234로 설정되었습니다.");
+      await showAlert(data.message + "\n초기 비밀번호는 1234로 설정되었습니다.", { type: "success" });
       setIsModalOpen(false);
       setNewEmp({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee' });
       fetchEmployees();
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     }
   };
 

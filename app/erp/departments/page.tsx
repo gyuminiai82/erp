@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Building2, Briefcase } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function DepartmentsPage() {
 
@@ -11,6 +12,7 @@ export default function DepartmentsPage() {
   const [positions, setPositions] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showAlert, showConfirm } = useDialog();
 
   // Department Modal State
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
@@ -21,9 +23,6 @@ export default function DepartmentsPage() {
   const [isPosModalOpen, setIsPosModalOpen] = useState(false);
   const [editingPos, setEditingPos] = useState<any>(null);
   const [posForm, setPosForm] = useState({ name: '', level: 10, description: '' });
-
-  // Delete Modal State
-  const [deleteTarget, setDeleteTarget] = useState<{ id: number; type: 'dept' | 'pos' } | null>(null);
 
   const fetchData = async () => {
     try {
@@ -49,7 +48,7 @@ export default function DepartmentsPage() {
 
   // Department Functions
   const handleSaveDept = async () => {
-    if (!deptForm.name.trim()) return alert("부서명을 입력해주세요.");
+    if (!deptForm.name.trim()) return showAlert("부서명을 입력해주세요.", { type: "warning" });
     
     const url = editingDept ? `http://localhost:8000/api/departments/${editingDept.id}` : "http://localhost:8000/api/departments";
     const method = editingDept ? "PUT" : "POST";
@@ -71,34 +70,48 @@ export default function DepartmentsPage() {
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.detail || "저장 실패");
+        await showAlert(data.detail || "저장 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
+  const handleDeleteDept = async (id: number) => {
+    const confirmed = await showConfirm("정말 이 부서를 삭제하시겠습니까?", { type: "error" });
+    if (!confirmed) return;
     try {
-      const typeStr = deleteTarget.type === 'dept' ? 'departments' : 'positions';
-      const res = await fetch(`http://localhost:8000/api/${typeStr}/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`http://localhost:8000/api/departments/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.detail || "삭제 실패");
+        await showAlert(data.detail || "삭제 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
-    } finally {
-      setDeleteTarget(null);
+    }
+  };
+
+  const handleDeletePos = async (id: number) => {
+    const confirmed = await showConfirm("정말 이 직급을 삭제하시겠습니까?", { type: "error" });
+    if (!confirmed) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/positions/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const data = await res.json();
+        await showAlert(data.detail || "삭제 실패", { type: "error" });
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
   // Position Functions
   const handleSavePos = async () => {
-    if (!posForm.name.trim()) return alert("직급명을 입력해주세요.");
+    if (!posForm.name.trim()) return showAlert("직급명을 입력해주세요.", { type: "warning" });
     
     const url = editingPos ? `http://localhost:8000/api/positions/${editingPos.id}` : "http://localhost:8000/api/positions";
     const method = editingPos ? "PUT" : "POST";
@@ -177,7 +190,7 @@ export default function DepartmentsPage() {
                         }} className="text-gray-400 hover:text-blue-600 p-1">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => setDeleteTarget({ id: dept.id, type: 'dept' })} className="text-gray-400 hover:text-red-600 p-1">
+                        <button onClick={() => handleDeleteDept(dept.id)} className="text-gray-400 hover:text-red-600 p-1">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
@@ -226,7 +239,7 @@ export default function DepartmentsPage() {
                       }} className="text-gray-400 hover:text-blue-600 p-1">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setDeleteTarget({ id: pos.id, type: 'pos' })} className="text-gray-400 hover:text-red-600 p-1">
+                      <button onClick={() => handleDeletePos(pos.id)} className="text-gray-400 hover:text-red-600 p-1">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
@@ -302,27 +315,6 @@ export default function DepartmentsPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900">삭제 확인</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-700">
-                정말 이 {deleteTarget.type === 'dept' ? '부서를' : '직급을'} 삭제하시겠습니까?
-                <br />
-                <span className="text-sm text-gray-500">(소속된 사원이 없어야 삭제 가능합니다)</span>
-              </p>
-            </div>
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
-              <Button variant="outline" onClick={() => setDeleteTarget(null)}>취소</Button>
-              <Button onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700 text-white">삭제</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

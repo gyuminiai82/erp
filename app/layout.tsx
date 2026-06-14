@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Minstudio ERP 시스템 관리자 로그인",
 };
 
+import { DialogProvider } from "@/components/providers/DialogProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,11 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <DialogProvider>
+          {children}
+        </DialogProvider>
+      </body>
     </html>
   );
 }

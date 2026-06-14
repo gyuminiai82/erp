@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Settings2, Save, Hash } from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -11,6 +12,7 @@ export default function SettingsPage() {
   });
   const [preview, setPreview] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const { showAlert } = useDialog();
 
   useEffect(() => {
     fetch("http://localhost:8000/api/settings")
@@ -49,9 +51,9 @@ export default function SettingsPage() {
       });
       if (!res.ok) throw new Error("저장 실패");
       
-      alert("환경설정이 성공적으로 저장되었습니다.");
+      await showAlert("환경설정이 성공적으로 저장되었습니다.", { type: "success" });
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     } finally {
       setIsSaving(false);
     }

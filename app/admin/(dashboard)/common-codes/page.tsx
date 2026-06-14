@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, Save, X, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function CommonCodesPage() {
   const [groups, setGroups] = useState<any[]>([]);
@@ -25,6 +26,7 @@ export default function CommonCodesPage() {
   
   const [editingCodeId, setEditingCodeId] = useState<number | null>(null);
   const [editCodeForm, setEditCodeForm] = useState<any>({});
+  const { showAlert, showConfirm } = useDialog();
 
   const fetchGroups = async () => {
     try {
@@ -72,7 +74,7 @@ export default function CommonCodesPage() {
   // --- Group Handlers ---
   const handleSaveNewGroup = async () => {
     if (!newGroup.code || !newGroup.name) {
-      alert("그룹 코드와 이름을 입력해주세요.");
+      await showAlert("그룹 코드와 이름을 입력해주세요.", { type: "warning" });
       return;
     }
     try {
@@ -88,7 +90,7 @@ export default function CommonCodesPage() {
         fetchGroups();
         setSelectedGroup(addedGroup);
       } else {
-        alert("그룹 추가 실패");
+        await showAlert("그룹 추가 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -96,7 +98,8 @@ export default function CommonCodesPage() {
   };
 
   const handleDeleteGroup = async (id: number) => {
-    if (!confirm("그룹을 삭제하시겠습니까? (하위 코드가 있으면 삭제할 수 없습니다)")) return;
+    const confirmed = await showConfirm("그룹을 삭제하시겠습니까? (하위 코드가 있으면 삭제할 수 없습니다)", { type: "error" });
+    if (!confirmed) return;
     try {
       const res = await fetch(`http://localhost:8000/api/common-code-groups/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -104,7 +107,7 @@ export default function CommonCodesPage() {
         fetchGroups();
       } else {
         const err = await res.json();
-        alert(err.detail || "그룹 삭제 실패");
+        await showAlert(err.detail || "그룹 삭제 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -132,7 +135,7 @@ export default function CommonCodesPage() {
           setSelectedGroup(await res.json());
         }
       } else {
-        alert("그룹 수정 실패");
+        await showAlert("그룹 수정 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -143,7 +146,7 @@ export default function CommonCodesPage() {
   const handleSaveNewCode = async () => {
     if (!selectedGroup) return;
     if (!newCode.code || !newCode.name) {
-      alert("코드와 이름을 입력해주세요.");
+      await showAlert("코드와 이름을 입력해주세요.", { type: "warning" });
       return;
     }
     
@@ -159,7 +162,7 @@ export default function CommonCodesPage() {
         setNewCode({ group_code: '', code: '', name: '', sort_order: 10, is_active: true });
         fetchCodes(selectedGroup.code);
       } else {
-        alert("코드 추가 실패");
+        await showAlert("코드 추가 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -167,13 +170,14 @@ export default function CommonCodesPage() {
   };
 
   const handleDeleteCode = async (id: number) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
+    const confirmed = await showConfirm("정말 삭제하시겠습니까?", { type: "error" });
+    if (!confirmed) return;
     try {
       const res = await fetch(`http://localhost:8000/api/common-codes/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchCodes(selectedGroup.code);
       } else {
-        alert("삭제 실패");
+        await showAlert("삭제 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -196,7 +200,7 @@ export default function CommonCodesPage() {
         setEditingCodeId(null);
         fetchCodes(selectedGroup.code);
       } else {
-        alert("코드 수정 실패");
+        await showAlert("코드 수정 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);

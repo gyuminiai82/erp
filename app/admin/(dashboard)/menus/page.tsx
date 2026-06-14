@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function MenusPage() {
   const [menus, setMenus] = useState<any[]>([]);
@@ -19,6 +20,7 @@ export default function MenusPage() {
 
   const [draggedMenuId, setDraggedMenuId] = useState<number | null>(null);
   const [dragOverMenuId, setDragOverMenuId] = useState<number | null>(null);
+  const { showAlert, showConfirm } = useDialog();
 
   const fetchMenus = () => {
     fetch("http://localhost:8000/api/menus")
@@ -88,16 +90,17 @@ export default function MenusPage() {
         setIsModalOpen(false);
         fetchMenus();
       } else {
-        alert("저장에 실패했습니다.");
+        await showAlert("저장에 실패했습니다.", { type: "error" });
       }
     } catch (e) {
       console.error(e);
-      alert("오류가 발생했습니다.");
+      await showAlert("오류가 발생했습니다.", { type: "error" });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("정말 이 메뉴를 삭제하시겠습니까?")) return;
+    const confirmed = await showConfirm("정말 이 메뉴를 삭제하시겠습니까?", { type: "error" });
+    if (!confirmed) return;
     
     try {
       const res = await fetch(`http://localhost:8000/api/menus/${id}`, { method: 'DELETE' });
@@ -105,11 +108,11 @@ export default function MenusPage() {
         fetchMenus();
       } else {
         const error = await res.json();
-        alert(error.detail || "삭제에 실패했습니다.");
+        await showAlert(error.detail || "삭제에 실패했습니다.", { type: "error" });
       }
     } catch (e) {
       console.error(e);
-      alert("오류가 발생했습니다.");
+      await showAlert("오류가 발생했습니다.", { type: "error" });
     }
   };
 
@@ -180,7 +183,7 @@ export default function MenusPage() {
         body: JSON.stringify({ menus: updates })
       });
       if (!res.ok) {
-        alert("순서 저장에 실패했습니다.");
+        await showAlert("순서 저장에 실패했습니다.", { type: "error" });
         fetchMenus();
       }
     } catch (err) {

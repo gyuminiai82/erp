@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Shield, UserPlus, Trash2, ShieldCheck, Mail, Calendar, Edit } from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function SystemAdminsPage() {
   const [admins, setAdmins] = useState<any[]>([]);
@@ -13,6 +14,7 @@ export default function SystemAdminsPage() {
     password: "",
     is_active: true
   });
+  const { showAlert, showConfirm } = useDialog();
 
   const fetchAdmins = async () => {
     try {
@@ -59,12 +61,13 @@ export default function SystemAdminsPage() {
       setFormData({ id: null, username: "", email: "", password: "", is_active: true });
       fetchAdmins();
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("해당 최고 관리자 계정을 삭제하시겠습니까?")) return;
+    const confirmed = await showConfirm("해당 최고 관리자 계정을 삭제하시겠습니까?", { type: "error" });
+    if (!confirmed) return;
     try {
       const res = await fetch(`http://localhost:8000/api/admins/${id}`, {
         method: "DELETE"
@@ -75,7 +78,7 @@ export default function SystemAdminsPage() {
       }
       fetchAdmins();
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     }
   };
 

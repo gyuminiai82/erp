@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, Plus, Trash2, Edit } from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function AttendanceSettingsPage() {
   const [policies, setPolicies] = useState<any[]>([]);
@@ -20,6 +21,7 @@ export default function AttendanceSettingsPage() {
     required_work_hours: 8,
     is_default: false
   });
+  const { showAlert, showConfirm } = useDialog();
 
   const fetchPolicies = async () => {
     try {
@@ -57,12 +59,13 @@ export default function AttendanceSettingsPage() {
       setIsModalOpen(false);
       fetchPolicies();
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
+    const confirmed = await showConfirm("정말 삭제하시겠습니까?", { type: "error" });
+    if (!confirmed) return;
     try {
       const res = await fetch(`http://localhost:8000/api/attendance-policies/${id}`, {
         method: "DELETE"
@@ -73,7 +76,7 @@ export default function AttendanceSettingsPage() {
       }
       fetchPolicies();
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     }
   };
 

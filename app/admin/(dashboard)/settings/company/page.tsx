@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Save, Building2 } from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function CompanySettingsPage() {
   const [info, setInfo] = useState({
@@ -14,6 +15,7 @@ export default function CompanySettingsPage() {
     logo_url: ""
   });
   const [isSaving, setIsSaving] = useState(false);
+  const { showAlert } = useDialog();
 
   useEffect(() => {
     fetch("http://localhost:8000/api/company")
@@ -47,9 +49,9 @@ export default function CompanySettingsPage() {
         body: JSON.stringify(info)
       });
       if (!res.ok) throw new Error("저장 실패");
-      alert("회사 정보가 성공적으로 저장되었습니다.");
+      await showAlert("회사 정보가 성공적으로 저장되었습니다.", { type: "success" });
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
     } finally {
       setIsSaving(false);
     }
