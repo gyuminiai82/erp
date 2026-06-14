@@ -139,7 +139,12 @@ export default function EmployeesPage() {
     },
     { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true },
     { field: 'address', headerName: '주소', width: 250, editable: true },
-    { field: 'is_active', headerName: '활성여부', width: 80 }
+    { 
+      field: 'is_active', 
+      headerName: '활성여부', 
+      width: 80,
+      renderCell: (val: any) => val ? '활성' : '비활성'
+    }
   ];
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {
