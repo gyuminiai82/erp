@@ -41,6 +41,7 @@ export function DataGrid({
   // Editing state
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editOffset, setEditOffset] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Virtualization calculations
@@ -110,20 +111,43 @@ export function DataGrid({
   }, []);
 
   // Editing Handlers
-  const handleDoubleClick = (rowIndex: number, colIndex: number, value: any) => {
+  const handleDoubleClick = (rowIndex: number, colIndex: number, value: any, e?: React.MouseEvent) => {
     if (!columns[colIndex].editable) return;
     setEditingCell({ row: rowIndex, col: colIndex });
     setEditValue(value !== null && value !== undefined ? String(value) : "");
+    
+    if (e) {
+      let offset = value !== null && value !== undefined ? String(value).length : 0;
+      if (document.caretRangeFromPoint) {
+        const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+        if (range && range.startContainer.nodeType === Node.TEXT_NODE) {
+          offset = range.startOffset;
+        }
+      } else if ((document as any).caretPositionFromPoint) {
+        const pos = (document as any).caretPositionFromPoint(e.clientX, e.clientY);
+        if (pos && pos.offsetNode.nodeType === Node.TEXT_NODE) {
+          offset = pos.offset;
+        }
+      }
+      setEditOffset(offset);
+    } else {
+      setEditOffset(null);
+    }
   };
 
   useEffect(() => {
     if (editingCell && inputRef.current) {
       inputRef.current.focus();
       if (inputRef.current.tagName === 'INPUT') {
-        (inputRef.current as HTMLInputElement).select();
+        const inputEl = inputRef.current as HTMLInputElement;
+        if (editOffset !== null) {
+          inputEl.setSelectionRange(editOffset, editOffset);
+        } else {
+          inputEl.select();
+        }
       }
     }
-  }, [editingCell]);
+  }, [editingCell, editOffset]);
 
   const finishEditing = () => {
     if (editingCell && onDataChange) {
@@ -294,7 +318,7 @@ export function DataGrid({
                         }}
                         onMouseDown={(e) => handleMouseDown(actualRowIndex, colIndex, e)}
                         onMouseEnter={() => handleMouseEnter(actualRowIndex, colIndex)}
-                        onDoubleClick={() => handleDoubleClick(actualRowIndex, colIndex, value)}
+                        onDoubleClick={(e) => handleDoubleClick(actualRowIndex, colIndex, value, e)}
                       >
                         {/* Excel Selection Borders (Black) */}
                         {inRange && (

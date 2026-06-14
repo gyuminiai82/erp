@@ -1,5 +1,7 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from database import engine, SessionLocal, get_db
 import json
 import asyncio
 from typing import List
@@ -127,6 +129,24 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.on_event("startup")
 async def start_background_tasks():
     asyncio.create_task(broadcast_metrics_task())
+
+@app.get("/api/departments")
+def get_departments(db: Session = Depends(get_db)):
+    departments = db.query(models.Department).all()
+    return [{"id": d.id, "name": d.name} for d in departments]
+
+@app.get("/api/positions")
+def get_positions(db: Session = Depends(get_db)):
+    positions = db.query(models.Position).order_by(models.Position.level).all()
+    return [{"id": p.id, "name": p.name} for p in positions]
+
+@app.get("/api/common-codes")
+def get_common_codes(group: str = None, db: Session = Depends(get_db)):
+    query = db.query(models.CommonCode).filter(models.CommonCode.is_active == True)
+    if group:
+        query = query.filter(models.CommonCode.group_code == group)
+    codes = query.order_by(models.CommonCode.sort_order).all()
+    return [{"code": c.code, "name": c.name, "group_code": c.group_code} for c in codes]
 
 @app.on_event("startup")
 def seed_data():

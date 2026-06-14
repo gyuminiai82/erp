@@ -10,6 +10,8 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [positions, setPositions] = useState<any[]>([]);
+  const [empTypes, setEmpTypes] = useState<any[]>([]);
+  const [empStatuses, setEmpStatuses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,15 +22,19 @@ export default function EmployeesPage() {
 
   const fetchData = async () => {
     try {
-      const [empRes, deptRes, posRes] = await Promise.all([
+      const [empRes, deptRes, posRes, typeRes, statusRes] = await Promise.all([
         fetch("http://localhost:8000/api/employees"),
         fetch("http://localhost:8000/api/departments"),
-        fetch("http://localhost:8000/api/positions")
+        fetch("http://localhost:8000/api/positions"),
+        fetch("http://localhost:8000/api/common-codes?group=EMP_TYPE"),
+        fetch("http://localhost:8000/api/common-codes?group=EMP_STATUS")
       ]);
       
       if (empRes.ok) setEmployees(await empRes.json());
       if (deptRes.ok) setDepartments(await deptRes.json());
       if (posRes.ok) setPositions(await posRes.json());
+      if (typeRes.ok) setEmpTypes(await typeRes.json());
+      if (statusRes.ok) setEmpStatuses(await statusRes.json());
       
     } catch (e) {
       console.error(e);
@@ -100,7 +106,7 @@ export default function EmployeesPage() {
       width: 120, 
       editable: true,
       editType: 'select',
-      options: [
+      options: empTypes.length > 0 ? empTypes.map(t => ({ label: t.name, value: t.code })) : [
         { label: '정규직', value: '정규직' },
         { label: '계약직', value: '계약직' },
         { label: '아르바이트', value: '아르바이트' },
@@ -114,13 +120,26 @@ export default function EmployeesPage() {
       width: 100,
       editable: true,
       editType: 'select',
-      options: [
+      options: empStatuses.length > 0 ? empStatuses.map(s => ({ label: s.name, value: s.code })) : [
         { label: '재직', value: '재직' },
         { label: '휴직', value: '휴직' },
         { label: '퇴사', value: '퇴사' }
       ]
     },
-    { field: 'hire_date', headerName: '입사일', width: 120 }
+    { field: 'hire_date', headerName: '입사일', width: 120 },
+    { field: 'email', headerName: '이메일', width: 180, editable: true },
+    { field: 'birth_date', headerName: '생년월일', width: 120, editable: true },
+    { 
+      field: 'gender', 
+      headerName: '성별', 
+      width: 80, 
+      editable: true,
+      editType: 'select',
+      options: [{ label: '남성', value: '남성' }, { label: '여성', value: '여성' }]
+    },
+    { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true },
+    { field: 'address', headerName: '주소', width: 250, editable: true },
+    { field: 'is_active', headerName: '활성여부', width: 80 }
   ];
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {

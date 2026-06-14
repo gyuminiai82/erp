@@ -2,6 +2,16 @@ from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Bool
 from sqlalchemy.orm import relationship
 from database import Base
 
+class CommonCode(Base):
+    __tablename__ = "common_codes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_code = Column(String, index=True) # e.g. 'EMP_STATUS', 'EMP_TYPE'
+    code = Column(String, index=True) # e.g. '재직', '정규직'
+    name = Column(String) # e.g. '재직', '정규직'
+    sort_order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+
 class Department(Base):
     __tablename__ = "departments"
 
