@@ -106,7 +106,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 ml-2 mt-8">Audit & Config</div>
 
-          <Link href="/erp/system/common-codes" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/erp/system/common-codes') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
+          <Link href="/admin/common-codes" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/admin/common-codes') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
             <Settings className="w-5 h-5 mr-3" />
             공통 코드 관리
           </Link>
