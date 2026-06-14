@@ -156,8 +156,9 @@ class CommonCodeCreate(BaseModel):
     sort_order: int = 0
     is_active: bool = True
 
+from typing import Optional
+
 class CommonCodeUpdate(BaseModel):
-    from typing import Optional
     group_code: Optional[str] = None
     code: Optional[str] = None
     name: Optional[str] = None

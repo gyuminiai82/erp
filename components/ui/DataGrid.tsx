@@ -278,7 +278,7 @@ export function DataGrid({
               return (
                 <div 
                   key={actualRowIndex} 
-                  className="flex border-b border-[#d4d4d4]"
+                  className="flex border-b border-[#d4d4d4] w-max min-w-full"
                   style={{ height: rowHeight }}
                 >
                   {/* State Indicator */}
