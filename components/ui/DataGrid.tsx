@@ -213,7 +213,9 @@ export function DataGrid({
         className="flex border-b border-[#d4d4d4] text-xs text-[#444] select-none z-20 sticky top-0"
         style={{ height: headerHeight, minWidth: 'min-content' }}
       >
-        {/* Top-Left empty corner cell */}
+        {/* State Column Header */}
+        <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]" />
+        {/* Corner Cell (Empty) */}
         <div 
           className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3]"
           style={{ width: rowHeaderWidth }}
@@ -255,6 +257,13 @@ export function DataGrid({
                   className="flex border-b border-[#d4d4d4]"
                   style={{ height: rowHeight }}
                 >
+                  {/* State Indicator */}
+                  <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 flex items-center justify-center bg-[#f3f3f3]">
+                    {row._state === 'U' && <span className="text-[10px] text-blue-600 font-bold" title="수정됨">U</span>}
+                    {row._state === 'C' && <span className="text-[10px] text-green-600 font-bold" title="추가됨">I</span>}
+                    {row._state === 'D' && <span className="text-[10px] text-red-600 font-bold" title="삭제됨">D</span>}
+                  </div>
+
                   {/* Row Header (Numbers) */}
                   <div 
                     className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 text-xs cursor-default"
@@ -319,24 +328,29 @@ export function DataGrid({
                               }}
                             >
                               <div className="w-full h-full flex items-center px-1.5 truncate">{editValue}</div>
-                              <div className="absolute top-full left-[-2px] right-[-2px] bg-white border border-gray-400 shadow-xl max-h-48 overflow-y-auto z-[100]">
-                                {col.options.map((opt, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="px-2 py-1.5 hover:bg-[#e6ebf5] cursor-pointer text-sm"
-                                    onMouseDown={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      if (onDataChange) {
-                                        onDataChange(actualRowIndex, col.field, opt.value);
-                                      }
-                                      setEditingCell(null);
-                                    }}
-                                  >
-                                    {opt.label}
+                              {(() => {
+                                const isNearBottom = (actualRowIndex * rowHeight - scrollTop + 200) > containerHeight;
+                                return (
+                                  <div className={`absolute left-[-2px] right-[-2px] bg-white border border-gray-400 shadow-xl max-h-48 overflow-y-auto z-[100] ${isNearBottom ? 'bottom-full mb-[2px]' : 'top-full mt-[2px]'}`}>
+                                    {col.options!.map((opt, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="px-2 py-1.5 hover:bg-[#e6ebf5] cursor-pointer text-sm"
+                                        onMouseDown={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          if (onDataChange) {
+                                            onDataChange(actualRowIndex, col.field, opt.value);
+                                          }
+                                          setEditingCell(null);
+                                        }}
+                                      >
+                                        {opt.label}
+                                      </div>
+                                    ))}
                                   </div>
-                                ))}
-                              </div>
+                                );
+                              })()}
                             </div>
                           ) : (
                             <input

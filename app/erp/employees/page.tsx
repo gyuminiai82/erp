@@ -123,11 +123,13 @@ export default function EmployeesPage() {
     { field: 'hire_date', headerName: '입사일', width: 120 }
   ];
 
-  const handleDataChange = (rowIndex: number, field: string, newValue: any) => {
+  const handleDataChange = (rowIndex: number, field: string, value: any) => {
     const updated = [...employees];
-    updated[rowIndex] = { ...updated[rowIndex], [field]: newValue };
+    updated[rowIndex] = { ...updated[rowIndex], [field]: value, _state: 'U' };
     setEmployees(updated);
-    // TODO: 연동을 원하시면 별도 PUT API 호출을 여기에 추가합니다.
+    
+    // Auto-save logic (simulated or actual API call can be placed here)
+    // For now, we rely on the Save button or auto-save later
   };
 
   if (loading) return <div className="p-8 text-gray-500 text-center">직원 데이터를 불러오는 중...</div>;
