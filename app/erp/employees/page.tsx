@@ -144,12 +144,12 @@ export default function EmployeesPage() {
           </select>
         </div>
 
-        <div className="overflow-hidden flex flex-col h-[600px] border-t border-gray-100">
+        <div className="flex flex-col h-[600px] border border-gray-300 shadow-sm rounded-lg overflow-hidden">
           <DataGrid 
             columns={columns} 
             data={employees} 
             onDataChange={handleDataChange} 
-            className="flex-1 border-none"
+            className="flex-1"
           />
         </div>
       </div>
