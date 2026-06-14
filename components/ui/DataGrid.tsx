@@ -119,7 +119,9 @@ export function DataGrid({
   useEffect(() => {
     if (editingCell && inputRef.current) {
       inputRef.current.focus();
-      inputRef.current.select();
+      if (inputRef.current.tagName === 'INPUT') {
+        (inputRef.current as HTMLInputElement).select();
+      }
     }
   }, [editingCell]);
 
@@ -306,21 +308,39 @@ export function DataGrid({
 
                         {isEditing ? (
                           col.editType === 'select' && col.options ? (
-                            <select
-                              className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={finishEditing}
-                              autoFocus
+                            <div
+                              className="absolute inset-0 w-full h-full border-2 border-black z-50 bg-white outline-none"
+                              tabIndex={0}
+                              ref={inputRef as any}
+                              onBlur={(e) => {
+                                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                                  finishEditing();
+                                }
+                              }}
                             >
-                              <option value="">선택하세요</option>
-                              {col.options.map((opt, idx) => (
-                                <option key={idx} value={opt.value}>{opt.label}</option>
-                              ))}
-                            </select>
+                              <div className="w-full h-full flex items-center px-1.5 truncate">{editValue}</div>
+                              <div className="absolute top-full left-[-2px] right-[-2px] bg-white border border-gray-400 shadow-xl max-h-48 overflow-y-auto z-[100]">
+                                {col.options.map((opt, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="px-2 py-1.5 hover:bg-[#e6ebf5] cursor-pointer text-sm"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      if (onDataChange) {
+                                        onDataChange(actualRowIndex, col.field, opt.value);
+                                      }
+                                      setEditingCell(null);
+                                    }}
+                                  >
+                                    {opt.label}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           ) : (
                             <input
-                              ref={inputRef}
+                              ref={inputRef as React.RefObject<HTMLInputElement>}
                               type="text"
                               className="absolute inset-0 w-full h-full border-2 border-black px-1.5 outline-none z-40 text-sm bg-white"
                               value={editValue}
