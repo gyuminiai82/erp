@@ -58,6 +58,12 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="이메일 또는 비밀번호가 올바르지 않습니다.",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
+    if role == "user" and user.status != "재직":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="재직 중인 사원만 로그인할 수 있습니다.",
+        )
     
     # 3. 토큰 발급
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
