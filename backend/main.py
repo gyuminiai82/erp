@@ -12,6 +12,7 @@ import menus
 import settings
 import company_api
 import attendance_policies_api
+import attendances_api
 import system_admins_api
 import departments_api
 import positions_api
@@ -47,6 +48,7 @@ app.include_router(menus.router)
 app.include_router(settings.router)
 app.include_router(company_api.router)
 app.include_router(attendance_policies_api.router)
+app.include_router(attendances_api.router)
 app.include_router(system_admins_api.router)
 app.include_router(departments_api.router)
 app.include_router(positions_api.router)

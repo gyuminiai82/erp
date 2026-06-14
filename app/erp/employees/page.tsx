@@ -1,13 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, UserPlus, FileDown, Trash2, Save, Undo2 } from 'lucide-react';
+import { Plus, Search, UserPlus, FileDown, Trash2, Save, Undo2, Edit2, ArrowUpRight, MoreVertical, LayoutGrid, List as ListIcon } from 'lucide-react';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function EmployeesPage() {
+  const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [positions, setPositions] = useState<any[]>([]);
@@ -23,6 +26,10 @@ export default function EmployeesPage() {
     phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: ''
   });
 
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchDept, setSearchDept] = useState('');
+  const [searchPos, setSearchPos] = useState('');
+
   const fetchData = async () => {
     try {
       const [empRes, deptRes, posRes, typeRes, statusRes] = await Promise.all([
@@ -33,7 +40,15 @@ export default function EmployeesPage() {
         fetch("http://localhost:8000/api/common-codes?group=EMP_STATUS")
       ]);
       
-      if (empRes.ok) setEmployees(await empRes.json());
+      if (empRes.ok) {
+        const data = await empRes.json();
+        setAllEmployees(data);
+        setEmployees(data);
+        // If there were active search queries, we might want to re-apply them, but usually fetch clears them or we reset
+        setSearchKeyword('');
+        setSearchDept('');
+        setSearchPos('');
+      }
       if (deptRes.ok) setDepartments(await deptRes.json());
       if (posRes.ok) setPositions(await posRes.json());
       if (typeRes.ok) setEmpTypes(await typeRes.json());
@@ -96,36 +111,144 @@ export default function EmployeesPage() {
   };
 
   const handleSave = async () => {
-    // Collect rows to delete
+    // Collect rows to delete and update
     const rowsToDelete = employees.filter(e => e._state === 'D');
+    const rowsToUpdate = employees.filter(e => e._state === 'U');
     
-    if (rowsToDelete.length === 0) {
+    if (rowsToDelete.length === 0 && rowsToUpdate.length === 0) {
       await showAlert("저장할 변경사항이 없습니다.", { type: "info" });
       return;
     }
 
-    const confirmed = await showConfirm(`삭제 예정인 ${rowsToDelete.length}명의 사원 데이터를 완전히 삭제하시겠습니까? (저장 시 복구 불가)`, { type: "error" });
+    const totalChanges = rowsToDelete.length + rowsToUpdate.length;
+    const confirmed = await showConfirm(`총 ${totalChanges}건의 변경사항(수정 ${rowsToUpdate.length}건, 삭제 ${rowsToDelete.length}건)을 저장하시겠습니까?`, { type: "warning" });
     if (!confirmed) return;
     
-    const idsToDelete = rowsToDelete.map(e => e.id);
-    
     try {
-      const res = await fetch(`http://localhost:8000/api/employees/bulk-delete`, { 
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employee_ids: idsToDelete })
-      });
-      if (res.ok) {
-        await showAlert("변경사항이 성공적으로 저장되었습니다.", { type: "success" });
-        fetchData();
-      } else {
-        const data = await res.json();
-        await showAlert(data.detail || "저장 실패", { type: "error" });
+      // Handle deletions
+      if (rowsToDelete.length > 0) {
+        const idsToDelete = rowsToDelete.map(e => e.id);
+        const delRes = await fetch(`http://localhost:8000/api/employees/bulk-delete`, { 
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employee_ids: idsToDelete })
+        });
+        if (!delRes.ok) {
+          const data = await delRes.json();
+          throw new Error(data.detail || "삭제 실패");
+        }
       }
-    } catch (e) {
+
+      // Handle updates
+      if (rowsToUpdate.length > 0) {
+        // Prepare payload, extracting only updatable fields
+        const updatePayload = rowsToUpdate.map(e => ({
+          id: e.id,
+          name: e.name,
+          email: e.email,
+          department: e.department,
+          position: e.position,
+          phone: e.phone,
+          birth_date: e.birth_date,
+          gender: e.gender,
+          address: e.address,
+          employment_type: e.employment_type,
+          resident_num: e.resident_num,
+          status: e.status,
+          hire_date: e.hire_date
+        }));
+
+        const upRes = await fetch(`http://localhost:8000/api/employees/bulk-update`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employees: updatePayload })
+        });
+        if (!upRes.ok) {
+          const data = await upRes.json();
+          throw new Error(data.detail || "수정 실패");
+        }
+      }
+
+      await showAlert("변경사항이 성공적으로 저장되었습니다.", { type: "success" });
+      fetchData();
+    } catch (e: any) {
       console.error(e);
-      await showAlert("오류가 발생했습니다.", { type: "error" });
+      await showAlert(e.message || "오류가 발생했습니다.", { type: "error" });
     }
+  };
+
+  const handleExcelDownload = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('사원목록');
+
+    worksheet.columns = [
+      { header: '사번', key: 'emp_no', width: 12 },
+      { header: '이름', key: 'name', width: 10 },
+      { header: '소속 부서', key: 'department', width: 15 },
+      { header: '직급', key: 'position', width: 10 },
+      { header: '상태', key: 'status', width: 10 },
+      { header: '연락처', key: 'phone', width: 18 },
+      { header: '이메일', key: 'email', width: 25 },
+      { header: '입사일', key: 'hire_date', width: 12 },
+      { header: '생년월일', key: 'birth_date', width: 12 },
+      { header: '성별', key: 'gender', width: 8 },
+      { header: '주민등록번호', key: 'resident_num', width: 18 },
+      { header: '주소', key: 'address', width: 40 },
+      { header: '고용형태', key: 'employment_type', width: 12 },
+    ];
+
+    employees.forEach(emp => {
+      worksheet.addRow({
+        emp_no: emp.emp_no,
+        name: emp.name,
+        department: emp.department || '',
+        position: emp.position || '',
+        status: emp.status || '',
+        phone: emp.phone || '',
+        email: emp.email || '',
+        hire_date: emp.hire_date || '',
+        birth_date: emp.birth_date || '',
+        gender: emp.gender || '',
+        resident_num: emp.resident_num || '',
+        address: emp.address || '',
+        employment_type: emp.employment_type || ''
+      });
+    });
+
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell, colNumber) => {
+        cell.font = { name: '맑은 고딕', size: 10 };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          left: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          right: { style: 'thin', color: { argb: 'FFE2E2E2' } }
+        };
+
+        if (rowNumber === 1) {
+          cell.font = { name: '맑은 고딕', size: 10, bold: true };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F4F7' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else {
+          if (colNumber === 7 || colNumber === 12) {
+            cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+          } else {
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          }
+        }
+      });
+      row.height = 22;
+    });
+
+    worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `employees_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   const handleCancel = async () => {
@@ -136,7 +259,7 @@ export default function EmployeesPage() {
   };
 
   const columns: ColumnDef[] = [
-    { field: 'emp_no', headerName: '사번', width: 120 },
+    { field: 'emp_no', headerName: '사번', width: 120, editable: true },
     { field: 'name', headerName: '이름', width: 120, editable: true },
     { 
       field: 'department', 
@@ -181,7 +304,7 @@ export default function EmployeesPage() {
         { label: '퇴사', value: '퇴사' }
       ]
     },
-    { field: 'hire_date', headerName: '입사일', width: 120 },
+    { field: 'hire_date', headerName: '입사일', width: 120, editable: true },
     { field: 'email', headerName: '이메일', width: 180, editable: true },
     { field: 'birth_date', headerName: '생년월일', width: 120, editable: true },
     { 
@@ -201,8 +324,37 @@ export default function EmployeesPage() {
     updated[rowIndex] = { ...updated[rowIndex], [field]: value, _state: 'U' };
     setEmployees(updated);
     
-    // Auto-save logic (simulated or actual API call can be placed here)
-    // For now, we rely on the Save button or auto-save later
+    // Update allEmployees as well so filters don't erase changes
+    const updatedAll = [...allEmployees];
+    const allIdx = updatedAll.findIndex(e => e.id === updated[rowIndex].id);
+    if (allIdx >= 0) {
+      updatedAll[allIdx] = { ...updated[rowIndex] };
+      setAllEmployees(updatedAll);
+    }
+  };
+
+  const handleSearch = () => {
+    let filtered = [...allEmployees];
+
+    if (searchKeyword.trim() !== '') {
+      const keyword = searchKeyword.toLowerCase();
+      filtered = filtered.filter(e => 
+        (e.name && e.name.toLowerCase().includes(keyword)) ||
+        (e.emp_no && e.emp_no.toLowerCase().includes(keyword)) ||
+        (e.email && e.email.toLowerCase().includes(keyword))
+      );
+    }
+
+    if (searchDept !== '') {
+      filtered = filtered.filter(e => e.department === searchDept);
+    }
+
+    if (searchPos !== '') {
+      filtered = filtered.filter(e => e.position === searchPos);
+    }
+
+    setEmployees(filtered);
+    setSelectedRowIndices([]);
   };
 
   if (loading) return <div className="p-8 text-gray-500 text-center">직원 데이터를 불러오는 중...</div>;
@@ -215,52 +367,75 @@ export default function EmployeesPage() {
           <p className="text-gray-500">전체 임직원 목록 조회 및 신규 사원 등록을 관리합니다.</p>
         </div>
         <div className="flex space-x-2">
-          {employees.some(e => e._state === 'D' || e._state === 'U') && (
-            <>
-              <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all">
-                <Undo2 className="w-4 h-4 mr-2" />
-                변경 취소
-              </Button>
-              <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200">
-                <Save className="w-4 h-4 mr-2" />
-                변경사항 저장
-              </Button>
-            </>
-          )}
-          {selectedRowIndices.length > 0 && (
-            <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent">
-              <Trash2 className="w-4 h-4 mr-2" />
-              선택 삭제 ({selectedRowIndices.length})
-            </Button>
-          )}
-          <Button variant="outline" className="text-gray-700 bg-white">
-            <FileDown className="w-4 h-4 mr-2" />
-            엑셀 다운로드
-          </Button>
-          <Button onClick={() => setIsModalOpen(true)}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            신규 사원 등록
-          </Button>
+          {/* Action buttons have been moved to the DataGrid toolbar */}
         </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex space-x-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-            <Input className="pl-9 bg-white" placeholder="이름, 사번, 이메일 검색..." />
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col xl:flex-row justify-end items-start xl:items-center gap-4">
+          <div className="flex space-x-4 w-full xl:w-auto items-center">
+            <div className="relative flex-1 xl:w-[250px]">
+              <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+              <Input 
+                value={searchKeyword}
+                onChange={e => setSearchKeyword(e.target.value)}
+                onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
+                className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
+                placeholder="이름, 사번, 이메일 검색..." 
+              />
+            </div>
+            <select 
+              value={searchDept}
+              onChange={e => setSearchDept(e.target.value)}
+              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent w-32"
+            >
+              <option value="">모든 부서</option>
+              {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+            </select>
+            <select 
+              value={searchPos}
+              onChange={e => setSearchPos(e.target.value)}
+              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent w-32"
+            >
+              <option value="">모든 직급</option>
+              {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+            </select>
+            <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10">
+              검색
+            </Button>
           </div>
-          <select className="border-gray-200 rounded-lg text-sm bg-white px-3 focus:ring-blue-500 focus:border-blue-500">
-            <option value="">모든 부서</option>
-            {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-          </select>
-          <select className="border-gray-200 rounded-lg text-sm bg-white px-3 focus:ring-blue-500 focus:border-blue-500">
-            <option value="">모든 직급</option>
-            {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
         </div>
 
         <div className="p-6 bg-gray-50/50">
+          <div className="flex justify-end mb-3 gap-2">
+            {employees.some(e => e._state === 'D' || e._state === 'U') && (
+              <>
+                <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all">
+                  <Undo2 className="w-4 h-4 mr-2" />
+                  변경 취소
+                </Button>
+                <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200">
+                  <Save className="w-4 h-4 mr-2" />
+                  변경사항 저장
+                </Button>
+              </>
+            )}
+            {selectedRowIndices.length > 0 && (
+              <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent">
+                <Trash2 className="w-4 h-4 mr-2" />
+                선택 삭제 ({selectedRowIndices.length})
+              </Button>
+            )}
+            <Button variant="outline" className="text-gray-700 bg-white" onClick={handleExcelDownload}>
+              <FileDown className="w-4 h-4 mr-2" />
+              엑셀 다운로드
+            </Button>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <UserPlus className="w-4 h-4 mr-2" />
+              신규 사원 등록
+            </Button>
+          </div>
+          
           <div className="flex flex-col h-[600px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
             <div className="h-[calc(100vh-280px)] min-h-[400px]">
               <DataGrid 

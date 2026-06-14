@@ -12,6 +12,13 @@ class DepartmentBase(BaseModel):
     name: str
     manager_id: Optional[int] = None
 
+class ReorderRequestItem(BaseModel):
+    id: int
+    sort_order: int
+
+class ReorderRequest(BaseModel):
+    items: List[ReorderRequestItem]
+
 class DepartmentCreate(DepartmentBase):
     pass
 
@@ -23,7 +30,15 @@ class DepartmentSchema(DepartmentBase):
 
 @router.get("", response_model=List[DepartmentSchema])
 def get_departments(db: Session = Depends(get_db)):
-    return db.query(models.Department).all()
+    return db.query(models.Department).order_by(models.Department.sort_order.asc(), models.Department.id.asc()).all()
+
+@router.put("/reorder")
+def reorder_departments(data: ReorderRequest, db: Session = Depends(get_db)):
+    # Update sort orders in bulk
+    for item in data.items:
+        db.query(models.Department).filter(models.Department.id == item.id).update({"sort_order": item.sort_order})
+    db.commit()
+    return {"message": "정렬 순서가 업데이트되었습니다."}
 
 @router.post("", response_model=DepartmentSchema)
 def create_department(data: DepartmentCreate, db: Session = Depends(get_db)):

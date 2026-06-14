@@ -19,6 +19,24 @@ class RoleUpdateRequest(BaseModel):
 class EmployeeBulkDeleteRequest(BaseModel):
     employee_ids: List[int]
 
+class EmployeeUpdateRequest(BaseModel):
+    id: int
+    name: str = None
+    email: str = None
+    department: str = None
+    position: str = None
+    phone: str = None
+    birth_date: str = None
+    gender: str = None
+    address: str = None
+    employment_type: str = None
+    resident_num: str = None
+    status: str = None
+    hire_date: str = None
+
+class EmployeeBulkUpdateRequest(BaseModel):
+    employees: List[EmployeeUpdateRequest]
+
 class EmployeeCreateRequest(BaseModel):
     emp_no: str = None  # Frontend might send it, but we'll override it
     name: str
@@ -195,3 +213,39 @@ def bulk_delete_employees(payload: EmployeeBulkDeleteRequest, db: Session = Depe
     
     db.commit()
     return {"message": f"{len(emps)}명의 사원이 삭제되었습니다."}
+
+@router.put("/bulk-update")
+def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depends(get_db)):
+    dept_map = {d.name: d.id for d in db.query(models.Department).all()}
+    pos_map = {p.name: p.id for p in db.query(models.Position).all()}
+    
+    for emp_data in payload.employees:
+        emp = db.query(models.Employee).filter(models.Employee.id == emp_data.id).first()
+        if emp:
+            if emp_data.name is not None: emp.name = emp_data.name
+            if emp_data.email is not None: emp.email = emp_data.email
+            
+            if emp_data.department in dept_map: emp.department_id = dept_map[emp_data.department]
+            elif emp_data.department == "": emp.department_id = None
+            
+            if emp_data.position in pos_map: emp.position_id = pos_map[emp_data.position]
+            elif emp_data.position == "": emp.position_id = None
+            
+            if emp_data.phone is not None: emp.phone = emp_data.phone
+            
+            if emp_data.birth_date:
+                try: emp.birth_date = datetime.strptime(emp_data.birth_date, "%Y-%m-%d").date()
+                except: pass
+            
+            if emp_data.gender is not None: emp.gender = emp_data.gender
+            if emp_data.address is not None: emp.address = emp_data.address
+            if emp_data.employment_type is not None: emp.employment_type = emp_data.employment_type
+            if emp_data.resident_num is not None: emp.resident_num = emp_data.resident_num
+            if emp_data.status is not None: emp.status = emp_data.status
+            
+            if emp_data.hire_date:
+                try: emp.hire_date = datetime.strptime(emp_data.hire_date, "%Y-%m-%d").date()
+                except: pass
+                
+    db.commit()
+    return {"message": f"{len(payload.employees)}명의 사원이 수정되었습니다."}

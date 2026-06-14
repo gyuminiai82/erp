@@ -120,8 +120,7 @@ export default function CommonCodesPage() {
     setEditGroupForm({ ...group });
   };
 
-  const handleSaveEditGroup = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSaveEditGroup = async () => {
     try {
       const res = await fetch(`http://localhost:8000/api/common-code-groups/${editingGroupId}`, {
         method: "PUT",
@@ -240,17 +239,6 @@ export default function CommonCodesPage() {
                     : 'hover:bg-gray-50 border border-transparent'
                 }`}
               >
-                {editingGroupId === group.id ? (
-                  <div className="flex flex-col gap-2 w-full pr-2" onClick={e => e.stopPropagation()}>
-                    <input className="border rounded px-2 py-1 text-sm" value={editGroupForm.name} onChange={e => setEditGroupForm({...editGroupForm, name: e.target.value})} placeholder="그룹명" />
-                    <input className="border rounded px-2 py-1 text-sm text-gray-500" value={editGroupForm.description || ''} onChange={e => setEditGroupForm({...editGroupForm, description: e.target.value})} placeholder="설명" />
-                    <div className="flex justify-end gap-1 mt-1">
-                      <Button size="sm" className="h-6 text-xs px-2" onClick={handleSaveEditGroup}>저장</Button>
-                      <Button size="sm" variant="outline" className="h-6 text-xs px-2" onClick={(e) => { e.stopPropagation(); setEditingGroupId(null); }}>취소</Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className={`font-semibold text-sm ${selectedGroup?.id === group.id ? 'text-blue-700' : 'text-gray-900'}`}>
@@ -271,8 +259,6 @@ export default function CommonCodesPage() {
                       </button>
                     </div>
                     <ChevronRight className={`w-4 h-4 ml-1 ${selectedGroup?.id === group.id ? 'text-blue-500' : 'text-gray-300'}`} />
-                  </>
-                )}
               </div>
             ))}
           </div>
@@ -439,6 +425,32 @@ export default function CommonCodesPage() {
           </div>
         </div>
       )}
+      {/* Group Edit Modal */}
+      {editingGroupId !== null && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-[400px] shadow-xl border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold text-gray-900">그룹 수정</h2>
+              <button onClick={() => setEditingGroupId(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">그룹명 <span className="text-red-500">*</span></label>
+                <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={editGroupForm.name} onChange={e => setEditGroupForm({...editGroupForm, name: e.target.value})} placeholder="예: 고용 형태" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
+                <input type="text" className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={editGroupForm.description || ''} onChange={e => setEditGroupForm({...editGroupForm, description: e.target.value})} placeholder="설명 입력" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-8">
+              <Button variant="outline" onClick={() => setEditingGroupId(null)}>취소</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSaveEditGroup}>저장하기</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

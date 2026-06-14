@@ -26,6 +26,7 @@ class Department(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     manager_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    sort_order = Column(Integer, default=0)
 
     # Relationship (사원 목록)
     employees = relationship("Employee", foreign_keys="Employee.department_id", back_populates="department")
@@ -38,6 +39,7 @@ class Position(Base):
     name = Column(String, unique=True, index=True)
     level = Column(Integer, default=10)
     description = Column(String)
+    sort_order = Column(Integer, default=0)
 
     employees = relationship("Employee", back_populates="position")
 

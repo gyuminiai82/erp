@@ -93,17 +93,45 @@ export function DataGrid({
   const [editOffset, setEditOffset] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<{ field: string; direction: 'asc' | 'desc' } | null>(null);
+
+  const handleSort = (field: string) => {
+    setSortConfig(current => {
+      if (!current || current.field !== field) {
+        return { field, direction: 'asc' };
+      }
+      if (current.direction === 'asc') {
+        return { field, direction: 'desc' };
+      }
+      return null;
+    });
+  };
+
+  const processedData = useMemo(() => {
+    let result = data.map((d, idx) => ({ ...d, _originalIndex: idx }));
+    if (sortConfig) {
+      result.sort((a, b) => {
+        const valA = a[sortConfig.field];
+        const valB = b[sortConfig.field];
+        if (valA === null || valA === undefined) return sortConfig.direction === 'asc' ? 1 : -1;
+        if (valB === null || valB === undefined) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [data, sortConfig]);
+
   // Virtualization calculations
-  const totalHeight = data.length * rowHeight;
+  const totalHeight = processedData.length * rowHeight;
   const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - 2);
-  const endIndex = Math.min(data.length - 1, Math.floor((scrollTop + containerHeight) / rowHeight) + 2);
+  const endIndex = Math.min(processedData.length - 1, Math.floor((scrollTop + containerHeight) / rowHeight) + 2);
   
   const visibleData = useMemo(() => {
-    return data.slice(startIndex, endIndex + 1).map((row, i) => ({
-      ...row,
-      _originalIndex: startIndex + i
-    }));
-  }, [data, startIndex, endIndex]);
+    return processedData.slice(startIndex, endIndex + 1);
+  }, [processedData, startIndex, endIndex]);
 
   // Handle Resize
   useEffect(() => {
@@ -345,22 +373,30 @@ export function DataGrid({
           {/* Column Headers */}
           {columns.map((col, i) => {
             const selected = isColHeaderSelected(i);
+            const isSorted = sortConfig?.field === col.field;
             return (
               <div 
                 key={i} 
-                className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-default relative group"
+                className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 truncate cursor-pointer relative group select-none"
                 style={{ 
                   width: colWidths[i],
                   backgroundColor: selected ? '#e6ebf5' : '#f3f3f3',
                   fontWeight: 'normal',
                 }}
+                onClick={() => handleSort(col.field)}
               >
                 {col.headerName}
+                {isSorted && (
+                  <span className="ml-1 text-[10px] text-gray-500 font-bold">
+                    {sortConfig!.direction === 'asc' ? '▲' : '▼'}
+                  </span>
+                )}
                 
                 {/* Resizer Handle */}
                 <div 
-                  className={`absolute right-[-2px] top-0 bottom-0 w-2.5 cursor-col-resize z-10 transition-colors ${resizingCol === i ? 'border-r-[3px] border-gray-600' : 'border-r-[3px] border-transparent hover:border-gray-400'}`}
+                  className="absolute right-[-2px] top-0 bottom-0 w-2.5 cursor-col-resize z-10"
                   onMouseDown={(e) => handleResizeStart(i, e)}
+                  onClick={(e) => e.stopPropagation()}
                 />
               </div>
             );
@@ -376,7 +412,11 @@ export function DataGrid({
                 <div 
                   key={actualRowIndex} 
                   className="flex border-b border-[#d4d4d4] w-max min-w-full"
-                  style={{ height: rowHeight }}
+                  style={{ 
+                    height: rowHeight,
+                    zIndex: editingCell?.row === actualRowIndex ? 50 : 1,
+                    position: 'relative'
+                  }}
                 >
                   {/* State Indicator */}
                   <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 flex items-center justify-center bg-[#f3f3f3]">
@@ -420,7 +460,7 @@ export function DataGrid({
                     onMouseDown={(e) => handleRowHeaderMouseDown(actualRowIndex, e)}
                     onMouseEnter={() => handleRowHeaderMouseEnter(actualRowIndex)}
                   >
-                    {actualRowIndex + 1}
+                    {startIndex + i + 1}
                   </div>
 
                   {/* Row Cells */}
@@ -431,14 +471,14 @@ export function DataGrid({
                     const isEditing = editingCell?.row === actualRowIndex && editingCell?.col === colIndex;
                     
                     return (
-                      <div
-                        key={colIndex}
-                        className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm truncate`}
-                        style={{ 
-                          width: colWidths[colIndex],
-                          backgroundColor: selected ? '#fff' : (inRange ? '#e6ebf5' : '#fff'),
-                          zIndex: 20
-                        }}
+                        <div
+                          key={colIndex}
+                          className={`px-1.5 flex items-center border-r border-[#d4d4d4] flex-shrink-0 relative text-sm`}
+                          style={{ 
+                            width: colWidths[colIndex],
+                            backgroundColor: selected ? '#fff' : (inRange ? '#e6ebf5' : '#fff'),
+                            zIndex: isEditing ? 50 : 20
+                          }}
                         onMouseDown={(e) => handleMouseDown(actualRowIndex, colIndex, e)}
                         onMouseEnter={() => handleMouseEnter(actualRowIndex, colIndex)}
                         onDoubleClick={(e) => handleDoubleClick(actualRowIndex, colIndex, value, e)}

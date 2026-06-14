@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="w-64 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col shadow-xl hidden md:flex">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <div className="flex items-center tracking-tight">
+          <Link href="/admin" className="flex items-center tracking-tight hover:opacity-90 transition-opacity cursor-pointer">
             <div className="w-8 h-8 rounded-md bg-[#107C41] text-white font-bold text-xl flex items-center justify-center mr-2 shadow-md shadow-green-500/20">
               M
             </div>
@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-white font-bold text-lg leading-tight">MINSTUDIO ERP</span>
               <span className="text-slate-400 text-[10px] font-semibold tracking-widest leading-none mt-0.5 ml-0.5">ADMIN</span>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -109,14 +109,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 ml-2 mt-8">Audit & Config</div>
 
-          <Link href="/admin/common-codes" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/admin/common-codes') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
-            <Settings className="w-5 h-5 mr-3" />
-            공통 코드 관리
-          </Link>
-
           <Link href="/admin/audit" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/admin/audit') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
             <FileText className="w-5 h-5 mr-3" />
             감사 로그
+          </Link>
+
+          <Link href="/admin/common-codes" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/admin/common-codes') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
+            <Settings className="w-5 h-5 mr-3" />
+            공통 코드 관리
           </Link>
 
           <Link href="/admin/settings" className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive('/admin/settings') ? 'bg-blue-600/10 text-blue-400' : 'hover:bg-slate-800 hover:text-white'}`}>
@@ -137,10 +137,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           
           <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
-            <div className="h-8 w-px bg-gray-200 mx-2"></div>
             <div className="relative">
               <div 
                 className="flex items-center cursor-pointer"

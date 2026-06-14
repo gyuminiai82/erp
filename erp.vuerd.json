@@ -82,12 +82,14 @@
         "columnIds": [
           "2e13c73b81f04e99bbebf973c960f743",
           "159db97ee3a944f6a286d9dffc6eb3ea",
-          "e591627775a44c269fe82875fe3b0482"
+          "e591627775a44c269fe82875fe3b0482",
+          "defe33341d344de6a7055d91ce8446e3"
         ],
         "seqColumnIds": [
           "2e13c73b81f04e99bbebf973c960f743",
           "159db97ee3a944f6a286d9dffc6eb3ea",
-          "e591627775a44c269fe82875fe3b0482"
+          "e591627775a44c269fe82875fe3b0482",
+          "defe33341d344de6a7055d91ce8446e3"
         ],
         "ui": {
           "x": 23.0454,
@@ -109,12 +111,14 @@
         "columnIds": [
           "9b43cd4da1bb427a8b1b3e7d40c8b192",
           "4519df9f5be347d092a6fc41a8396dc8",
-          "fb87911abac34cb4acfa2e830586f2e1"
+          "fb87911abac34cb4acfa2e830586f2e1",
+          "00f734f8f77047438a7b337cde515bee"
         ],
         "seqColumnIds": [
           "9b43cd4da1bb427a8b1b3e7d40c8b192",
           "4519df9f5be347d092a6fc41a8396dc8",
-          "fb87911abac34cb4acfa2e830586f2e1"
+          "fb87911abac34cb4acfa2e830586f2e1",
+          "00f734f8f77047438a7b337cde515bee"
         ],
         "ui": {
           "x": 24.2727,
@@ -3270,6 +3274,56 @@
         "comment": "사용",
         "dataType": "BOOLEAN",
         "default": "TRUE",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "defe33341d344de6a7055d91ce8446e3": {
+        "id": "defe33341d344de6a7055d91ce8446e3",
+        "tableId": "bce92db4d0f24dcfb798b7e278aced08",
+        "name": "sort_order",
+        "comment": "정렬 순서",
+        "dataType": "INT",
+        "default": "0",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "00f734f8f77047438a7b337cde515bee": {
+        "id": "00f734f8f77047438a7b337cde515bee",
+        "tableId": "886fd05db17144e995f998ff7db29dcf",
+        "name": "sort_order",
+        "comment": "정렬 순서",
+        "dataType": "INT",
+        "default": "0",
         "options": {
           "autoIncrement": false,
           "primaryKey": false,

@@ -1,10 +1,83 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Building2, Briefcase } from 'lucide-react';
+import { Plus, Trash2, Edit2, Building2, Briefcase, GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useDialog } from "@/components/providers/DialogProvider";
+
+function SortableDeptRow({ dept, employees, setEditingDept, setDeptForm, setIsDeptModalOpen, handleDeleteDept }: any) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: dept.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 1 : 0, position: (isDragging ? 'relative' : 'static') as 'relative' | 'static' };
+  const manager = employees.find((e: any) => e.id === dept.manager_id);
+  
+  return (
+    <tr ref={setNodeRef} style={style} className={`border-b border-gray-100 bg-white ${isDragging ? 'shadow-lg bg-gray-50' : 'hover:bg-gray-50'}`}>
+      <td className="py-3 px-4 w-10 text-gray-400 cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
+        <GripVertical className="w-4 h-4" />
+      </td>
+      <td className="py-3 px-6 font-medium text-gray-900">{dept.name}</td>
+      <td className="py-3 px-6 text-gray-600">{manager ? `${manager.name} (${manager.emp_no})` : '-'}</td>
+      <td className="py-3 px-6 text-right space-x-2">
+        <button onClick={() => {
+          setEditingDept(dept);
+          setDeptForm({ name: dept.name, manager_id: dept.manager_id || '' });
+          setIsDeptModalOpen(true);
+        }} className="text-gray-400 hover:text-blue-600 p-1">
+          <Edit2 className="w-4 h-4" />
+        </button>
+        <button onClick={() => handleDeleteDept(dept.id)} className="text-gray-400 hover:text-red-600 p-1">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+function SortablePosRow({ pos, setEditingPos, setPosForm, setIsPosModalOpen, handleDeletePos }: any) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pos.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 1 : 0, position: (isDragging ? 'relative' : 'static') as 'relative' | 'static' };
+  
+  return (
+    <tr ref={setNodeRef} style={style} className={`border-b border-gray-100 bg-white ${isDragging ? 'shadow-lg bg-gray-50' : 'hover:bg-gray-50'}`}>
+      <td className="py-3 px-4 w-10 text-gray-400 cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
+        <GripVertical className="w-4 h-4" />
+      </td>
+      <td className="py-3 px-6 text-gray-500">{pos.level}</td>
+      <td className="py-3 px-6 font-medium text-gray-900">{pos.name}</td>
+      <td className="py-3 px-6 text-gray-500">{pos.description || '-'}</td>
+      <td className="py-3 px-6 text-right space-x-2">
+        <button onClick={() => {
+          setEditingPos(pos);
+          setPosForm({ name: pos.name, level: pos.level, description: pos.description || '' });
+          setIsPosModalOpen(true);
+        }} className="text-gray-400 hover:text-blue-600 p-1">
+          <Edit2 className="w-4 h-4" />
+        </button>
+        <button onClick={() => handleDeletePos(pos.id)} className="text-gray-400 hover:text-red-600 p-1">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </td>
+    </tr>
+  );
+}
 
 export default function DepartmentsPage() {
 
@@ -45,6 +118,49 @@ export default function DepartmentsPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEndDept = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = departments.findIndex(d => d.id === active.id);
+      const newIndex = departments.findIndex(d => d.id === over?.id);
+      const newItems = arrayMove(departments, oldIndex, newIndex);
+      setDepartments(newItems);
+      
+      try {
+        await fetch("http://localhost:8000/api/departments/reorder", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: newItems.map((item, idx) => ({ id: item.id, sort_order: idx + 1 })) })
+        });
+      } catch (e) { console.error(e); }
+    }
+  };
+
+  const handleDragEndPos = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = positions.findIndex(p => p.id === active.id);
+      const newIndex = positions.findIndex(p => p.id === over?.id);
+      const newItems = arrayMove(positions, oldIndex, newIndex);
+      setPositions(newItems);
+      
+      try {
+        await fetch("http://localhost:8000/api/positions/reorder", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: newItems.map((item, idx) => ({ id: item.id, sort_order: idx + 1 })) })
+        });
+      } catch (e) { console.error(e); }
+    }
+  };
 
   // Department Functions
   const handleSaveDept = async () => {
@@ -170,37 +286,32 @@ export default function DepartmentsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                  <th className="py-3 px-4 w-10"></th>
                   <th className="py-3 px-6 font-semibold">부서명</th>
                   <th className="py-3 px-6 font-semibold">부서장</th>
                   <th className="py-3 px-6 font-semibold text-right">관리</th>
                 </tr>
               </thead>
-              <tbody className="text-sm">
-                {departments.map((dept) => {
-                  const manager = employees.find(e => e.id === dept.manager_id);
-                  return (
-                    <tr key={dept.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-6 font-medium text-gray-900">{dept.name}</td>
-                      <td className="py-3 px-6 text-gray-600">{manager ? `${manager.name} (${manager.emp_no})` : '-'}</td>
-                      <td className="py-3 px-6 text-right space-x-2">
-                        <button onClick={() => {
-                          setEditingDept(dept);
-                          setDeptForm({ name: dept.name, manager_id: dept.manager_id || '' });
-                          setIsDeptModalOpen(true);
-                        }} className="text-gray-400 hover:text-blue-600 p-1">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleDeleteDept(dept.id)} className="text-gray-400 hover:text-red-600 p-1">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {departments.length === 0 && (
-                  <tr><td colSpan={3} className="py-8 text-center text-gray-500">등록된 부서가 없습니다.</td></tr>
-                )}
-              </tbody>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndDept}>
+                <SortableContext items={departments.map(d => d.id)} strategy={verticalListSortingStrategy}>
+                  <tbody className="text-sm">
+                    {departments.map((dept) => (
+                      <SortableDeptRow 
+                        key={dept.id} 
+                        dept={dept} 
+                        employees={employees}
+                        setEditingDept={setEditingDept}
+                        setDeptForm={setDeptForm}
+                        setIsDeptModalOpen={setIsDeptModalOpen}
+                        handleDeleteDept={handleDeleteDept}
+                      />
+                    ))}
+                    {departments.length === 0 && (
+                      <tr><td colSpan={4} className="py-8 text-center text-gray-500">등록된 부서가 없습니다.</td></tr>
+                    )}
+                  </tbody>
+                </SortableContext>
+              </DndContext>
             </table>
         </div>
 
@@ -219,36 +330,32 @@ export default function DepartmentsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                  <th className="py-3 px-4 w-10"></th>
                   <th className="py-3 px-6 font-semibold w-24">레벨</th>
                   <th className="py-3 px-6 font-semibold">직급명</th>
                   <th className="py-3 px-6 font-semibold">설명</th>
                   <th className="py-3 px-6 font-semibold text-right">관리</th>
                 </tr>
               </thead>
-              <tbody className="text-sm">
-                {positions.map((pos) => (
-                  <tr key={pos.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-6 text-gray-500">{pos.level}</td>
-                    <td className="py-3 px-6 font-medium text-gray-900">{pos.name}</td>
-                    <td className="py-3 px-6 text-gray-500">{pos.description || '-'}</td>
-                    <td className="py-3 px-6 text-right space-x-2">
-                      <button onClick={() => {
-                        setEditingPos(pos);
-                        setPosForm({ name: pos.name, level: pos.level, description: pos.description || '' });
-                        setIsPosModalOpen(true);
-                      }} className="text-gray-400 hover:text-blue-600 p-1">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDeletePos(pos.id)} className="text-gray-400 hover:text-red-600 p-1">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {positions.length === 0 && (
-                  <tr><td colSpan={4} className="py-8 text-center text-gray-500">등록된 직급이 없습니다.</td></tr>
-                )}
-              </tbody>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndPos}>
+                <SortableContext items={positions.map(p => p.id)} strategy={verticalListSortingStrategy}>
+                  <tbody className="text-sm">
+                    {positions.map((pos) => (
+                      <SortablePosRow 
+                        key={pos.id} 
+                        pos={pos}
+                        setEditingPos={setEditingPos}
+                        setPosForm={setPosForm}
+                        setIsPosModalOpen={setIsPosModalOpen}
+                        handleDeletePos={handleDeletePos}
+                      />
+                    ))}
+                    {positions.length === 0 && (
+                      <tr><td colSpan={5} className="py-8 text-center text-gray-500">등록된 직급이 없습니다.</td></tr>
+                    )}
+                  </tbody>
+                </SortableContext>
+              </DndContext>
             </table>
         </div>
       </div>

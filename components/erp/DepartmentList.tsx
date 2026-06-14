@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Users } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Plus, Edit2, Trash2, Users, Save, X } from 'lucide-react';
+import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 interface Department {

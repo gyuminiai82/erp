@@ -10,7 +10,8 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [menus, setMenus] = useState<any[]>([]);
   const [openMenuIds, setOpenMenuIds] = useState<number[]>([]);
-  const [userInfo, setUserInfo] = useState<{name: string, email: string, role_name: string} | null>(null);
+  const [userInfo, setUserInfo] = useState<{name: string, email: string, role_name: string, role_code: string} | null>(null);
+  const [attendance, setAttendance] = useState<{check_in?: string, check_out?: string} | null>(null);
   const pathname = usePathname();
 
   const toggleMenu = (id: number) => {
@@ -41,6 +42,17 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
             }
           })
           .catch(err => console.error(err));
+
+          if (data.role_code !== 'admin') {
+            fetch(`http://localhost:8000/api/attendances/today`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.ok ? res.json() : null)
+            .then(attData => {
+              if (attData) setAttendance(attData);
+            })
+            .catch(err => console.error(err));
+          }
         }
       })
       .catch(err => console.error(err));
@@ -73,18 +85,54 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
     return <IconComponent className="w-5 h-5 mr-3 opacity-70 group-hover:opacity-100 transition-opacity" />;
   };
 
+  const handleClockIn = async () => {
+    const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:8000/api/attendances/clock-in`, {
+        method: "POST",
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAttendance(prev => ({...prev, check_in: data.check_in}));
+        alert(data.message);
+      } else {
+        const err = await res.json();
+        alert(err.detail);
+      }
+    } catch(e) { console.error(e); }
+  };
+
+  const handleClockOut = async () => {
+    const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:8000/api/attendances/clock-out`, {
+        method: "POST",
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAttendance(prev => ({...prev, check_out: data.check_out}));
+        alert(data.message);
+      } else {
+        const err = await res.json();
+        alert(err.detail);
+      }
+    } catch(e) { console.error(e); }
+  };
+
   return (
     <div className="flex h-screen bg-[#f8f9fc] text-gray-800 font-sans">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm hidden md:flex">
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
-          <div className="flex items-center text-[#107C41] font-bold text-xl tracking-tight">
+          <Link href="/erp" className="flex items-center text-[#107C41] font-bold text-xl tracking-tight hover:opacity-90 transition-opacity cursor-pointer">
             <div className="w-8 h-8 rounded-md bg-[#107C41] text-white flex items-center justify-center mr-2 shadow-md shadow-green-500/20">
               M
             </div>
             MINSTUDIO ERP
-          </div>
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -160,6 +208,28 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
           </div>
           
           <div className="flex items-center space-x-4">
+            {userInfo && userInfo.role_code !== 'admin' && (
+              <div className="hidden sm:flex items-center mr-2">
+                {!attendance?.check_in ? (
+                  <button onClick={handleClockIn} className="px-4 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors shadow-sm">
+                    출근하기
+                  </button>
+                ) : (
+                  <div className="flex items-center space-x-3 text-sm">
+                    <span className="text-gray-600 font-medium">출근 {new Date(attendance.check_in).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'})}</span>
+                    {!attendance.check_out ? (
+                      <button onClick={handleClockOut} className="px-4 py-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-sm">
+                        퇴근하기
+                      </button>
+                    ) : (
+                      <span className="text-gray-600 font-medium">퇴근 {new Date(attendance.check_out).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'})}</span>
+                    )}
+                  </div>
+                )}
+                <div className="h-6 w-px bg-gray-200 ml-4 mr-1"></div>
+              </div>
+            )}
+            
             <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>

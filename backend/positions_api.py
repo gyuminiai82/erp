@@ -13,6 +13,13 @@ class PositionBase(BaseModel):
     level: int = 10
     description: Optional[str] = None
 
+class ReorderRequestItem(BaseModel):
+    id: int
+    sort_order: int
+
+class ReorderRequest(BaseModel):
+    items: List[ReorderRequestItem]
+
 class PositionCreate(PositionBase):
     pass
 
@@ -24,7 +31,14 @@ class PositionSchema(PositionBase):
 
 @router.get("", response_model=List[PositionSchema])
 def get_positions(db: Session = Depends(get_db)):
-    return db.query(models.Position).order_by(models.Position.level.asc()).all()
+    return db.query(models.Position).order_by(models.Position.sort_order.asc(), models.Position.level.asc()).all()
+
+@router.put("/reorder")
+def reorder_positions(data: ReorderRequest, db: Session = Depends(get_db)):
+    for item in data.items:
+        db.query(models.Position).filter(models.Position.id == item.id).update({"sort_order": item.sort_order})
+    db.commit()
+    return {"message": "정렬 순서가 업데이트되었습니다."}
 
 @router.post("", response_model=PositionSchema)
 def create_position(data: PositionCreate, db: Session = Depends(get_db)):
