@@ -116,16 +116,16 @@ export default function CommonCodesPage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex-1 overflow-hidden flex flex-col">
-        <div className="overflow-auto flex-1 p-6">
+        <div className="overflow-auto flex-1">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-50 text-gray-500 text-xs uppercase sticky top-0 z-10 shadow-sm">
+            <thead className="text-gray-500 text-xs uppercase">
               <tr>
-                <th className="px-6 py-4 font-medium rounded-tl-lg">그룹 코드</th>
-                <th className="px-6 py-4 font-medium">코드</th>
-                <th className="px-6 py-4 font-medium">이름(라벨)</th>
-                <th className="px-6 py-4 font-medium">정렬 순서</th>
-                <th className="px-6 py-4 font-medium text-center">상태</th>
-                <th className="px-6 py-4 font-medium text-right rounded-tr-lg">관리</th>
+                <th className="sticky top-0 z-10 bg-gray-50 px-6 py-4 font-medium shadow-sm border-b border-gray-200">그룹 코드</th>
+                <th className="sticky top-0 z-10 bg-gray-50 px-6 py-4 font-medium shadow-sm border-b border-gray-200">코드</th>
+                <th className="sticky top-0 z-10 bg-gray-50 px-6 py-4 font-medium shadow-sm border-b border-gray-200">이름(라벨)</th>
+                <th className="sticky top-0 z-10 bg-gray-50 px-6 py-4 font-medium shadow-sm border-b border-gray-200">정렬 순서</th>
+                <th className="sticky top-0 z-10 bg-gray-50 px-6 py-4 font-medium text-center shadow-sm border-b border-gray-200">상태</th>
+                <th className="sticky top-0 z-10 bg-gray-50 px-6 py-4 font-medium text-right shadow-sm border-b border-gray-200">관리</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
