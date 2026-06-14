@@ -23,7 +23,7 @@ def inject_menus():
                 "icon": "Users",
                 "submenus": [
                     {"name": "사원 관리", "url": "/erp/employees", "roles": ["master", "hr_manager"]},
-                    {"name": "부서 관리", "url": "/erp/departments", "roles": ["master", "hr_manager"]},
+                    {"name": "부서/직급 관리", "url": "/erp/departments", "roles": ["master", "hr_manager"]},
                     {"name": "인사 발령", "url": "/erp/appointments", "roles": ["master", "hr_manager"]}
                 ]
             },

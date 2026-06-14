@@ -135,8 +135,8 @@ export default function DepartmentsPage() {
   return (
     <div className="w-full">
       <div className="flex justify-between items-end mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">조직(부서/직급) 관리</h1>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">부서/직급 관리</h1>
           <p className="text-gray-500">회사의 조직 구조인 부서와 직급 체계를 관리합니다.</p>
         </div>
       </div>
