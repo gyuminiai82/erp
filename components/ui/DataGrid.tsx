@@ -75,7 +75,16 @@ export function DataGrid({
   // Mouse Handlers for Selection
   const handleMouseDown = (rowIndex: number, colIndex: number, e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only left click
-    if (editingCell) finishEditing();
+    
+    if (editingCell) {
+      if (editingCell.row === rowIndex && editingCell.col === colIndex) {
+        // Clicking inside the currently editing cell (e.g. clicking a select dropdown)
+        e.stopPropagation();
+        return;
+      } else {
+        finishEditing();
+      }
+    }
     
     setSelectedCell({ row: rowIndex, col: colIndex });
     setSelectionRange({ startRow: rowIndex, endRow: rowIndex, startCol: colIndex, endCol: colIndex });
