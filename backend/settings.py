@@ -11,9 +11,9 @@ class SystemSettingSchema(BaseModel):
     emp_no_prefix: str = "EMP"
     emp_no_year_format: str = "YY"
     emp_no_length: int = 3
-    national_pension_rate: float = 0.045
-    health_insurance_rate: float = 0.03545
-    long_term_care_rate: float = 0.1295
+    national_pension_rate: float = 0.0475
+    health_insurance_rate: float = 0.03595
+    long_term_care_rate: float = 0.1314
     employment_insurance_rate: float = 0.009
     overtime_multiplier: float = 1.5
 
@@ -28,9 +28,9 @@ def get_settings(db: Session = Depends(get_db)):
             emp_no_prefix="EMP",
             emp_no_year_format="YY",
             emp_no_length=3,
-            national_pension_rate=0.045,
-            health_insurance_rate=0.03545,
-            long_term_care_rate=0.1295,
+            national_pension_rate=0.0475,
+            health_insurance_rate=0.03595,
+            long_term_care_rate=0.1314,
             employment_insurance_rate=0.009,
             overtime_multiplier=1.5
         )
