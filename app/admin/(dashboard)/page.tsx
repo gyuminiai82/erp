@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Users, ShieldAlert, Activity, Database, HardDrive, AlertTriangle, Cpu, Terminal } from 'lucide-react';
 import { useWebSocket } from './WebSocketProvider';
 export default function AdminDashboardPage() {
@@ -63,7 +64,7 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-100 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">최근 보안 및 감사 로그</h3>
-            <button className="text-sm text-[#107C41] font-medium hover:underline">로그 전체 보기</button>
+            <Link href="/admin/audit" className="text-sm text-[#107C41] font-medium hover:underline">로그 전체 보기</Link>
           </div>
           <div className="overflow-auto flex-1">
             <table className="w-full text-left text-sm whitespace-nowrap">

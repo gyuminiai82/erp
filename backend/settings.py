@@ -49,8 +49,11 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
     if not setting:
         raise HTTPException(status_code=404, detail="설정을 찾을 수 없습니다.")
 
-    # 감사 로그(Audit Log)를 위해 변경 전 데이터(old_rates) 백업
-    old_rates = {
+    # 감사 로그(Audit Log)를 위해 변경 전 데이터(old_settings) 백업
+    old_settings = {
+        "emp_no_prefix": setting.emp_no_prefix,
+        "emp_no_year_format": setting.emp_no_year_format,
+        "emp_no_length": setting.emp_no_length,
         "national_pension_rate": setting.national_pension_rate,
         "health_insurance_rate": setting.health_insurance_rate,
         "long_term_care_rate": setting.long_term_care_rate,
@@ -72,8 +75,11 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
     setting.holiday_multiplier = payload.holiday_multiplier
     setting.holiday_overtime_multiplier = payload.holiday_overtime_multiplier
 
-    # 감사 로그(Audit Log)를 위해 변경 후 데이터(new_rates) 백업
-    new_rates = {
+    # 감사 로그(Audit Log)를 위해 변경 후 데이터(new_settings) 백업
+    new_settings = {
+        "emp_no_prefix": payload.emp_no_prefix,
+        "emp_no_year_format": payload.emp_no_year_format,
+        "emp_no_length": payload.emp_no_length,
         "national_pension_rate": payload.national_pension_rate,
         "health_insurance_rate": payload.health_insurance_rate,
         "long_term_care_rate": payload.long_term_care_rate,
@@ -86,19 +92,19 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
     db.commit()
     db.refresh(setting)
 
-    # 요율 변경사항이 있다면 Audit Log 적재
-    if old_rates != new_rates:
+    # 설정 변경사항이 있다면 Audit Log 적재
+    if old_settings != new_settings:
         import json
         audit = models.AuditLog(
-            event_title="시스템 및 급여 정책 변경",
-            event_desc="4대 보험 요율 또는 수당 배수가 변경되었습니다.",
+            event_title="시스템 환경설정 변경",
+            event_desc="사번 생성 규칙 또는 급여/보험 정책이 변경되었습니다.",
             user_name="SysAdmin",
             user_email="admin@minstudio.com",
             ip_address="127.0.0.1",
             severity="WARNING",
             target_resource="system_settings",
             action_type="UPDATE",
-            payload=json.dumps({"old": old_rates, "new": new_rates}, ensure_ascii=False)
+            payload=json.dumps({"old": old_settings, "new": new_settings}, ensure_ascii=False)
         )
         db.add(audit)
         db.commit()
