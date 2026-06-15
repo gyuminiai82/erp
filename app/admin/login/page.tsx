@@ -2,13 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Shield, User } from "lucide-react";
-
-type Role = "admin" | "user";
+import { AlertCircle, User } from "lucide-react";
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [role, setRole] = useState<Role>("admin");
   const [email, setEmail] = useState("admin@minstudio.com");
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
@@ -28,7 +25,7 @@ export default function AdminLogin() {
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
-      formData.append("client_id", role);
+      formData.append("client_id", "admin"); // 고정
 
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -48,7 +45,7 @@ export default function AdminLogin() {
       localStorage.setItem("erp_token", data.access_token);
       localStorage.setItem("erp_user_role", data.role);
 
-      router.push(data.role === "admin" ? "/admin" : "/erp");
+      router.push("/admin");
 
     } catch (err: any) {
       setErrorMsg(err.message || "로그인 중 오류가 발생했습니다.");
@@ -68,53 +65,16 @@ export default function AdminLogin() {
           </div>
         </div>
         <h2 className="mt-6 text-center text-2xl font-bold text-gray-900 tracking-tight">
-          Minstudio 접속
+          Minstudio 관리자 접속
         </h2>
         <p className="mt-2 text-center text-sm text-gray-500">
-          내부 업무 시스템 권한 인증
+          시스템 관리자 권한 인증
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-[420px]">
         <div className="bg-white py-8 px-6 shadow-sm sm:rounded-2xl border border-gray-200">
           
-          <div className="flex p-1 mb-8 bg-gray-100 rounded-lg">
-            <button
-              type="button"
-              onClick={() => { 
-                setRole("admin"); 
-                setEmail("admin@minstudio.com");
-                setPassword("admin123");
-                setErrorMsg(""); 
-              }}
-              className={`flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                role === "admin"
-                  ? "bg-white text-gray-900 shadow-sm border border-gray-200/50"
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <Shield className="w-4 h-4 mr-2 opacity-70" />
-              시스템 관리자
-            </button>
-            <button
-              type="button"
-              onClick={() => { 
-                setRole("user"); 
-                setEmail("emp23001@minstudio.com");
-                setPassword("1234");
-                setErrorMsg(""); 
-              }}
-              className={`flex-1 flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                role === "user"
-                  ? "bg-white text-gray-900 shadow-sm border border-gray-200/50"
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <User className="w-4 h-4 mr-2 opacity-70" />
-              일반 사원
-            </button>
-          </div>
-
           {errorMsg && (
             <div className="mb-6 bg-red-50 border border-red-100 p-3.5 rounded-lg flex items-start">
               <AlertCircle className="w-4 h-4 text-red-600 mr-2.5 flex-shrink-0 mt-0.5" />
@@ -125,7 +85,7 @@ export default function AdminLogin() {
           <form className="space-y-5" onSubmit={handleLogin}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                {role === "admin" ? "관리자 이메일" : "이메일 주소"}
+                관리자 이메일
               </label>
               <input
                 type="text"
@@ -133,7 +93,7 @@ export default function AdminLogin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="appearance-none block w-full px-3.5 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black sm:text-sm transition-colors"
-                placeholder={role === "admin" ? "admin@minstudio.com" : "user@minstudio.com"}
+                placeholder="admin@minstudio.com"
               />
             </div>
 
@@ -166,11 +126,21 @@ export default function AdminLogin() {
             </div>
           </form>
           
-          <div className="mt-6 text-center">
+          <div className="mt-6 flex flex-col space-y-4 text-center">
             <button className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
               비밀번호를 잊으셨나요?
             </button>
+            <div className="border-t border-gray-100 pt-4">
+              <button 
+                type="button"
+                onClick={() => router.push('/login')}
+                className="text-sm font-semibold text-[#107C41] hover:text-[#0c5e31] transition-colors flex items-center justify-center w-full"
+              >
+                <User className="w-4 h-4 mr-1.5" /> 일반 사원 접속 페이지로 이동
+              </button>
+            </div>
           </div>
+
         </div>
         
         <p className="mt-8 text-center text-sm text-gray-400">
