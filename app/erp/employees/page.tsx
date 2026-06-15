@@ -468,65 +468,24 @@ export default function EmployeesPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 bg-gray-50/50">
           <div className="flex flex-col gap-4 mb-4">
-            {/* Top Row: Search and Action Buttons */}
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
-              <div className="flex items-center gap-2 w-full xl:w-auto">
-                <div className="relative flex-1 min-w-[200px] xl:w-[300px]">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
-                  <Input 
-                    value={searchKeyword}
-                    onChange={e => setSearchKeyword(e.target.value)}
-                    onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
-                    className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
-                    placeholder="이름, 사번, 이메일 검색..." 
-                  />
-                </div>
-                <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10 shrink-0">
-                  검색
-                </Button>
+            {/* Top Row: Search Input, Filters, and Search Button */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                <Input 
+                  value={searchKeyword}
+                  onChange={e => setSearchKeyword(e.target.value)}
+                  onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
+                  className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
+                  placeholder="이름, 사번, 이메일 검색..." 
+                />
               </div>
 
-              {/* Action buttons */}
-              <div className="flex flex-wrap justify-start xl:justify-end gap-2 w-full xl:w-auto">
-                {employees.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U') && (
-                  <>
-                    <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
-                      <Undo2 className="w-4 h-4 mr-2" />
-                      변경 취소
-                    </Button>
-                    <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200 shrink-0">
-                      <Save className="w-4 h-4 mr-2" />
-                      변경사항 저장
-                    </Button>
-                  </>
-                )}
-                {selectedRowIndices.length > 0 && (
-                  <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent shrink-0">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    선택 삭제 ({selectedRowIndices.length})
-                  </Button>
-                )}
-                <Button variant="outline" className="text-gray-700 bg-white shrink-0" onClick={handleExcelDownload}>
-                  <FileDown className="w-4 h-4 mr-2" />
-                  엑셀 다운로드
-                </Button>
-                <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  행 추가
-                </Button>
-              </div>
-            </div>
-
-            {/* Bottom Row: Detailed Filters */}
-            <div className="flex flex-wrap items-center gap-2 bg-white/50 p-3 rounded-lg border border-gray-200 shadow-sm">
-              <span className="text-sm font-medium text-gray-600 mr-2 flex items-center">
-                <ListIcon className="w-4 h-4 mr-1" />
-                상세 필터:
-              </span>
+              {/* Filters */}
               <select 
                 value={searchDept}
                 onChange={e => setSearchDept(e.target.value)}
-                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
               >
                 <option value="">모든 부서</option>
                 {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
@@ -534,7 +493,7 @@ export default function EmployeesPage() {
               <select 
                 value={searchPos}
                 onChange={e => setSearchPos(e.target.value)}
-                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
               >
                 <option value="">모든 직급</option>
                 {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
@@ -542,7 +501,7 @@ export default function EmployeesPage() {
               <select 
                 value={searchRole}
                 onChange={e => setSearchRole(e.target.value)}
-                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
               >
                 <option value="">모든 권한</option>
                 {ROLE_OPTIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
@@ -550,7 +509,7 @@ export default function EmployeesPage() {
               <select 
                 value={searchEmpType}
                 onChange={e => setSearchEmpType(e.target.value)}
-                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
               >
                 <option value="">모든 고용형태</option>
                 {empTypes.map(t => <option key={t.id} value={t.code}>{t.name}</option>)}
@@ -558,11 +517,45 @@ export default function EmployeesPage() {
               <select 
                 value={searchStatus}
                 onChange={e => setSearchStatus(e.target.value)}
-                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
               >
                 <option value="">모든 상태</option>
                 {empStatuses.map(s => <option key={s.id} value={s.code}>{s.name}</option>)}
               </select>
+
+              <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10 shrink-0">
+                검색
+              </Button>
+            </div>
+
+            {/* Bottom Row: Action buttons */}
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              {employees.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U') && (
+                <>
+                  <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
+                    <Undo2 className="w-4 h-4 mr-2" />
+                    변경 취소
+                  </Button>
+                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200 shrink-0">
+                    <Save className="w-4 h-4 mr-2" />
+                    변경사항 저장
+                  </Button>
+                </>
+              )}
+              {selectedRowIndices.length > 0 && (
+                <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent shrink-0">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  선택 삭제 ({selectedRowIndices.length})
+                </Button>
+              )}
+              <Button variant="outline" className="text-gray-700 bg-white shrink-0" onClick={handleExcelDownload}>
+                <FileDown className="w-4 h-4 mr-2" />
+                엑셀 다운로드
+              </Button>
+              <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
+                <Plus className="w-4 h-4 mr-2" />
+                행 추가
+              </Button>
             </div>
           </div>
           
