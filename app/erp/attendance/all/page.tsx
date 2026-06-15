@@ -369,7 +369,7 @@ export default function AttendanceStatusPage() {
             </div>
             <div className="p-6 overflow-y-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 text-gray-600 sticky top-0">
+                <thead className="bg-gray-50 text-gray-600 sticky top-0 z-10">
                   <tr>
                     <th className="py-3 px-4 font-semibold border-b">이름</th>
                     <th className="py-3 px-4 font-semibold border-b">부서/직급</th>
