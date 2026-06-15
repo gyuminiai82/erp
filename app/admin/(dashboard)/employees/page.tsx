@@ -24,7 +24,7 @@ export default function RoleManagementPage() {
   const fetchEmployees = () => {
     fetch("/api/employees")
       .then(res => res.json())
-      .then(data => setEmployees(data))
+      .then(data => setEmployees(data.filter((emp: any) => emp.role === 'master')))
       .catch(err => console.error(err));
   };
 
