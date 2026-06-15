@@ -610,7 +610,7 @@ export default function EmployeesPage() {
       {/* Employee Registration Modal */}
       {isEmpModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50">
               <h3 className="font-bold text-lg text-slate-800">신규 사원 등록</h3>
               <button onClick={() => setIsEmpModalOpen(false)} className="text-gray-400 hover:text-gray-600">
@@ -630,7 +630,7 @@ export default function EmployeesPage() {
                 </div>
               </div>
               <form id="newEmpForm" onSubmit={handleModalSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
                     <Input required value={newEmpData.name} onChange={e => setNewEmpData({...newEmpData, name: e.target.value})} placeholder="홍길동" />
@@ -639,8 +639,6 @@ export default function EmployeesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">이메일 *</label>
                     <Input required type="email" value={newEmpData.email} onChange={e => setNewEmpData({...newEmpData, email: e.target.value})} placeholder="hong@example.com" />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">부서</label>
                     <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.department} onChange={e => setNewEmpData({...newEmpData, department: e.target.value})}>
@@ -648,6 +646,7 @@ export default function EmployeesPage() {
                       {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
                     </select>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">직급</label>
                     <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.position} onChange={e => setNewEmpData({...newEmpData, position: e.target.value})}>
@@ -655,8 +654,6 @@ export default function EmployeesPage() {
                       {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
                     </select>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">고용형태</label>
                     <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.employment_type} onChange={e => setNewEmpData({...newEmpData, employment_type: e.target.value})}>
@@ -670,8 +667,7 @@ export default function EmployeesPage() {
                       {ROLE_OPTIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                     </select>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">상태</label>
                     <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.status} onChange={e => setNewEmpData({...newEmpData, status: e.target.value})}>
@@ -683,18 +679,15 @@ export default function EmployeesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">입사일</label>
                     <Input type="date" value={newEmpData.hire_date} onChange={e => setNewEmpData({...newEmpData, hire_date: e.target.value})} />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
                     <Input value={newEmpData.phone} onChange={e => setNewEmpData({...newEmpData, phone: formatPhoneNumber(e.target.value)})} placeholder="010-0000-0000" />
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
                     <Input type="number" value={newEmpData.base_salary} onChange={e => setNewEmpData({...newEmpData, base_salary: Number(e.target.value)})} placeholder="0" />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
                     <Input type="date" value={newEmpData.birth_date} onChange={e => setNewEmpData({...newEmpData, birth_date: e.target.value})} />
@@ -706,18 +699,17 @@ export default function EmployeesPage() {
                       <option value="여성">여성</option>
                     </select>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
                     <Input value={newEmpData.resident_num} onChange={e => setNewEmpData({...newEmpData, resident_num: formatResidentNum(e.target.value)})} placeholder="000000-0000000" />
                   </div>
-                  {/* 빈 칸으로 두어 주민등록번호가 과도하게 길어지는 것을 방지 */}
-                  <div></div>
-                </div>
-                <div className="w-full">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
-                  <Input value={newEmpData.address} onChange={e => setNewEmpData({...newEmpData, address: e.target.value})} placeholder="서울특별시 강남구..." />
+                  <div className="md:col-span-2">
+                    {/* 주소는 옆에 빈칸을 두지 않고 남은 2칸을 꽉 채우거나 전체 3칸을 채울 수 있음. 
+                        주민번호(1칸) 옆에 두면 2칸을 차지해 한 줄에 깔끔하게 배치 가능 */}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
+                    <Input value={newEmpData.address} onChange={e => setNewEmpData({...newEmpData, address: e.target.value})} placeholder="서울특별시 강남구..." />
+                  </div>
                 </div>
               </form>
             </div>
