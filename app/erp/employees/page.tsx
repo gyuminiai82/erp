@@ -30,6 +30,9 @@ export default function EmployeesPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchDept, setSearchDept] = useState('');
   const [searchPos, setSearchPos] = useState('');
+  const [searchRole, setSearchRole] = useState('');
+  const [searchEmpType, setSearchEmpType] = useState('');
+  const [searchStatus, setSearchStatus] = useState('');
 
   const fetchData = async () => {
     try {
@@ -49,6 +52,9 @@ export default function EmployeesPage() {
         setSearchKeyword('');
         setSearchDept('');
         setSearchPos('');
+        setSearchRole('');
+        setSearchEmpType('');
+        setSearchStatus('');
       }
       if (deptRes.ok) setDepartments(await deptRes.json());
       if (posRes.ok) setPositions(await posRes.json());
@@ -429,6 +435,18 @@ export default function EmployeesPage() {
       filtered = filtered.filter(e => e.position === searchPos);
     }
 
+    if (searchRole !== '') {
+      filtered = filtered.filter(e => e.role === searchRole);
+    }
+
+    if (searchEmpType !== '') {
+      filtered = filtered.filter(e => e.employment_type === searchEmpType);
+    }
+
+    if (searchStatus !== '') {
+      filtered = filtered.filter(e => e.status === searchStatus);
+    }
+
     setEmployees(filtered);
     setSelectedRowIndices([]);
   };
@@ -478,6 +496,30 @@ export default function EmployeesPage() {
               >
                 <option value="">모든 직급</option>
                 {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+              </select>
+              <select 
+                value={searchRole}
+                onChange={e => setSearchRole(e.target.value)}
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+              >
+                <option value="">모든 권한</option>
+                {ROLE_OPTIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+              </select>
+              <select 
+                value={searchEmpType}
+                onChange={e => setSearchEmpType(e.target.value)}
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+              >
+                <option value="">모든 고용형태</option>
+                {empTypes.map(t => <option key={t.id} value={t.code}>{t.name}</option>)}
+              </select>
+              <select 
+                value={searchStatus}
+                onChange={e => setSearchStatus(e.target.value)}
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+              >
+                <option value="">모든 상태</option>
+                {empStatuses.map(s => <option key={s.id} value={s.code}>{s.name}</option>)}
               </select>
               <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10 shrink-0">
                 검색
