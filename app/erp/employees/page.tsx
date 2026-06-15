@@ -640,13 +640,51 @@ export default function EmployeesPage() {
                     </select>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
-                  <Input value={newEmpData.phone} onChange={e => setNewEmpData({...newEmpData, phone: e.target.value})} placeholder="010-0000-0000" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">상태</label>
+                    <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.status} onChange={e => setNewEmpData({...newEmpData, status: e.target.value})}>
+                      {empStatuses.map(s => <option key={s.id} value={s.code}>{s.name}</option>)}
+                      {empStatuses.length === 0 && <option value="재직">재직</option>}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">입사일</label>
+                    <Input type="date" value={newEmpData.hire_date} onChange={e => setNewEmpData({...newEmpData, hire_date: e.target.value})} />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
-                  <Input type="number" value={newEmpData.base_salary} onChange={e => setNewEmpData({...newEmpData, base_salary: Number(e.target.value)})} placeholder="0" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
+                    <Input value={newEmpData.phone} onChange={e => setNewEmpData({...newEmpData, phone: e.target.value})} placeholder="010-0000-0000" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
+                    <Input type="number" value={newEmpData.base_salary} onChange={e => setNewEmpData({...newEmpData, base_salary: Number(e.target.value)})} placeholder="0" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
+                    <Input type="date" value={newEmpData.birth_date} onChange={e => setNewEmpData({...newEmpData, birth_date: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">성별</label>
+                    <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.gender} onChange={e => setNewEmpData({...newEmpData, gender: e.target.value})}>
+                      <option value="남성">남성</option>
+                      <option value="여성">여성</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
+                    <Input value={newEmpData.resident_num} onChange={e => setNewEmpData({...newEmpData, resident_num: e.target.value})} placeholder="000000-0000000" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
+                    <Input value={newEmpData.address} onChange={e => setNewEmpData({...newEmpData, address: e.target.value})} placeholder="서울특별시 강남구..." />
+                  </div>
                 </div>
               </form>
             </div>
