@@ -153,12 +153,21 @@ export default function EmployeesPage() {
   const handleBulkDelete = async () => {
     if (selectedRowIndices.length === 0) return;
     
-    // Instead of immediate API call, just mark row as 'D'
-    const updated = [...employees];
-    selectedRowIndices.forEach(idx => {
-      updated[idx] = { ...updated[idx], _state: 'D' };
+    const newEmployees = employees.filter((emp, idx) => {
+      if (selectedRowIndices.includes(idx)) {
+        // 임시 추가된 행(C 상태 또는 임시 ID)이면 표에서 아예 지워버림
+        if (emp._state === 'C' || !emp.id || String(emp.id).startsWith('temp-')) {
+          return false;
+        } else {
+          // 기존 DB에 있던 행이면 삭제 마킹(D)만 하고 남겨둠
+          emp._state = 'D';
+          return true;
+        }
+      }
+      return true;
     });
-    setEmployees(updated);
+
+    setEmployees(newEmployees);
     setSelectedRowIndices([]);
   };
 
@@ -187,14 +196,16 @@ export default function EmployeesPage() {
       // Handle deletions
       if (rowsToDelete.length > 0) {
         const idsToDelete = rowsToDelete.map(e => parseInt(String(e.id), 10)).filter(id => !isNaN(id));
-        const delRes = await fetch(`/api/employees/bulk-delete`, { 
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ employee_ids: idsToDelete })
-        });
-        if (!delRes.ok) {
-          const data = await delRes.json();
-          throw new Error(formatApiError(data.detail, "삭제 실패"));
+        if (idsToDelete.length > 0) {
+          const delRes = await fetch(`/api/employees/bulk-delete`, { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ employee_ids: idsToDelete })
+          });
+          if (!delRes.ok) {
+            const data = await delRes.json();
+            throw new Error(formatApiError(data.detail, "삭제 실패"));
+          }
         }
       }
 
