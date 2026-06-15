@@ -99,9 +99,9 @@ export default function DepartmentsPage() {
   const fetchData = async () => {
     try {
       const [deptRes, posRes, empRes] = await Promise.all([
-        fetch("http://localhost:8000/api/departments"),
-        fetch("http://localhost:8000/api/positions"),
-        fetch("http://localhost:8000/api/employees")
+        fetch("/api/departments"),
+        fetch("/api/positions"),
+        fetch("/api/employees")
       ]);
       
       if (deptRes.ok) setDepartments(await deptRes.json());
@@ -134,7 +134,7 @@ export default function DepartmentsPage() {
       setDepartments(newItems);
       
       try {
-        await fetch("http://localhost:8000/api/departments/reorder", {
+        await fetch("/api/departments/reorder", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: newItems.map((item, idx) => ({ id: item.id, sort_order: idx + 1 })) })
@@ -152,7 +152,7 @@ export default function DepartmentsPage() {
       setPositions(newItems);
       
       try {
-        await fetch("http://localhost:8000/api/positions/reorder", {
+        await fetch("/api/positions/reorder", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ items: newItems.map((item, idx) => ({ id: item.id, sort_order: idx + 1 })) })
@@ -165,7 +165,7 @@ export default function DepartmentsPage() {
   const handleSaveDept = async () => {
     if (!deptForm.name.trim()) return showAlert("부서명을 입력해주세요.", { type: "warning" });
     
-    const url = editingDept ? `http://localhost:8000/api/departments/${editingDept.id}` : "http://localhost:8000/api/departments";
+    const url = editingDept ? `/api/departments/${editingDept.id}` : "/api/departments";
     const method = editingDept ? "PUT" : "POST";
     
     try {
@@ -196,7 +196,7 @@ export default function DepartmentsPage() {
     const confirmed = await showConfirm("정말 이 부서를 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/departments/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/departments/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchData();
       } else {
@@ -212,7 +212,7 @@ export default function DepartmentsPage() {
     const confirmed = await showConfirm("정말 이 직급을 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/positions/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/positions/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchData();
       } else {
@@ -228,7 +228,7 @@ export default function DepartmentsPage() {
   const handleSavePos = async () => {
     if (!posForm.name.trim()) return showAlert("직급명을 입력해주세요.", { type: "warning" });
     
-    const url = editingPos ? `http://localhost:8000/api/positions/${editingPos.id}` : "http://localhost:8000/api/positions";
+    const url = editingPos ? `/api/positions/${editingPos.id}` : "/api/positions";
     const method = editingPos ? "PUT" : "POST";
     
     try {

@@ -30,7 +30,7 @@ export default function AdminLogin() {
       formData.append("password", password);
       formData.append("client_id", role);
 
-      const response = await fetch("http://localhost:8000/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

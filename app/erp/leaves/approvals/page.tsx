@@ -11,7 +11,7 @@ export default function LeaveApprovalsPage() {
   const fetchAllLeaves = async () => {
     try {
       const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
-      const res = await fetch('http://localhost:8000/api/leaves/all', {
+      const res = await fetch('/api/leaves/all', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -35,7 +35,7 @@ export default function LeaveApprovalsPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
-      const res = await fetch(`http://localhost:8000/api/leaves/${id}/status`, {
+      const res = await fetch(`/api/leaves/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

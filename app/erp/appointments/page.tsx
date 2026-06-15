@@ -27,10 +27,10 @@ export default function AppointmentsPage() {
   const fetchData = async () => {
     try {
       const [appRes, empRes, deptRes, posRes] = await Promise.all([
-        fetch("http://localhost:8000/api/appointments"),
-        fetch("http://localhost:8000/api/employees"),
-        fetch("http://localhost:8000/api/departments"),
-        fetch("http://localhost:8000/api/positions")
+        fetch("/api/appointments"),
+        fetch("/api/employees"),
+        fetch("/api/departments"),
+        fetch("/api/positions")
       ]);
       
       if (appRes.ok) setAppointments(await appRes.json());
@@ -68,7 +68,7 @@ export default function AppointmentsPage() {
     };
 
     try {
-      const res = await fetch("http://localhost:8000/api/appointments", {
+      const res = await fetch("/api/appointments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -99,7 +99,7 @@ export default function AppointmentsPage() {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/appointments/${id}/status`, {
+      const res = await fetch(`/api/appointments/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
@@ -121,7 +121,7 @@ export default function AppointmentsPage() {
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/appointments/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchData();
       } else {

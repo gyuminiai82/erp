@@ -25,7 +25,7 @@ export default function AttendanceSettingsPage() {
 
   const fetchPolicies = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/attendance-policies");
+      const res = await fetch("/api/attendance-policies");
       const data = await res.json();
       setPolicies(data);
     } catch (err) {
@@ -46,8 +46,8 @@ export default function AttendanceSettingsPage() {
     try {
       const method = formData.id ? "PUT" : "POST";
       const url = formData.id 
-        ? `http://localhost:8000/api/attendance-policies/${formData.id}`
-        : `http://localhost:8000/api/attendance-policies`;
+        ? `/api/attendance-policies/${formData.id}`
+        : `/api/attendance-policies`;
 
       const res = await fetch(url, {
         method,
@@ -67,7 +67,7 @@ export default function AttendanceSettingsPage() {
     const confirmed = await showConfirm("정말 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/attendance-policies/${id}`, {
+      const res = await fetch(`/api/attendance-policies/${id}`, {
         method: "DELETE"
       });
       if (!res.ok) {

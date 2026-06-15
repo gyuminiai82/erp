@@ -18,7 +18,7 @@ export default function CompanySettingsPage() {
   const { showAlert } = useDialog();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/company")
+    fetch("/api/company")
       .then(res => res.json())
       .then(data => {
         setInfo(data);
@@ -43,7 +43,7 @@ export default function CompanySettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch("http://localhost:8000/api/company", {
+      const res = await fetch("/api/company", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(info)

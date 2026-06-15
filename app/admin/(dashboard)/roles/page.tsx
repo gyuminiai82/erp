@@ -54,11 +54,11 @@ export default function RolesPage() {
   );
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/roles")
+    fetch("/api/roles")
       .then(res => res.json())
       .then(data => setRoles(data));
       
-    fetch("http://localhost:8000/api/menus")
+    fetch("/api/menus")
       .then(res => res.json())
       .then(data => setMenus(data));
   }, []);
@@ -66,7 +66,7 @@ export default function RolesPage() {
   useEffect(() => {
     if (selectedRole) {
       setIsLoadingMenus(true);
-      fetch(`http://localhost:8000/api/roles/${selectedRole}/menus`)
+      fetch(`/api/roles/${selectedRole}/menus`)
         .then(res => res.json())
         .then(data => {
           setRoleMenus(data);
@@ -95,7 +95,7 @@ export default function RolesPage() {
     setRoleMenus(newRoleMenus);
     
     if (selectedRole) {
-      fetch(`http://localhost:8000/api/roles/${selectedRole}/menus`, {
+      fetch(`/api/roles/${selectedRole}/menus`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ menus: newRoleMenus })
@@ -125,7 +125,7 @@ export default function RolesPage() {
     setRoleMenus(newRoleMenus);
     
     if (selectedRole) {
-      fetch(`http://localhost:8000/api/roles/${selectedRole}/menus`, {
+      fetch(`/api/roles/${selectedRole}/menus`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ menus: newRoleMenus })
@@ -143,7 +143,7 @@ export default function RolesPage() {
         
         // update backend
         const payload = newItems.map((item, idx) => ({ id: item.id, sort_order: idx }));
-        fetch("http://localhost:8000/api/roles/batch-sort", {
+        fetch("/api/roles/batch-sort", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ roles: payload })
@@ -157,7 +157,7 @@ export default function RolesPage() {
   const handleAddRole = async () => {
     if (!newRoleName) return;
     try {
-      const res = await fetch("http://localhost:8000/api/roles", {
+      const res = await fetch("/api/roles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newRoleName, description: newRoleDesc })

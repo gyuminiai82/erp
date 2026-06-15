@@ -22,7 +22,7 @@ export default function RoleManagementPage() {
   const { showAlert } = useDialog();
 
   const fetchEmployees = () => {
-    fetch("http://localhost:8000/api/employees")
+    fetch("/api/employees")
       .then(res => res.json())
       .then(data => setEmployees(data))
       .catch(err => console.error(err));
@@ -30,7 +30,7 @@ export default function RoleManagementPage() {
 
   useEffect(() => {
     if (isModalOpen) {
-      fetch("http://localhost:8000/api/employees/next-emp-no")
+      fetch("/api/employees/next-emp-no")
         .then(res => res.json())
         .then(data => setNewEmp(prev => ({ ...prev, emp_no: data.next_emp_no })))
         .catch(err => console.error(err));
@@ -39,7 +39,7 @@ export default function RoleManagementPage() {
 
   useEffect(() => {
     fetchEmployees();
-    fetch("http://localhost:8000/api/employees/departments")
+    fetch("/api/employees/departments")
       .then(res => res.json())
       .then(data => setDepartments(data))
       .catch(err => console.error(err));
@@ -51,7 +51,7 @@ export default function RoleManagementPage() {
 
   const handleRoleChange = async (empId: number, newRoleId: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/employees/${empId}/role`, {
+      const res = await fetch(`/api/employees/${empId}/role`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role_id: newRoleId })
@@ -74,7 +74,7 @@ export default function RoleManagementPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8000/api/employees", {
+      const res = await fetch("/api/employees", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

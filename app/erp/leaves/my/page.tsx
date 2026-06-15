@@ -19,7 +19,7 @@ export default function LeaveApplicationPage() {
   const fetchMyLeaves = async () => {
     try {
       const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
-      const res = await fetch('http://localhost:8000/api/leaves/my', {
+      const res = await fetch('/api/leaves/my', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -34,7 +34,7 @@ export default function LeaveApplicationPage() {
   const fetchBalance = async () => {
     try {
       const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
-      const res = await fetch('http://localhost:8000/api/leaves/balance', {
+      const res = await fetch('/api/leaves/balance', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -64,7 +64,7 @@ export default function LeaveApplicationPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
-      const res = await fetch('http://localhost:8000/api/leaves/apply', {
+      const res = await fetch('/api/leaves/apply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

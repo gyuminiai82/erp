@@ -33,11 +33,11 @@ export default function EmployeesPage() {
   const fetchData = async () => {
     try {
       const [empRes, deptRes, posRes, typeRes, statusRes] = await Promise.all([
-        fetch("http://localhost:8000/api/employees"),
-        fetch("http://localhost:8000/api/departments"),
-        fetch("http://localhost:8000/api/positions"),
-        fetch("http://localhost:8000/api/common-codes?group=EMP_TYPE"),
-        fetch("http://localhost:8000/api/common-codes?group=EMP_STATUS")
+        fetch("/api/employees"),
+        fetch("/api/departments"),
+        fetch("/api/positions"),
+        fetch("/api/common-codes?group=EMP_TYPE"),
+        fetch("/api/common-codes?group=EMP_STATUS")
       ]);
       
       if (empRes.ok) {
@@ -76,7 +76,7 @@ export default function EmployeesPage() {
 
   const handleCreate = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/employees", {
+      const res = await fetch("/api/employees", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -137,7 +137,7 @@ export default function EmployeesPage() {
       // Handle deletions
       if (rowsToDelete.length > 0) {
         const idsToDelete = rowsToDelete.map(e => e.id);
-        const delRes = await fetch(`http://localhost:8000/api/employees/bulk-delete`, { 
+        const delRes = await fetch(`/api/employees/bulk-delete`, { 
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ employee_ids: idsToDelete })
@@ -167,7 +167,7 @@ export default function EmployeesPage() {
           hire_date: e.hire_date
         }));
 
-        const upRes = await fetch(`http://localhost:8000/api/employees/bulk-update`, {
+        const upRes = await fetch(`/api/employees/bulk-update`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ employees: updatePayload })

@@ -23,7 +23,7 @@ export default function MenusPage() {
   const { showAlert, showConfirm } = useDialog();
 
   const fetchMenus = () => {
-    fetch("http://localhost:8000/api/menus")
+    fetch("/api/menus")
       .then(res => res.json())
       .then(data => setMenus(data))
       .catch(err => console.error(err));
@@ -62,7 +62,7 @@ export default function MenusPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const method = editMode ? 'PUT' : 'POST';
-    const url = editMode ? `http://localhost:8000/api/menus/${formData.id}` : `http://localhost:8000/api/menus`;
+    const url = editMode ? `/api/menus/${formData.id}` : `/api/menus`;
     
     let sortOrder = formData.sort_order;
     if (!editMode) {
@@ -103,7 +103,7 @@ export default function MenusPage() {
     if (!confirmed) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/api/menus/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/menus/${id}`, { method: 'DELETE' });
       if (res.ok) {
         fetchMenus();
       } else {
@@ -177,7 +177,7 @@ export default function MenusPage() {
     setDraggedMenuId(null);
 
     try {
-      const res = await fetch("http://localhost:8000/api/menus/batch-sort", {
+      const res = await fetch("/api/menus/batch-sort", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ menus: updates })

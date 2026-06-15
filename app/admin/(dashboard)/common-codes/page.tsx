@@ -30,7 +30,7 @@ export default function CommonCodesPage() {
 
   const fetchGroups = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/common-code-groups");
+      const res = await fetch("/api/common-code-groups");
       if (res.ok) {
         const data = await res.json();
         setGroups(data);
@@ -48,7 +48,7 @@ export default function CommonCodesPage() {
   const fetchCodes = async (groupCode: string) => {
     setLoadingCodes(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/common-codes?group=${groupCode}`);
+      const res = await fetch(`/api/common-codes?group=${groupCode}`);
       if (res.ok) {
         setCodes(await res.json());
       }
@@ -78,7 +78,7 @@ export default function CommonCodesPage() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8000/api/common-code-groups", {
+      const res = await fetch("/api/common-code-groups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newGroup)
@@ -101,7 +101,7 @@ export default function CommonCodesPage() {
     const confirmed = await showConfirm("그룹을 삭제하시겠습니까? (하위 코드가 있으면 삭제할 수 없습니다)", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/common-code-groups/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/common-code-groups/${id}`, { method: "DELETE" });
       if (res.ok) {
         if (selectedGroup?.id === id) setSelectedGroup(null);
         fetchGroups();
@@ -122,7 +122,7 @@ export default function CommonCodesPage() {
 
   const handleSaveEditGroup = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/common-code-groups/${editingGroupId}`, {
+      const res = await fetch(`/api/common-code-groups/${editingGroupId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editGroupForm)
@@ -151,7 +151,7 @@ export default function CommonCodesPage() {
     
     const codePayload = { ...newCode, group_code: selectedGroup.code };
     try {
-      const res = await fetch("http://localhost:8000/api/common-codes", {
+      const res = await fetch("/api/common-codes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(codePayload)
@@ -172,7 +172,7 @@ export default function CommonCodesPage() {
     const confirmed = await showConfirm("정말 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/common-codes/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/common-codes/${id}`, { method: "DELETE" });
       if (res.ok) {
         fetchCodes(selectedGroup.code);
       } else {
@@ -190,7 +190,7 @@ export default function CommonCodesPage() {
 
   const handleSaveEditCode = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/common-codes/${editingCodeId}`, {
+      const res = await fetch(`/api/common-codes/${editingCodeId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editCodeForm)

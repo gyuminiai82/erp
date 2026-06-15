@@ -19,7 +19,7 @@ export default function AuditLogsPage() {
 
   const fetchLogs = () => {
     setIsLoading(true);
-    let url = `http://localhost:8000/api/audit-logs?page=${page}&size=${size}`;
+    let url = `/api/audit-logs?page=${page}&size=${size}`;
     if (severity !== 'ALL') url += `&severity=${severity}`;
     if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
     

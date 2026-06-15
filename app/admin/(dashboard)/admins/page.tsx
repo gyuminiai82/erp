@@ -18,7 +18,7 @@ export default function SystemAdminsPage() {
 
   const fetchAdmins = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/admins");
+      const res = await fetch("/api/admins");
       const data = await res.json();
       setAdmins(data);
     } catch (err) {
@@ -34,8 +34,8 @@ export default function SystemAdminsPage() {
     try {
       const method = formData.id ? "PUT" : "POST";
       const url = formData.id 
-        ? `http://localhost:8000/api/admins/${formData.id}`
-        : `http://localhost:8000/api/admins`;
+        ? `/api/admins/${formData.id}`
+        : `/api/admins`;
         
       const payload: any = {
         username: formData.username,
@@ -69,7 +69,7 @@ export default function SystemAdminsPage() {
     const confirmed = await showConfirm("해당 최고 관리자 계정을 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/admins/${id}`, {
+      const res = await fetch(`/api/admins/${id}`, {
         method: "DELETE"
       });
       if (!res.ok) {

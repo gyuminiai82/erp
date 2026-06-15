@@ -25,7 +25,7 @@ export default function PositionList() {
 
   const fetchPositions = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/positions");
+      const res = await fetch("/api/positions");
       if (res.ok) {
         const data = await res.json();
         setPositions(data);
@@ -44,7 +44,7 @@ export default function PositionList() {
   const handleCreate = async () => {
     if (!newName.trim()) return;
     try {
-      const res = await fetch("http://localhost:8000/api/positions", {
+      const res = await fetch("/api/positions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newName, level: newLevel })
@@ -65,7 +65,7 @@ export default function PositionList() {
   const handleUpdate = async (id: number) => {
     if (!editName.trim()) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/positions/${id}`, {
+      const res = await fetch(`/api/positions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName, level: editLevel })
@@ -82,7 +82,7 @@ export default function PositionList() {
   const handleDelete = async (id: number) => {
     if (!confirm("정말 이 직급을 삭제하시겠습니까? (해당 직급을 가진 사원이 없어야 합니다)")) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/positions/${id}`, {
+      const res = await fetch(`/api/positions/${id}`, {
         method: "DELETE"
       });
       if (res.ok) {

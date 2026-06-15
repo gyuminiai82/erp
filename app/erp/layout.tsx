@@ -22,7 +22,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
     
     if (token) {
-      fetch("http://localhost:8000/api/auth/me", {
+      fetch("/api/auth/me", {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       .then(res => res.ok ? res.json() : null)
@@ -30,7 +30,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
         if (data) {
           setUserInfo(data);
           
-          fetch(`http://localhost:8000/api/menus/my?role_name=${data.role_code || 'employee'}`, {
+          fetch(`/api/menus/my?role_name=${data.role_code || 'employee'}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -44,7 +44,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
           .catch(err => console.error(err));
 
           if (data.role_code !== 'admin') {
-            fetch(`http://localhost:8000/api/attendances/today`, {
+            fetch(`/api/attendances/today`, {
               headers: { 'Authorization': `Bearer ${token}` }
             })
             .then(res => res.ok ? res.json() : null)
@@ -88,7 +88,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const handleClockIn = async () => {
     const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:8000/api/attendances/clock-in`, {
+      const res = await fetch(`/api/attendances/clock-in`, {
         method: "POST",
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -106,7 +106,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const handleClockOut = async () => {
     const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:8000/api/attendances/clock-out`, {
+      const res = await fetch(`/api/attendances/clock-out`, {
         method: "POST",
         headers: { 'Authorization': `Bearer ${token}` }
       });

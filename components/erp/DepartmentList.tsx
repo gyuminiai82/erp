@@ -20,7 +20,7 @@ export default function DepartmentList() {
 
   const fetchDepartments = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/departments");
+      const res = await fetch("/api/departments");
       if (res.ok) {
         const data = await res.json();
         setDepartments(data);
@@ -39,7 +39,7 @@ export default function DepartmentList() {
   const handleCreate = async () => {
     if (!newName.trim()) return;
     try {
-      const res = await fetch("http://localhost:8000/api/departments", {
+      const res = await fetch("/api/departments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newName })
@@ -56,7 +56,7 @@ export default function DepartmentList() {
   const handleUpdate = async (id: number) => {
     if (!editName.trim()) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/departments/${id}`, {
+      const res = await fetch(`/api/departments/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName })
@@ -73,7 +73,7 @@ export default function DepartmentList() {
   const handleDelete = async (id: number) => {
     if (!confirm("정말 이 부서를 삭제하시겠습니까? (소속 사원이 없어야 합니다)")) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/departments/${id}`, {
+      const res = await fetch(`/api/departments/${id}`, {
         method: "DELETE"
       });
       if (res.ok) {

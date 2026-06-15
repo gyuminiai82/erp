@@ -15,7 +15,7 @@ export default function SettingsPage() {
   const { showAlert } = useDialog();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/settings")
+    fetch("/api/settings")
       .then(res => res.json())
       .then(data => {
         setSettings({
@@ -44,7 +44,7 @@ export default function SettingsPage() {
         emp_no_length: Number(settings.emp_no_length)
       };
       
-      const res = await fetch("http://localhost:8000/api/settings", {
+      const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
