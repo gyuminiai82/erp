@@ -21,14 +21,16 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/${{ secrets.EC2_USER }}/port_erp
-          # 최신 코드 풀
-          git pull origin main
+          # 강제로 원격 최신 코드로 덮어쓰기 (EC2 내부 충돌 무시)
+          git fetch --all
+          git reset --hard origin/main
           
           # DB 암호를 환경변수로 넘기기 위해 .env 파일 생성
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
           
-          # Nginx 및 기타 컨테이너 재빌드 및 재시작
-          docker-compose -f docker-compose.prod.yml up -d --build
+          # 확실한 갱신을 위해 프론트엔드 컨테이너 캐시 없이 재빌드 및 재시작
+          docker-compose -f docker-compose.prod.yml build --no-cache frontend
+          docker-compose -f docker-compose.prod.yml up -d
           
           # 오래된 도커 이미지 정리
           docker image prune -f
