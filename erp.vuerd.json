@@ -4,9 +4,9 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -900,
-    "scrollLeft": 0,
-    "zoomLevel": 0.88,
+    "scrollTop": 0,
+    "scrollLeft": -465.0693,
+    "zoomLevel": 0.94,
     "show": 431,
     "database": 4,
     "databaseName": "erp",
@@ -50,8 +50,7 @@
       "3f0c81e1fbaf434f8ac6d9bb11861c43",
       "77941bfc94a1417eb1b5e23be46142f9",
       "cda9564a59ad428a909e96653f6f162b",
-      "c908ae05961347feb4aa8bde7a361008",
-      "08c8f28fc9d14d5d98fe0d3424af7afa"
+      "c908ae05961347feb4aa8bde7a361008"
     ],
     "relationshipIds": [
       "10f12f2983c448e2b0bf92591481be3d",
@@ -92,15 +91,15 @@
           "defe33341d344de6a7055d91ce8446e3"
         ],
         "ui": {
-          "x": 23.0454,
-          "y": 157.9091,
+          "x": 20.5454,
+          "y": 175.4091,
           "zIndex": 1,
           "widthName": 69,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781333261827,
+          "updateAt": 1781495600766,
           "createAt": 1781225924433
         }
       },
@@ -121,15 +120,15 @@
           "00f734f8f77047438a7b337cde515bee"
         ],
         "ui": {
-          "x": 24.2727,
-          "y": 11.091,
+          "x": 19.2727,
+          "y": 13.591,
           "zIndex": 1,
           "widthName": 60,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781333258238,
+          "updateAt": 1781495602767,
           "createAt": 1781225924433
         }
       },
@@ -200,15 +199,15 @@
           "707507071a094c5a850a255629d7bbe8"
         ],
         "ui": {
-          "x": 28.3182,
-          "y": 302.909,
+          "x": 20.8182,
+          "y": 342.909,
           "zIndex": 1,
           "widthName": 66,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781333267332,
+          "updateAt": 1781495605186,
           "createAt": 1781225924433
         }
       },
@@ -237,15 +236,15 @@
           "461e14394a8245f8b5ee962d4519f635"
         ],
         "ui": {
-          "x": 450.7273,
-          "y": 429.9091,
+          "x": 15.9546,
+          "y": 558.5455,
           "zIndex": 1,
           "widthName": 79,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781333274129,
+          "updateAt": 1781495606699,
           "createAt": 1781225924433
         }
       },
@@ -304,14 +303,14 @@
         ],
         "ui": {
           "x": 439.7353,
-          "y": 732.7934,
+          "y": 755.2934,
           "zIndex": 1,
           "widthName": 60,
           "widthComment": 85,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781349403521,
+          "updateAt": 1781495607822,
           "createAt": 1781228564121
         }
       },
@@ -355,15 +354,15 @@
           "0509f2b86a9949fe84b0d9df0732545d"
         ],
         "ui": {
-          "x": 616.9908,
-          "y": 931.136,
+          "x": 596.9908,
+          "y": 1001.136,
           "zIndex": 1,
           "widthName": 90,
           "widthComment": 93,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781349406409,
+          "updateAt": 1781495611204,
           "createAt": 1781228564121
         }
       },
@@ -714,15 +713,15 @@
           "002f6832d16241fb81c42ed62cfee226"
         ],
         "ui": {
-          "x": 1106.8182,
-          "y": 1051.1364,
+          "x": 1071.8182,
+          "y": 1026.1364,
           "zIndex": 2,
           "widthName": 122,
           "widthComment": 81,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781438045825,
+          "updateAt": 1781495616206,
           "createAt": 1781225924433
         }
       },
@@ -747,47 +746,16 @@
           "73affa93ae5b4e95b71676401dbec728"
         ],
         "ui": {
-          "x": 1442.0454,
-          "y": 1304.5455,
+          "x": 964.5454,
+          "y": 1299.5455,
           "zIndex": 2,
           "widthName": 85,
           "widthComment": 60,
           "color": ""
         },
         "meta": {
-          "updateAt": 1781438042748,
+          "updateAt": 1781495615103,
           "createAt": 1781225924433
-        }
-      },
-      "08c8f28fc9d14d5d98fe0d3424af7afa": {
-        "id": "08c8f28fc9d14d5d98fe0d3424af7afa",
-        "name": "leave_balances",
-        "comment": "연차 관리",
-        "columnIds": [
-          "2f505fea3741464ba44e6ded445f719c",
-          "6640d11672fc4c47ba6af6e8d9c375c1",
-          "46f1dde7cd9a4e6c95e9d1e9cc01c91d",
-          "7aec4de6807b46988f295107c667604b",
-          "be74cb6a298a45afa1486271c777a7cf"
-        ],
-        "seqColumnIds": [
-          "2f505fea3741464ba44e6ded445f719c",
-          "6640d11672fc4c47ba6af6e8d9c375c1",
-          "46f1dde7cd9a4e6c95e9d1e9cc01c91d",
-          "7aec4de6807b46988f295107c667604b",
-          "be74cb6a298a45afa1486271c777a7cf"
-        ],
-        "ui": {
-          "x": 200,
-          "y": 200,
-          "zIndex": 2,
-          "widthName": 93,
-          "widthComment": 60,
-          "color": ""
-        },
-        "meta": {
-          "updateAt": 1718000000000,
-          "createAt": 1718000000000
         }
       }
     },
@@ -2903,7 +2871,7 @@
         "ui": {
           "keys": 0,
           "widthName": 74,
-          "widthComment": 60,
+          "widthComment": 74,
           "widthDataType": 75,
           "widthDefault": 60
         },
@@ -2923,7 +2891,7 @@
         "ui": {
           "keys": 0,
           "widthName": 93,
-          "widthComment": 60,
+          "widthComment": 102,
           "widthDataType": 81,
           "widthDefault": 60
         },
@@ -3291,131 +3259,6 @@
           "updateAt": 1781225924433,
           "createAt": 1781225924433
         }
-      },
-      "2f505fea3741464ba44e6ded445f719c": {
-        "id": "2f505fea3741464ba44e6ded445f719c",
-        "tableId": "08c8f28fc9d14d5d98fe0d3424af7afa",
-        "name": "id",
-        "comment": "ID",
-        "dataType": "INT",
-        "default": "",
-        "options": {
-          "autoIncrement": true,
-          "primaryKey": true,
-          "unique": false,
-          "notNull": true
-        },
-        "ui": {
-          "keys": 0,
-          "widthName": 60,
-          "widthComment": 60,
-          "widthDataType": 60,
-          "widthDefault": 60
-        },
-        "meta": {
-          "updateAt": 1718000000000,
-          "createAt": 1718000000000
-        }
-      },
-      "6640d11672fc4c47ba6af6e8d9c375c1": {
-        "id": "6640d11672fc4c47ba6af6e8d9c375c1",
-        "tableId": "08c8f28fc9d14d5d98fe0d3424af7afa",
-        "name": "employee_id",
-        "comment": "사원 ID",
-        "dataType": "INT",
-        "default": "",
-        "options": {
-          "autoIncrement": false,
-          "primaryKey": false,
-          "unique": false,
-          "notNull": true
-        },
-        "ui": {
-          "keys": 0,
-          "widthName": 60,
-          "widthComment": 60,
-          "widthDataType": 60,
-          "widthDefault": 60
-        },
-        "meta": {
-          "updateAt": 1718000000000,
-          "createAt": 1718000000000
-        }
-      },
-      "46f1dde7cd9a4e6c95e9d1e9cc01c91d": {
-        "id": "46f1dde7cd9a4e6c95e9d1e9cc01c91d",
-        "tableId": "08c8f28fc9d14d5d98fe0d3424af7afa",
-        "name": "year",
-        "comment": "기준 연도",
-        "dataType": "INT",
-        "default": "",
-        "options": {
-          "autoIncrement": false,
-          "primaryKey": false,
-          "unique": false,
-          "notNull": true
-        },
-        "ui": {
-          "keys": 0,
-          "widthName": 60,
-          "widthComment": 60,
-          "widthDataType": 60,
-          "widthDefault": 60
-        },
-        "meta": {
-          "updateAt": 1718000000000,
-          "createAt": 1718000000000
-        }
-      },
-      "7aec4de6807b46988f295107c667604b": {
-        "id": "7aec4de6807b46988f295107c667604b",
-        "tableId": "08c8f28fc9d14d5d98fe0d3424af7afa",
-        "name": "total_days",
-        "comment": "총 연차",
-        "dataType": "FLOAT",
-        "default": "",
-        "options": {
-          "autoIncrement": false,
-          "primaryKey": false,
-          "unique": false,
-          "notNull": false
-        },
-        "ui": {
-          "keys": 0,
-          "widthName": 60,
-          "widthComment": 60,
-          "widthDataType": 60,
-          "widthDefault": 60
-        },
-        "meta": {
-          "updateAt": 1718000000000,
-          "createAt": 1718000000000
-        }
-      },
-      "be74cb6a298a45afa1486271c777a7cf": {
-        "id": "be74cb6a298a45afa1486271c777a7cf",
-        "tableId": "08c8f28fc9d14d5d98fe0d3424af7afa",
-        "name": "used_days",
-        "comment": "사용 연차",
-        "dataType": "FLOAT",
-        "default": "",
-        "options": {
-          "autoIncrement": false,
-          "primaryKey": false,
-          "unique": false,
-          "notNull": false
-        },
-        "ui": {
-          "keys": 0,
-          "widthName": 60,
-          "widthComment": 60,
-          "widthDataType": 60,
-          "widthDefault": 60
-        },
-        "meta": {
-          "updateAt": 1718000000000,
-          "createAt": 1718000000000
-        }
       }
     },
     "relationshipEntities": {
@@ -3429,8 +3272,8 @@
           "columnIds": [
             "2e13c73b81f04e99bbebf973c960f743"
           ],
-          "x": 421.0454,
-          "y": 195.9091,
+          "x": 418.5454,
+          "y": 213.4091,
           "direction": 2
         },
         "end": {
@@ -3457,8 +3300,8 @@
           "columnIds": [
             "9b43cd4da1bb427a8b1b3e7d40c8b192"
           ],
-          "x": 418.2727,
-          "y": 87.091,
+          "x": 413.2727,
+          "y": 89.591,
           "direction": 2
         },
         "end": {
@@ -3494,8 +3337,8 @@
           "columnIds": [
             "e591627775a44c269fe82875fe3b0482"
           ],
-          "x": 421.0454,
-          "y": 271.90909999999997,
+          "x": 418.5454,
+          "y": 289.40909999999997,
           "direction": 2
         },
         "meta": {
@@ -3522,8 +3365,8 @@
           "columnIds": [
             "8e019ab1beac4250a5ac82982d59fcb6"
           ],
-          "x": 425.3182,
-          "y": 402.909,
+          "x": 417.8182,
+          "y": 442.909,
           "direction": 2
         },
         "meta": {
@@ -3541,7 +3384,7 @@
           "columnIds": [
             "cb70c58da4094a5491d576c106606537"
           ],
-          "x": 651.6364,
+          "x": 657.8864,
           "y": 464.6818,
           "direction": 8
         },
@@ -3550,9 +3393,9 @@
           "columnIds": [
             "08fe223773224752acf0d0c76eb37da3"
           ],
-          "x": 549.9773,
-          "y": 429.9091,
-          "direction": 4
+          "x": 412.9546,
+          "y": 620.5455,
+          "direction": 2
         },
         "meta": {
           "updateAt": 1781225924434,
@@ -3569,7 +3412,7 @@
           "columnIds": [
             "cb70c58da4094a5491d576c106606537"
           ],
-          "x": 871.6364,
+          "x": 890.3864,
           "y": 464.6818,
           "direction": 8
         },
@@ -3578,9 +3421,9 @@
           "columnIds": [
             "461e14394a8245f8b5ee962d4519f635"
           ],
-          "x": 748.4773,
-          "y": 429.9091,
-          "direction": 4
+          "x": 412.9546,
+          "y": 744.5455,
+          "direction": 2
         },
         "meta": {
           "updateAt": 1781226219948,
@@ -3597,7 +3440,7 @@
           "columnIds": [
             "cb70c58da4094a5491d576c106606537"
           ],
-          "x": 981.6364,
+          "x": 1006.6364,
           "y": 134.6818,
           "direction": 2
         },
@@ -3626,7 +3469,7 @@
             "c6775524f50a4cfebe8bdfe55c200748"
           ],
           "x": 633.2353,
-          "y": 884.7934,
+          "y": 907.2934,
           "direction": 8
         },
         "end": {
@@ -3634,8 +3477,8 @@
           "columnIds": [
             "352d95603e0744a48853659080a3ab5b"
           ],
-          "x": 616.9908,
-          "y": 957.136,
+          "x": 596.9908,
+          "y": 1027.136,
           "direction": 1
         },
         "meta": {
@@ -3662,8 +3505,8 @@
           "columnIds": [
             "0509f2b86a9949fe84b0d9df0732545d"
           ],
-          "x": 616.9908,
-          "y": 1009.136,
+          "x": 596.9908,
+          "y": 1079.136,
           "direction": 1
         },
         "meta": {
@@ -3681,7 +3524,7 @@
           "columnIds": [
             "cb70c58da4094a5491d576c106606537"
           ],
-          "x": 981.6364,
+          "x": 1006.6364,
           "y": 354.6818,
           "direction": 2
         },
@@ -3710,7 +3553,7 @@
             "c6775524f50a4cfebe8bdfe55c200748"
           ],
           "x": 826.7353,
-          "y": 770.7934,
+          "y": 793.2934,
           "direction": 2
         },
         "end": {
@@ -3766,7 +3609,7 @@
             "c6775524f50a4cfebe8bdfe55c200748"
           ],
           "x": 826.7353,
-          "y": 846.7934,
+          "y": 869.2934,
           "direction": 2
         },
         "end": {
@@ -3821,17 +3664,17 @@
           "columnIds": [
             "81dc54a9f7034123900bbfbe218eb8b7"
           ],
-          "x": 1493.8182,
-          "y": 1127.1364,
-          "direction": 2
+          "x": 1265.3182,
+          "y": 1178.1364,
+          "direction": 8
         },
         "end": {
           "tableId": "c908ae05961347feb4aa8bde7a361008",
           "columnIds": [
             "4058ce8d71c44673a2de751a814d02f8"
           ],
-          "x": 1637.5454,
-          "y": 1304.5455,
+          "x": 1160.0454,
+          "y": 1299.5455,
           "direction": 4
         },
         "meta": {
