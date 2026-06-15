@@ -140,7 +140,7 @@ export default function EmployeesPage() {
     try {
       // Handle deletions
       if (rowsToDelete.length > 0) {
-        const idsToDelete = rowsToDelete.map(e => e.id);
+        const idsToDelete = rowsToDelete.map(e => parseInt(String(e.id), 10)).filter(id => !isNaN(id));
         const delRes = await fetch(`/api/employees/bulk-delete`, { 
           method: "POST",
           headers: { "Content-Type": "application/json" },
