@@ -18,7 +18,7 @@ export default function RoleManagementPage() {
   
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newEmp, setNewEmp] = useState({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee', base_salary: 0 });
+  const [newEmp, setNewEmp] = useState({ emp_no: '', name: '', email: '', department_id: '', role_id: 'master', base_salary: 0 });
   const { showAlert } = useDialog();
 
   const fetchEmployees = () => {
@@ -87,7 +87,7 @@ export default function RoleManagementPage() {
       
       await showAlert(data.message + "\n초기 비밀번호는 1234로 설정되었습니다.", { type: "success" });
       setIsModalOpen(false);
-      setNewEmp({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee', base_salary: 0 });
+      setNewEmp({ emp_no: '', name: '', email: '', department_id: '', role_id: 'master', base_salary: 0 });
       fetchEmployees();
     } catch (err: any) {
       await showAlert(err.message, { type: "error" });
@@ -154,7 +154,7 @@ export default function RoleManagementPage() {
               className="px-4 py-2 bg-[#107C41] text-white text-sm font-medium rounded-lg hover:bg-[#0c5e31] transition-colors shadow-sm flex items-center"
             >
               <Plus className="w-4 h-4 mr-2" />
-              신규 사원 등록
+              총괄 관리자 등록
             </button>
           </div>
         </div>
@@ -243,7 +243,7 @@ export default function RoleManagementPage() {
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900">신규 사원 등록</h3>
+              <h3 className="text-lg font-bold text-gray-900">총괄 관리자 등록</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -275,29 +275,6 @@ export default function RoleManagementPage() {
                   value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
-                <input 
-                  type="number" required
-                  placeholder="3000000"
-                  value={newEmp.base_salary} onChange={e => setNewEmp({...newEmp, base_salary: Number(e.target.value)})}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">접근 권한</label>
-                <select 
-                  required
-                  value={newEmp.role_id} onChange={e => setNewEmp({...newEmp, role_id: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all bg-white"
-                >
-                  {ROLE_OPTIONS.map(r => (
-                    <option key={r.id} value={r.id}>{r.name} - {r.desc}</option>
-                  ))}
-                </select>
               </div>
               
               <div className="pt-4 border-t border-gray-100 flex justify-end space-x-2">
