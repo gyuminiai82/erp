@@ -89,9 +89,9 @@ export default function EmployeesPage() {
         body: JSON.stringify({
           name: newEmp.name,
           email: newEmp.email,
-          department_id: Number(newEmp.department_id),
+          department_id: newEmp.department_id ? Number(newEmp.department_id) : null,
           position_id: newEmp.position_id ? Number(newEmp.position_id) : null,
-          role_id: "employee", // Default role
+          role_id: newEmp.role_id || "employee",
           phone: newEmp.phone || null,
           birth_date: newEmp.birth_date || null,
           gender: newEmp.gender || null,
