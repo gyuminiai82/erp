@@ -378,7 +378,7 @@ export default function EmployeesPage() {
 
   const columns: ColumnDef[] = [
     { field: 'emp_no', headerName: '사번', width: 120, editable: true },
-    { field: 'name', headerName: '이름 *', width: 120, editable: true },
+    { field: 'name', headerName: '이름', width: 120, editable: true },
     { 
       field: 'department', 
       headerName: '부서', 
@@ -395,7 +395,7 @@ export default function EmployeesPage() {
       editType: 'select',
       options: positions.map(p => ({ label: p.name, value: p.name }))
     },
-    { field: 'phone', headerName: '연락처', width: 150, editable: true },
+    { field: 'phone', headerName: '연락처', width: 150, editable: true, formatEditValue: formatPhoneNumber },
     { 
       field: 'employment_type', 
       headerName: '고용형태', 
@@ -432,7 +432,7 @@ export default function EmployeesPage() {
       options: ROLE_OPTIONS.map(r => ({ label: r.name, value: r.id })),
       renderCell: (v) => ROLE_OPTIONS.find(r => r.id === v)?.name || '일반 사원'
     },
-    { field: 'email', headerName: '이메일 *', width: 180, editable: true },
+    { field: 'email', headerName: '이메일', width: 180, editable: true },
     { field: 'birth_date', headerName: '생년월일', width: 120, editable: true },
     { 
       field: 'gender', 
@@ -442,7 +442,7 @@ export default function EmployeesPage() {
       editType: 'select',
       options: [{ label: '남성', value: '남성' }, { label: '여성', value: '여성' }]
     },
-    { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true, renderCell: (v) => maskResidentNum(v) },
+    { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true, formatEditValue: formatResidentNum, renderCell: (v) => maskResidentNum(v) },
     { field: 'address', headerName: '주소', width: 250, editable: true },
     { field: 'base_salary', headerName: '기본급(원)', width: 150, editable: true, renderCell: (v) => v ? Number(v).toLocaleString() : '0' }
   ];

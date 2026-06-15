@@ -8,6 +8,7 @@ export interface ColumnDef {
   editType?: 'text' | 'select';
   options?: { label: string; value: string | number }[];
   renderCell?: (value: any, row: any) => React.ReactNode;
+  formatEditValue?: (val: string) => string;
 }
 
 export interface DataGridProps {
@@ -656,7 +657,13 @@ export function DataGrid({
                                 type="text"
                                 className="relative w-full h-full border-none outline-none px-1.5 py-0 m-0 bg-transparent text-sm leading-none"
                                 value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
+                                onChange={(e) => {
+                                  let val = e.target.value;
+                                  if (col.formatEditValue) {
+                                    val = col.formatEditValue(val);
+                                  }
+                                  setEditValue(val);
+                                }}
                                 onBlur={finishEditing}
                                 style={{ lineHeight: 'inherit' }}
                               />
