@@ -7,7 +7,22 @@ from pydantic import BaseModel
 
 from database import get_db
 from models import Payroll, Employee
-from auth import get_current_user
+from auth import SECRET_KEY, ALGORITHM
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import jwt, JWTError
+
+security = HTTPBearer()
+
+def get_current_employee(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        emp = db.query(Employee).filter(Employee.email == email).first()
+        if not emp:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        return emp
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 router = APIRouter(
     prefix="/api/payrolls",
@@ -45,7 +60,7 @@ class PayrollResponse(PayrollBase):
 # CRUD Endpoints
 
 @router.get("", response_model=List[PayrollResponse])
-def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     # 관리자만 전체 조회가 가능하도록 하거나, 일반 사원은 자기 것만 보게 하려면 여기 로직을 추가
     query = db.query(Payroll)
     
@@ -76,7 +91,7 @@ def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), cur
     return results
 
 @router.post("", response_model=PayrollResponse)
-def create_payroll(payroll: PayrollCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_payroll(payroll: PayrollCreate, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     # 관리자 권한 체크 필요 (추가 구현)
     
     # 실수령액 계산
@@ -100,7 +115,7 @@ def create_payroll(payroll: PayrollCreate, db: Session = Depends(get_db), curren
     )
 
 @router.put("/{payroll_id}", response_model=PayrollResponse)
-def update_payroll(payroll_id: int, payroll: PayrollUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def update_payroll(payroll_id: int, payroll: PayrollUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     db_payroll = db.query(Payroll).filter(Payroll.id == payroll_id).first()
     if not db_payroll:
         raise HTTPException(status_code=404, detail="Payroll not found")
@@ -124,7 +139,7 @@ def update_payroll(payroll_id: int, payroll: PayrollUpdate, db: Session = Depend
     )
 
 @router.delete("/{payroll_id}")
-def delete_payroll(payroll_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_payroll(payroll_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     db_payroll = db.query(Payroll).filter(Payroll.id == payroll_id).first()
     if not db_payroll:
         raise HTTPException(status_code=404, detail="Payroll not found")
