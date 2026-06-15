@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Shield, Users, ArrowRight, FileImage, X } from 'lucide-react';
+import { Shield, Users, ArrowRight, FileImage, Database, X } from 'lucide-react';
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isErdModalOpen, setIsErdModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] flex items-center justify-center relative overflow-hidden p-4">
@@ -59,14 +60,22 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* Architecture Button */}
-        <div className="mt-12 pt-8 border-t border-slate-100">
+        {/* Architecture & ERD Buttons */}
+        <div className="mt-12 pt-8 border-t border-slate-100 flex flex-wrap items-center justify-center gap-4">
           <button 
             onClick={() => setIsModalOpen(true)}
             className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-[#107C41] transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
           >
             <FileImage className="w-4 h-4" />
             <span>시스템 구성도 보기</span>
+          </button>
+
+          <button 
+            onClick={() => setIsErdModalOpen(true)}
+            className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-blue-500 transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
+          >
+            <Database className="w-4 h-4" />
+            <span>데이터베이스 구조 (ERD) 보기</span>
           </button>
         </div>
       </div>
@@ -90,6 +99,31 @@ export default function Home() {
                 alt="System Architecture" 
                 className="w-full h-auto max-w-4xl rounded-lg shadow-sm border border-gray-200 bg-white"
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ERD Modal */}
+      {isErdModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50 shrink-0">
+              <h3 className="font-bold text-lg text-slate-800">데이터베이스 구조 (ERD)</h3>
+              <button 
+                onClick={() => setIsErdModalOpen(false)}
+                className="p-1.5 rounded-full hover:bg-gray-200 text-slate-500 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 bg-gray-50/50 overflow-y-auto flex flex-col items-center justify-center">
+              <img 
+                src="/erd.png" 
+                alt="Entity Relationship Diagram" 
+                className="w-full h-auto max-w-4xl rounded-lg shadow-sm border border-gray-200 bg-white"
+              />
+              <p className="mt-4 text-sm text-gray-500">※ 현재는 포트폴리오용 임시 ERD 이미지입니다. 추후 vuerd에서 추출한 실제 이미지로 public/erd.png 를 덮어씌워주세요.</p>
             </div>
           </div>
         </div>
