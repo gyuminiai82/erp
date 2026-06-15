@@ -107,7 +107,7 @@ export default function Home() {
       {/* ERD Modal */}
       {isErdModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[95vw] overflow-hidden relative flex flex-col max-h-[95vh]">
             <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50 shrink-0">
               <h3 className="font-bold text-lg text-slate-800">데이터베이스 구조 (ERD)</h3>
               <button 
@@ -117,11 +117,11 @@ export default function Home() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 bg-gray-50/50 overflow-y-auto flex flex-col items-center justify-center">
+            <div className="p-6 bg-[#f0f2f5] overflow-auto flex justify-center">
               <img 
                 src="/erd.png" 
                 alt="Entity Relationship Diagram" 
-                className="w-full h-auto max-w-4xl rounded-lg shadow-sm border border-gray-200 bg-white"
+                className="w-auto h-auto max-w-none rounded shadow-md bg-white"
               />
             </div>
           </div>
