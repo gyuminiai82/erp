@@ -19,7 +19,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
+    const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
     
     if (token) {
       fetch("/api/auth/me", {
@@ -87,7 +87,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleClockIn = async () => {
-    const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
+    const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
     try {
       const res = await fetch(`/api/attendances/clock-in`, {
         method: "POST",
@@ -105,7 +105,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   };
 
   const handleClockOut = async () => {
-    const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token');
+    const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
     try {
       const res = await fetch(`/api/attendances/clock-out`, {
         method: "POST",
@@ -260,7 +260,10 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
                       <p className="text-xs text-gray-500 truncate">{userInfo?.email || ''}</p>
                     </div>
                     <div className="p-1">
-                      <Link href="/login" className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
+                      <Link href="/login" onClick={() => {
+                        localStorage.removeItem("erp_user_token");
+                        localStorage.removeItem("erp_user_access_token");
+                      }} className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
                         <LogOut className="w-4 h-4 mr-2" />
                         로그아웃
                       </Link>

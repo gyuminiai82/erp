@@ -10,7 +10,7 @@ export default function LeaveApprovalsPage() {
 
   const fetchAllLeaves = async () => {
     try {
-      const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch('/api/leaves/all', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -34,7 +34,7 @@ export default function LeaveApprovalsPage() {
     
     setLoading(true);
     try {
-      const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch(`/api/leaves/${id}/status`, {
         method: 'PUT',
         headers: {

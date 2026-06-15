@@ -44,7 +44,7 @@ export default function PayrollsPage() {
   const [editMode, setEditMode] = useState(false);
   const [currentPayroll, setCurrentPayroll] = useState<Partial<Payroll>>({});
   
-  const token = typeof window !== 'undefined' ? localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token') || localStorage.getItem('token') : null;
 
   useEffect(() => {
     if (!token) {

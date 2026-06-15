@@ -50,8 +50,8 @@ export default function LoginPage() {
       }
       
       // Store token
-      localStorage.setItem("erp_token", data.access_token);
-      localStorage.setItem("erp_access_token", data.access_token);
+      localStorage.setItem("erp_user_token", data.access_token);
+      localStorage.setItem("erp_user_access_token", data.access_token);
       
       // MUST CHANGE PASSWORD CHECK (강제 납치 로직)
       if (data.must_change_password) {

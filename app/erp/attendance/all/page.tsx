@@ -18,7 +18,7 @@ export default function AttendanceStatusPage() {
 
   const fetchAttendances = async (year: number, month: number) => {
     try {
-      const token = localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token');
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch(`/api/attendances/all?year=${year}&month=${month}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });

@@ -282,16 +282,16 @@ export default function DepartmentsPage() {
                 부서 추가
               </Button>
             </div>
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                  <th className="py-3 px-4 w-10"></th>
-                  <th className="py-3 px-6 font-semibold">부서명</th>
-                  <th className="py-3 px-6 font-semibold">부서장</th>
-                  <th className="py-3 px-6 font-semibold text-right">관리</th>
-                </tr>
-              </thead>
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndDept}>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndDept}>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                    <th className="py-3 px-4 w-10"></th>
+                    <th className="py-3 px-6 font-semibold">부서명</th>
+                    <th className="py-3 px-6 font-semibold">부서장</th>
+                    <th className="py-3 px-6 font-semibold text-right">관리</th>
+                  </tr>
+                </thead>
                 <SortableContext items={departments.map(d => d.id)} strategy={verticalListSortingStrategy}>
                   <tbody className="text-sm">
                     {departments.map((dept) => (
@@ -310,8 +310,8 @@ export default function DepartmentsPage() {
                     )}
                   </tbody>
                 </SortableContext>
-              </DndContext>
-            </table>
+              </table>
+            </DndContext>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
@@ -326,16 +326,16 @@ export default function DepartmentsPage() {
                 직급 추가
               </Button>
             </div>
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
-                  <th className="py-3 px-4 w-10"></th>
-                  <th className="py-3 px-6 font-semibold">직급명</th>
-                  <th className="py-3 px-6 font-semibold">설명</th>
-                  <th className="py-3 px-6 font-semibold text-right">관리</th>
-                </tr>
-              </thead>
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndPos}>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndPos}>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                    <th className="py-3 px-4 w-10"></th>
+                    <th className="py-3 px-6 font-semibold">직급명</th>
+                    <th className="py-3 px-6 font-semibold">설명</th>
+                    <th className="py-3 px-6 font-semibold text-right">관리</th>
+                  </tr>
+                </thead>
                 <SortableContext items={positions.map(p => p.id)} strategy={verticalListSortingStrategy}>
                   <tbody className="text-sm">
                     {positions.map((pos) => (
@@ -353,8 +353,8 @@ export default function DepartmentsPage() {
                     )}
                   </tbody>
                 </SortableContext>
-              </DndContext>
-            </table>
+              </table>
+            </DndContext>
         </div>
       </div>
 

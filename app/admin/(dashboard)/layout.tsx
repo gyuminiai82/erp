@@ -107,7 +107,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
                   <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 z-50 overflow-hidden transform origin-top-right animate-in fade-in zoom-in-95 duration-100">
                     <div className="p-1">
-                      <Link href="/admin/login" className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
+                      <Link href="/admin/login" onClick={() => {
+                        localStorage.removeItem("erp_admin_token");
+                        localStorage.removeItem("erp_admin_access_token");
+                        localStorage.removeItem("erp_admin_user_role");
+                      }} className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
                         <LogOut className="w-4 h-4 mr-2" />
                         로그아웃
                       </Link>

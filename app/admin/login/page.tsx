@@ -39,13 +39,13 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
       
-      // Store token
-      localStorage.setItem("erp_token", data.access_token);
-      localStorage.setItem("erp_access_token", data.access_token);
-      localStorage.setItem("erp_user_role", data.role);
+      // 로그인 성공 시 로컬 스토리지에 토큰 및 권한 저장
+      localStorage.setItem("erp_admin_token", data.access_token);
+      localStorage.setItem("erp_admin_access_token", data.access_token);
+      localStorage.setItem("erp_admin_user_role", data.role);
       
-      // 정상 로그인 -> 관리자 페이지
-      router.push('/admin');
+      // 관리자 대시보드로 이동
+      router.push("/admin");
       
     } catch (err: any) {
       setErrorMsg(err.message);
