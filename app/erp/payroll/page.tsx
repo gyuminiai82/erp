@@ -241,7 +241,7 @@ export default function PayrollsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">급여 대장 관리</h1>
