@@ -619,6 +619,16 @@ export default function EmployeesPage() {
               </button>
             </div>
             <div className="p-6 overflow-y-auto max-h-[70vh]">
+              <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-3 text-sm text-blue-800 shadow-sm">
+                <span className="text-blue-500 font-bold mt-0.5">ℹ️</span>
+                <div>
+                  <p className="font-semibold mb-1">저장 안내</p>
+                  <p className="text-blue-700/90">
+                    아래의 <strong className="text-blue-900">[표에 임시 추가]</strong>를 누르시면 배경의 표에만 임시로 들어갑니다.<br/>
+                    반드시 표 상단의 <strong className="text-blue-900 bg-white px-1 py-0.5 rounded border border-blue-200">[변경사항 저장]</strong> 버튼을 눌러야 최종 완료됩니다.
+                  </p>
+                </div>
+              </div>
               <form id="newEmpForm" onSubmit={handleModalSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
