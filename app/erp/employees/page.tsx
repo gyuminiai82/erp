@@ -332,7 +332,7 @@ export default function EmployeesPage() {
 
   const columns: ColumnDef[] = [
     { field: 'emp_no', headerName: '사번', width: 120, editable: true },
-    { field: 'name', headerName: '이름', width: 120, editable: true },
+    { field: 'name', headerName: '이름 *', width: 120, editable: true },
     { 
       field: 'department', 
       headerName: '부서', 
@@ -386,7 +386,7 @@ export default function EmployeesPage() {
       options: ROLE_OPTIONS.map(r => ({ label: r.name, value: r.id })),
       renderCell: (v) => ROLE_OPTIONS.find(r => r.id === v)?.name || '일반 사원'
     },
-    { field: 'email', headerName: '이메일', width: 180, editable: true },
+    { field: 'email', headerName: '이메일 *', width: 180, editable: true },
     { field: 'birth_date', headerName: '생년월일', width: 120, editable: true },
     { 
       field: 'gender', 
