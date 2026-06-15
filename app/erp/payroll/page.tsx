@@ -30,10 +30,12 @@ export default function PayrollsPage() {
   const [payrolls, setPayrolls] = useState<Payroll[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   
-  // 현재 월 설정 (YYYY-MM)
-  const [currentMonth, setCurrentMonth] = useState<string>(
-    new Date().toISOString().slice(0, 7)
-  );
+  // 급여대장은 이전 달을 기본값으로 설정
+  const [currentMonth, setCurrentMonth] = useState<string>(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d.toISOString().slice(0, 7);
+  });
   
   const [systemSettings, setSystemSettings] = useState<any>(null);
   
