@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit, Trash2, X, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 
 interface Payroll {
   id: number;
@@ -242,6 +243,71 @@ export default function PayrollsPage() {
     return base + bonus - deductions;
   };
 
+  const columns: ColumnDef[] = [
+    {
+      field: 'employee_name',
+      headerName: '사번/이름',
+      width: 180,
+      renderCell: (val: any, row: any) => (
+        <div>
+          <div className="font-medium text-gray-900">{row.employee_name}</div>
+          <div className="text-xs text-gray-500">{row.employee_no}</div>
+        </div>
+      )
+    },
+    {
+      field: 'department_name',
+      headerName: '부서',
+      width: 150,
+      renderCell: (val: any) => <span className="text-gray-600">{val || '-'}</span>
+    },
+    {
+      field: 'base_salary',
+      headerName: '기본급',
+      width: 130,
+      renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
+    },
+    {
+      field: 'bonus',
+      headerName: '상여금',
+      width: 130,
+      renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
+    },
+    {
+      field: 'deductions',
+      headerName: '공제액',
+      width: 130,
+      renderCell: (val: any) => <div className="text-right w-full text-red-500">-{Number(val).toLocaleString()}원</div>
+    },
+    {
+      field: 'net_pay',
+      headerName: '실수령액',
+      width: 140,
+      renderCell: (val: any) => <div className="text-right w-full font-bold text-[#107C41]">{Number(val).toLocaleString()}원</div>
+    },
+    {
+      field: 'payment_date',
+      headerName: '지급일',
+      width: 120,
+      renderCell: (val: any) => <div className="text-center w-full text-gray-600">{val}</div>
+    },
+    {
+      field: 'id',
+      headerName: '관리',
+      width: 100,
+      renderCell: (val: any, row: any) => (
+        <div className="flex items-center justify-center space-x-2 w-full">
+          <button onClick={() => handleOpenModal(row)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            <Edit className="w-4 h-4" />
+          </button>
+          <button onClick={() => handleDelete(row.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -281,65 +347,20 @@ export default function PayrollsPage() {
 
       {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 text-sm font-medium">
-                <th className="px-6 py-4">사번/이름</th>
-                <th className="px-6 py-4">부서</th>
-                <th className="px-6 py-4 text-right">기본급</th>
-                <th className="px-6 py-4 text-right">상여금</th>
-                <th className="px-6 py-4 text-right">공제액</th>
-                <th className="px-6 py-4 text-right text-[#107C41]">실수령액</th>
-                <th className="px-6 py-4 text-center">지급일</th>
-                <th className="px-6 py-4 text-center">관리</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
-                    <div className="animate-pulse flex flex-col items-center">
-                      <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
-                      데이터를 불러오는 중입니다...
-                    </div>
-                  </td>
-                </tr>
-              ) : payrolls.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
-                    선택한 월({currentMonth})의 급여 데이터가 없습니다.
-                  </td>
-                </tr>
-              ) : (
-                payrolls.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{p.employee_name}</div>
-                      <div className="text-xs text-gray-500">{p.employee_no}</div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{p.department_name || '-'}</td>
-                    <td className="px-6 py-4 text-right">{p.base_salary.toLocaleString()}원</td>
-                    <td className="px-6 py-4 text-right">{p.bonus.toLocaleString()}원</td>
-                    <td className="px-6 py-4 text-right text-red-500">-{p.deductions.toLocaleString()}원</td>
-                    <td className="px-6 py-4 text-right font-bold text-[#107C41]">{p.net_pay.toLocaleString()}원</td>
-                    <td className="px-6 py-4 text-center text-gray-600">{p.payment_date}</td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        <button onClick={() => handleOpenModal(p)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleDelete(p.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <div className="px-6 py-8 text-center text-gray-500">
+            <div className="animate-pulse flex flex-col items-center">
+              <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
+              데이터를 불러오는 중입니다...
+            </div>
+          </div>
+        ) : payrolls.length === 0 ? (
+          <div className="px-6 py-12 text-center text-gray-500">
+            선택한 월({currentMonth})의 급여 데이터가 없습니다.
+          </div>
+        ) : (
+          <DataGrid columns={columns} data={payrolls} />
+        )}
       </div>
 
       {/* Modal */}
