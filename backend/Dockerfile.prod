@@ -1,0 +1,18 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# 시스템 의존성 설치
+RUN apt-get update && apt-get install -y gcc python3-dev libpq-dev && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 소스 복사
+COPY . .
+
+EXPOSE 8000
+
+# 프로덕션에서는 --reload 제외하고 gunicorn 등을 사용할 수도 있으나, uvicorn 단독으로 운영 (필요시 workers 옵션 추가)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
