@@ -34,6 +34,15 @@ export default function EmployeesPage() {
   const [searchEmpType, setSearchEmpType] = useState('');
   const [searchStatus, setSearchStatus] = useState('');
 
+  // 팝업 등록용 상태
+  const [isEmpModalOpen, setIsEmpModalOpen] = useState(false);
+  const [newEmpData, setNewEmpData] = useState({
+    name: '', email: '', department: '', position: '', role: 'employee',
+    phone: '', birth_date: '', gender: '남성', address: '', 
+    employment_type: '정규직', resident_num: '', base_salary: 0, 
+    status: '재직', hire_date: ''
+  });
+
   const fetchData = async () => {
     try {
       const [empRes, deptRes, posRes, typeRes, statusRes] = await Promise.all([
@@ -82,26 +91,29 @@ export default function EmployeesPage() {
   };
 
   const handleAddRow = () => {
+    setNewEmpData({
+      name: '', email: '', department: '', position: '', role: 'employee',
+      phone: '', birth_date: '', gender: '남성', address: '', 
+      employment_type: '정규직', resident_num: '', base_salary: 0, 
+      status: '재직', hire_date: new Date().toISOString().split('T')[0]
+    });
+    setIsEmpModalOpen(true);
+  };
+
+  const handleModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmpData.name || !newEmpData.email) {
+      showAlert("이름과 이메일은 필수 입력 항목입니다.", { type: "warning" });
+      return;
+    }
     const newTempEmp = {
       id: `temp_${Date.now()}`,
       emp_no: '자동 채번',
-      name: '',
-      email: '',
-      department: '',
-      position: '',
-      role: 'employee',
-      phone: '',
-      birth_date: '',
-      gender: '남성',
-      address: '',
-      employment_type: '정규직',
-      resident_num: '',
-      base_salary: 0,
-      status: '재직',
-      hire_date: new Date().toISOString().split('T')[0],
+      ...newEmpData,
       _state: 'C'
     };
     setEmployees([newTempEmp, ...employees]);
+    setIsEmpModalOpen(false);
   };
 
   const handleBulkDelete = async () => {
@@ -574,6 +586,78 @@ export default function EmployeesPage() {
           </div>
         </div>
       </div>
+      {/* Employee Registration Modal */}
+      {isEmpModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-800">신규 사원 등록</h3>
+              <button onClick={() => setIsEmpModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <Trash2 className="w-5 h-5 hidden" /> {/* Just for spacing or use an X icon */}
+                <span className="text-xl leading-none">&times;</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[70vh]">
+              <form id="newEmpForm" onSubmit={handleModalSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">이름 *</label>
+                    <Input required value={newEmpData.name} onChange={e => setNewEmpData({...newEmpData, name: e.target.value})} placeholder="홍길동" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">이메일 *</label>
+                    <Input required type="email" value={newEmpData.email} onChange={e => setNewEmpData({...newEmpData, email: e.target.value})} placeholder="hong@example.com" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">부서</label>
+                    <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.department} onChange={e => setNewEmpData({...newEmpData, department: e.target.value})}>
+                      <option value="">선택 안함</option>
+                      {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">직급</label>
+                    <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.position} onChange={e => setNewEmpData({...newEmpData, position: e.target.value})}>
+                      <option value="">선택 안함</option>
+                      {positions.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">고용형태</label>
+                    <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.employment_type} onChange={e => setNewEmpData({...newEmpData, employment_type: e.target.value})}>
+                      {empTypes.map(t => <option key={t.id} value={t.code}>{t.name}</option>)}
+                      {empTypes.length === 0 && <option value="정규직">정규직</option>}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">시스템 권한</label>
+                    <select className="w-full border border-gray-200 rounded-lg px-3 py-2 h-10" value={newEmpData.role} onChange={e => setNewEmpData({...newEmpData, role: e.target.value})}>
+                      {ROLE_OPTIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
+                  <Input value={newEmpData.phone} onChange={e => setNewEmpData({...newEmpData, phone: e.target.value})} placeholder="010-0000-0000" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
+                  <Input type="number" value={newEmpData.base_salary} onChange={e => setNewEmpData({...newEmpData, base_salary: Number(e.target.value)})} placeholder="0" />
+                </div>
+              </form>
+            </div>
+            <div className="p-4 border-t border-gray-100 bg-slate-50 flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEmpModalOpen(false)}>취소</Button>
+              <Button type="submit" form="newEmpForm" className="bg-[#107C41] hover:bg-[#0b5c30] text-white">표에 임시 추가</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
