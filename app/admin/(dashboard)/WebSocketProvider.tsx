@@ -19,7 +19,8 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     let isUnmounted = false;
 
     const connect = () => {
-      ws = new WebSocket('ws://localhost:8000/api/ws');
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(`${protocol}//${window.location.host}/api/ws`);
       
       ws.onmessage = (event) => {
         try {
