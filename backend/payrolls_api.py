@@ -153,17 +153,31 @@ def delete_payroll(payroll_id: int, db: Session = Depends(get_db), current_user 
 
 @router.post("/generate")
 def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
-    from models import SystemSetting
+    from models import SystemSetting, Attendance, AttendancePolicy
+    from sqlalchemy import extract
+    import datetime
     
     # 1. 활성 사원 목록
     employees = db.query(Employee).filter(Employee.is_active == True, Employee.deleted_at == None).all()
     
-    # 2. 4대보험 요율 설정 가져오기
+    # 2. 요율 및 배수 설정 가져오기
     setting = db.query(SystemSetting).first()
-    nps_rate = setting.nps_rate if setting and setting.nps_rate is not None else 4.75
-    nhis_rate = setting.nhis_rate if setting and setting.nhis_rate is not None else 3.595
-    ltci_rate = setting.ltci_rate if setting and setting.ltci_rate is not None else 13.25
-    ei_rate = setting.ei_rate if setting and setting.ei_rate is not None else 0.9
+    nps_rate = setting.national_pension_rate if setting and setting.national_pension_rate is not None else 0.045
+    nhis_rate = setting.health_insurance_rate if setting and setting.health_insurance_rate is not None else 0.03545
+    ltci_rate = setting.long_term_care_rate if setting and setting.long_term_care_rate is not None else 0.1295
+    ei_rate = setting.employment_insurance_rate if setting and setting.employment_insurance_rate is not None else 0.009
+    
+    over_mult = setting.overtime_multiplier if setting and getattr(setting, 'overtime_multiplier', None) is not None else 1.5
+    holi_mult = setting.holiday_multiplier if setting and getattr(setting, 'holiday_multiplier', None) is not None else 1.5
+    holi_over_mult = setting.holiday_overtime_multiplier if setting and getattr(setting, 'holiday_overtime_multiplier', None) is not None else 2.0
+    
+    policy = db.query(AttendancePolicy).filter(AttendancePolicy.is_default == True).first()
+    work_end_time = policy.work_end_time if policy and policy.work_end_time else datetime.time(18, 0)
+    
+    try:
+        payment_year, payment_month_num = map(int, payload.payment_month.split('-'))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid payment_month format. Use YYYY-MM")
     
     generated_count = 0
     
@@ -172,14 +186,53 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
         if base == 0:
             continue
             
-        nps = int(base * (nps_rate / 100))
-        nhis = int(base * (nhis_rate / 100))
-        ltci = int(nhis * (ltci_rate / 100))
-        ei = int(base * (ei_rate / 100))
+        hourly_wage = base / 209.0
+        bonus_calc = 0.0
         
-        deductions = nps + nhis + ltci + ei
-        bonus = 0
-        net_pay = base + bonus - deductions
+        # 3. 근태 정보 조회하여 수당 계산
+        attendances = db.query(Attendance).filter(
+            Attendance.employee_id == emp.id,
+            extract('year', Attendance.work_date) == payment_year,
+            extract('month', Attendance.work_date) == payment_month_num,
+            Attendance.check_out != None
+        ).all()
+        
+        for att in attendances:
+            if not att.check_out or not att.check_in:
+                continue
+                
+            weekday = att.work_date.weekday()
+            is_weekend = weekday >= 5
+            
+            if is_weekend:
+                work_seconds = (att.check_out - att.check_in).total_seconds()
+                work_hours = work_seconds / 3600.0
+                if work_hours > 0:
+                    if work_hours <= 8:
+                        bonus_calc += work_hours * hourly_wage * holi_mult
+                    else:
+                        bonus_calc += 8 * hourly_wage * holi_mult
+                        bonus_calc += (work_hours - 8) * hourly_wage * holi_over_mult
+            else:
+                out_time = att.check_out.time()
+                if out_time > work_end_time:
+                    std_end_dt = datetime.datetime.combine(att.check_out.date(), work_end_time)
+                    over_seconds = (att.check_out - std_end_dt).total_seconds()
+                    if over_seconds > 0:
+                        over_hours = over_seconds / 3600.0
+                        bonus_calc += over_hours * hourly_wage * over_mult
+                        
+        bonus = int(bonus_calc)
+        total_salary = base + bonus
+        
+        # 4대보험 공제 계산 (세전 총액 기준)
+        nps = int(total_salary * nps_rate)
+        nhis = int(total_salary * nhis_rate)
+        ltci = int(nhis * ltci_rate)
+        ei = int(total_salary * ei_rate)
+        
+        deductions = int((nps + nhis + ltci + ei) / 10) * 10
+        net_pay = total_salary - deductions
         
         existing = db.query(Payroll).filter(Payroll.employee_id == emp.id, Payroll.payment_month == payload.payment_month).first()
         if existing:

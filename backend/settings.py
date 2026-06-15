@@ -16,6 +16,8 @@ class SystemSettingSchema(BaseModel):
     long_term_care_rate: float = 0.1314
     employment_insurance_rate: float = 0.009
     overtime_multiplier: float = 1.5
+    holiday_multiplier: float = 1.5
+    holiday_overtime_multiplier: float = 2.0
 
     class Config:
         from_attributes = True
@@ -32,7 +34,9 @@ def get_settings(db: Session = Depends(get_db)):
             health_insurance_rate=0.03595,
             long_term_care_rate=0.1314,
             employment_insurance_rate=0.009,
-            overtime_multiplier=1.5
+            overtime_multiplier=1.5,
+            holiday_multiplier=1.5,
+            holiday_overtime_multiplier=2.0
         )
         db.add(setting)
         db.commit()
@@ -51,7 +55,9 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
         "health_insurance_rate": setting.health_insurance_rate,
         "long_term_care_rate": setting.long_term_care_rate,
         "employment_insurance_rate": setting.employment_insurance_rate,
-        "overtime_multiplier": setting.overtime_multiplier
+        "overtime_multiplier": setting.overtime_multiplier,
+        "holiday_multiplier": setting.holiday_multiplier,
+        "holiday_overtime_multiplier": setting.holiday_overtime_multiplier
     }
 
     # 값 갱신
@@ -63,6 +69,8 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
     setting.long_term_care_rate = payload.long_term_care_rate
     setting.employment_insurance_rate = payload.employment_insurance_rate
     setting.overtime_multiplier = payload.overtime_multiplier
+    setting.holiday_multiplier = payload.holiday_multiplier
+    setting.holiday_overtime_multiplier = payload.holiday_overtime_multiplier
 
     # 감사 로그(Audit Log)를 위해 변경 후 데이터(new_rates) 백업
     new_rates = {
@@ -70,7 +78,9 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
         "health_insurance_rate": payload.health_insurance_rate,
         "long_term_care_rate": payload.long_term_care_rate,
         "employment_insurance_rate": payload.employment_insurance_rate,
-        "overtime_multiplier": payload.overtime_multiplier
+        "overtime_multiplier": payload.overtime_multiplier,
+        "holiday_multiplier": payload.holiday_multiplier,
+        "holiday_overtime_multiplier": payload.holiday_overtime_multiplier
     }
 
     db.commit()

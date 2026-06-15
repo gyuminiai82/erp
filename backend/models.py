@@ -213,7 +213,9 @@ class SystemSetting(Base):
     health_insurance_rate = Column(Float, default=0.03545)      # 건강보험 3.545%
     long_term_care_rate = Column(Float, default=0.1295)         # 장기요양보험 (건보료의 12.95%)
     employment_insurance_rate = Column(Float, default=0.009)    # 고용보험 0.9%
-    overtime_multiplier = Column(Float, default=1.5)            # 초과근무 배수
+    overtime_multiplier = Column(Float, default=1.5)            # 평일 초과근무 배수
+    holiday_multiplier = Column(Float, default=1.5)             # 휴일근무 배수 (8시간 이내)
+    holiday_overtime_multiplier = Column(Float, default=2.0)    # 휴일근무 배수 (8시간 초과)
 
 class CompanyInfo(Base):
     __tablename__ = "company_info"

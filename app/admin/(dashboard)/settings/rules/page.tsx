@@ -8,7 +8,14 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     emp_no_prefix: "EMP",
     emp_no_year_format: "YY",
-    emp_no_length: 3
+    emp_no_length: 3,
+    national_pension_rate: 0.0475,
+    health_insurance_rate: 0.03595,
+    long_term_care_rate: 0.1314,
+    employment_insurance_rate: 0.009,
+    overtime_multiplier: 1.5,
+    holiday_multiplier: 1.5,
+    holiday_overtime_multiplier: 2.0
   });
   const [preview, setPreview] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -21,7 +28,14 @@ export default function SettingsPage() {
         setSettings({
           emp_no_prefix: data.emp_no_prefix || "EMP",
           emp_no_year_format: data.emp_no_year_format || "YY",
-          emp_no_length: data.emp_no_length || 3
+          emp_no_length: data.emp_no_length || 3,
+          national_pension_rate: data.national_pension_rate || 0.045,
+          health_insurance_rate: data.health_insurance_rate || 0.03545,
+          long_term_care_rate: data.long_term_care_rate || 0.1295,
+          employment_insurance_rate: data.employment_insurance_rate || 0.009,
+          overtime_multiplier: data.overtime_multiplier || 1.5,
+          holiday_multiplier: data.holiday_multiplier || 1.5,
+          holiday_overtime_multiplier: data.holiday_overtime_multiplier || 2.0
         });
       })
       .catch(err => console.error(err));
@@ -142,6 +156,62 @@ export default function SettingsPage() {
             <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">실시간 미리보기</span>
               <span className="text-2xl font-mono font-bold text-[#107C41] tracking-tight">{preview}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 급여 및 수당 정책 섹션 추가 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center mb-4">
+            <div className="bg-red-50 p-2 rounded-lg mr-3">
+              <Hash className="w-5 h-5 text-red-600" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">법정 수당 할증률 설정</h2>
+          </div>
+          <p className="text-sm text-gray-500 mb-6">초과근무(야근) 및 주말 출근 시 적용될 수당 배수를 설정합니다.</p>
+          <div className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">평일 연장근로 배수</label>
+              <input type="number" step="0.1" value={settings.overtime_multiplier} onChange={e => setSettings({...settings, overtime_multiplier: Number(e.target.value)})} className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none" />
+              <p className="text-xs text-gray-400 mt-1">예: 1.5 (통상임금의 150%)</p>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">휴일(주말) 기본 배수 (8시간 이내)</label>
+              <input type="number" step="0.1" value={settings.holiday_multiplier} onChange={e => setSettings({...settings, holiday_multiplier: Number(e.target.value)})} className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">휴일(주말) 연장 배수 (8시간 초과)</label>
+              <input type="number" step="0.1" value={settings.holiday_overtime_multiplier} onChange={e => setSettings({...settings, holiday_overtime_multiplier: Number(e.target.value)})} className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center mb-4">
+            <div className="bg-blue-50 p-2 rounded-lg mr-3">
+              <Hash className="w-5 h-5 text-blue-600" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">4대 보험 공제 요율</h2>
+          </div>
+          <p className="text-sm text-gray-500 mb-6">근로자 부담분 기준 요율을 소수로 입력하세요 (예: 4.5% = 0.045).</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">국민연금</label>
+              <input type="number" step="0.0001" value={settings.national_pension_rate} onChange={e => setSettings({...settings, national_pension_rate: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">건강보험</label>
+              <input type="number" step="0.0001" value={settings.health_insurance_rate} onChange={e => setSettings({...settings, health_insurance_rate: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">장기요양 (건보료의 %)</label>
+              <input type="number" step="0.0001" value={settings.long_term_care_rate} onChange={e => setSettings({...settings, long_term_care_rate: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">고용보험</label>
+              <input type="number" step="0.0001" value={settings.employment_insurance_rate} onChange={e => setSettings({...settings, employment_insurance_rate: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg text-sm" />
             </div>
           </div>
         </div>
