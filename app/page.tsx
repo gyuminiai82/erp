@@ -1,7 +1,12 @@
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Shield, Users, ArrowRight } from 'lucide-react';
+import { Shield, Users, ArrowRight, FileImage, X } from 'lucide-react';
 
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#f8f9fc] flex items-center justify-center relative overflow-hidden p-4">
       {/* Background decorations */}
@@ -15,7 +20,7 @@ export default function Home() {
           Minstudio <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-600">ERP</span>
         </h1>
         <p className="text-lg md:text-xl text-slate-600 mb-12 max-w-2xl mx-auto">
-          혁신적인 업무 환경의 시작. 역할을 선택하고 스마트한 사내 인트라넷 시스템에 접속하세요.
+          기능개발 테스트용 웹사이트 입니다.
         </p>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
@@ -28,7 +33,7 @@ export default function Home() {
               </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-3">시스템 관리자</h2>
               <p className="text-slate-500 text-sm mb-6">
-                조직도 관리, 권한 설정, 공통 코드 등<br/>시스템 전반을 제어합니다.
+                ERP 운영을 위한 기본적인 정보를 설정합니다.
               </p>
               <div className="flex items-center text-[#107C41] font-medium text-sm group-hover:translate-x-1 transition-transform">
                 관리자 접속하기 <ArrowRight className="w-4 h-4 ml-1" />
@@ -45,7 +50,7 @@ export default function Home() {
               </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-3">일반 사원</h2>
               <p className="text-slate-500 text-sm mb-6">
-                나의 근태 관리, 휴가 신청, 부서원 조회 등<br/>개인 업무 시스템에 접속합니다.
+                회사 업부를 위한 기본적인 기능을 제공합니다.
               </p>
               <div className="flex items-center text-blue-500 font-medium text-sm group-hover:translate-x-1 transition-transform">
                 사원 접속하기 <ArrowRight className="w-4 h-4 ml-1" />
@@ -53,7 +58,42 @@ export default function Home() {
             </div>
           </Link>
         </div>
+
+        {/* Architecture Button */}
+        <div className="mt-12 pt-8 border-t border-slate-100">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-[#107C41] transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
+          >
+            <FileImage className="w-4 h-4" />
+            <span>시스템 구성도 보기</span>
+          </button>
+        </div>
       </div>
+
+      {/* Architecture Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50 shrink-0">
+              <h3 className="font-bold text-lg text-slate-800">시스템 구성도 (Architecture)</h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-1.5 rounded-full hover:bg-gray-200 text-slate-500 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 bg-gray-50/50 overflow-y-auto flex items-center justify-center">
+              <img 
+                src="/architecture.png" 
+                alt="System Architecture" 
+                className="w-full h-auto max-w-4xl rounded-lg shadow-sm border border-gray-200 bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
