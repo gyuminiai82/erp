@@ -43,6 +43,13 @@ const formatPhoneNumber = (value: string) => {
   return res;
 };
 
+const formatResidentNum = (value: string) => {
+  if (!value) return '';
+  const num = value.replace(/[^0-9]/g, '');
+  if (num.length <= 6) return num;
+  return num.slice(0, 6) + '-' + num.slice(6, 13);
+};
+
 export default function EmployeesPage() {
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
@@ -444,6 +451,8 @@ export default function EmployeesPage() {
     let finalValue = value;
     if (field === 'phone') {
       finalValue = formatPhoneNumber(value || '');
+    } else if (field === 'resident_num') {
+      finalValue = formatResidentNum(value || '');
     }
 
     const updated = [...employees];
@@ -711,7 +720,7 @@ export default function EmployeesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
-                    <Input value={newEmpData.resident_num} onChange={e => setNewEmpData({...newEmpData, resident_num: e.target.value})} placeholder="000000-0000000" />
+                    <Input value={newEmpData.resident_num} onChange={e => setNewEmpData({...newEmpData, resident_num: formatResidentNum(e.target.value)})} placeholder="000000-0000000" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
