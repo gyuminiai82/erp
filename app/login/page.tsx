@@ -6,8 +6,8 @@ import { AlertCircle, User, Lock, Activity } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('emp23001@minstudio.com');
+  const [password, setPassword] = useState('password123!');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberEmail, setRememberEmail] = useState(false);
