@@ -55,6 +55,7 @@ class Employee(Base):
     status = Column(String, default="재직") # 재직, 휴직, 퇴사 등
     is_active = Column(Boolean, default=True)
     must_change_password = Column(Boolean, default=True)
+    base_salary = Column(Integer, default=0) # 기본급
     
     phone = Column(String, nullable=True)
     birth_date = Column(Date, nullable=True)

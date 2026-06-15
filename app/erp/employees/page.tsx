@@ -23,7 +23,7 @@ export default function EmployeesPage() {
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [newEmp, setNewEmp] = useState({ 
     name: '', email: '', department_id: '', position_id: '',
-    phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: ''
+    phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0
   });
 
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -91,12 +91,13 @@ export default function EmployeesPage() {
           address: newEmp.address || null,
           employment_type: newEmp.employment_type || "정규직",
           resident_num: newEmp.resident_num || null,
+          base_salary: Number(newEmp.base_salary) || 0,
         })
       });
       
       if (res.ok) {
         setIsModalOpen(false);
-        setNewEmp({ name: '', email: '', department_id: '', position_id: '', phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '' });
+        setNewEmp({ name: '', email: '', department_id: '', position_id: '', phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0 });
         fetchData();
       } else {
         const data = await res.json();
@@ -164,7 +165,8 @@ export default function EmployeesPage() {
           employment_type: e.employment_type,
           resident_num: e.resident_num,
           status: e.status,
-          hire_date: e.hire_date
+          hire_date: e.hire_date,
+          base_salary: Number(e.base_salary) || 0
         }));
 
         const upRes = await fetch(`/api/employees/bulk-update`, {
@@ -354,7 +356,8 @@ export default function EmployeesPage() {
       options: [{ label: '남성', value: '남성' }, { label: '여성', value: '여성' }]
     },
     { field: 'resident_num', headerName: '주민등록번호', width: 150, editable: true, renderCell: (v) => maskResidentNum(v) },
-    { field: 'address', headerName: '주소', width: 250, editable: true }
+    { field: 'address', headerName: '주소', width: 250, editable: true },
+    { field: 'base_salary', headerName: '기본급(원)', width: 150, editable: true, renderCell: (v) => v ? Number(v).toLocaleString() : '0' }
   ];
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {
@@ -582,6 +585,10 @@ export default function EmployeesPage() {
                       <option value="인턴">인턴</option>
                       <option value="프리랜서">프리랜서</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
+                    <Input type="number" value={newEmp.base_salary} onChange={e => setNewEmp({...newEmp, base_salary: Number(e.target.value)})} placeholder="3000000" />
                   </div>
                 </div>
               </div>

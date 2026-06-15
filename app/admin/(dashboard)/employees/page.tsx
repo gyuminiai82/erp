@@ -18,7 +18,7 @@ export default function RoleManagementPage() {
   
   // 모달 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newEmp, setNewEmp] = useState({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee' });
+  const [newEmp, setNewEmp] = useState({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee', base_salary: 0 });
   const { showAlert } = useDialog();
 
   const fetchEmployees = () => {
@@ -87,7 +87,7 @@ export default function RoleManagementPage() {
       
       await showAlert(data.message + "\n초기 비밀번호는 1234로 설정되었습니다.", { type: "success" });
       setIsModalOpen(false);
-      setNewEmp({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee' });
+      setNewEmp({ emp_no: '', name: '', email: '', department_id: '', role_id: 'employee', base_salary: 0 });
       fetchEmployees();
     } catch (err: any) {
       await showAlert(err.message, { type: "error" });
@@ -273,6 +273,16 @@ export default function RoleManagementPage() {
                   type="email" required
                   placeholder="hong@minstudio.com"
                   value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
+                <input 
+                  type="number" required
+                  placeholder="3000000"
+                  value={newEmp.base_salary} onChange={e => setNewEmp({...newEmp, base_salary: Number(e.target.value)})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
                 />
               </div>

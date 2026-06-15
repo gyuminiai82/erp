@@ -36,6 +36,7 @@ class EmployeeUpdateRequest(BaseModel):
     resident_num: Optional[str] = None
     status: Optional[str] = None
     hire_date: Optional[str] = None
+    base_salary: Optional[int] = None
 
 class EmployeeBulkUpdateRequest(BaseModel):
     employees: List[EmployeeUpdateRequest]
@@ -54,6 +55,7 @@ class EmployeeCreateRequest(BaseModel):
     employment_type: str = "정규직"
     resident_num: Optional[str] = None
     profile_image_url: Optional[str] = None
+    base_salary: Optional[int] = 0
 
 @router.get("/departments")
 def get_departments(db: Session = Depends(get_db)):
@@ -120,7 +122,8 @@ def get_employees(db: Session = Depends(get_db)):
             "address": emp.address,
             "employment_type": emp.employment_type,
             "resident_num": crypto.decrypt_data(emp.resident_num),
-            "profile_image_url": emp.profile_image_url
+            "profile_image_url": emp.profile_image_url,
+            "base_salary": emp.base_salary
         })
     return result
 
@@ -189,7 +192,8 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         address=payload.address,
         employment_type=payload.employment_type,
         resident_num=crypto.encrypt_data(payload.resident_num),
-        profile_image_url=payload.profile_image_url
+        profile_image_url=payload.profile_image_url,
+        base_salary=payload.base_salary
     )
     db.add(new_emp)
     db.commit()
@@ -245,6 +249,7 @@ def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depe
             if emp_data.employment_type is not None: emp.employment_type = emp_data.employment_type
             if emp_data.resident_num is not None: emp.resident_num = crypto.encrypt_data(emp_data.resident_num)
             if emp_data.status is not None: emp.status = emp_data.status
+            if emp_data.base_salary is not None: emp.base_salary = emp_data.base_salary
             
             if emp_data.hire_date:
                 try: emp.hire_date = datetime.strptime(emp_data.hire_date, "%Y-%m-%d").date()

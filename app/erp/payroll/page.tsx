@@ -100,6 +100,32 @@ export default function PayrollsPage() {
     }
   };
 
+  const handleBulkGenerate = async () => {
+    const confirmed = window.confirm(`${currentMonth} 귀속 급여를 일괄 산출하시겠습니까? (기존 데이터가 있다면 덮어씁니다)`);
+    if (!confirmed) return;
+    
+    try {
+      setLoading(true);
+      const res = await fetch('/api/payrolls/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ payment_month: currentMonth })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "일괄 산출 실패");
+      
+      alert(data.message);
+      fetchPayrolls();
+    } catch (err: any) {
+      alert(err.message);
+      setLoading(false);
+    }
+  };
+
   const handleOpenModal = (payroll?: Payroll) => {
     if (payroll) {
       setEditMode(true);
@@ -229,11 +255,18 @@ export default function PayrollsPage() {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
           />
           <button 
+            onClick={handleBulkGenerate}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            일괄 자동 산출
+          </button>
+          <button 
             onClick={() => handleOpenModal()}
             className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors"
           >
             <Plus className="w-4 h-4 mr-2" />
-            급여 등록
+            수동 등록
           </button>
         </div>
       </div>

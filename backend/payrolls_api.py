@@ -41,6 +41,9 @@ class PayrollBase(BaseModel):
 class PayrollCreate(PayrollBase):
     pass
 
+class PayrollGenerateRequest(BaseModel):
+    payment_month: str
+
 class PayrollUpdate(BaseModel):
     base_salary: Optional[int] = None
     bonus: Optional[int] = None
@@ -147,3 +150,55 @@ def delete_payroll(payroll_id: int, db: Session = Depends(get_db), current_user 
     db.delete(db_payroll)
     db.commit()
     return {"ok": True}
+
+@router.post("/generate")
+def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+    from models import SystemSetting
+    
+    # 1. 활성 사원 목록
+    employees = db.query(Employee).filter(Employee.is_active == True, Employee.deleted_at == None).all()
+    
+    # 2. 4대보험 요율 설정 가져오기
+    setting = db.query(SystemSetting).first()
+    nps_rate = setting.nps_rate if setting and setting.nps_rate is not None else 4.75
+    nhis_rate = setting.nhis_rate if setting and setting.nhis_rate is not None else 3.595
+    ltci_rate = setting.ltci_rate if setting and setting.ltci_rate is not None else 13.25
+    ei_rate = setting.ei_rate if setting and setting.ei_rate is not None else 0.9
+    
+    generated_count = 0
+    
+    for emp in employees:
+        base = emp.base_salary or 0
+        if base == 0:
+            continue
+            
+        nps = int(base * (nps_rate / 100))
+        nhis = int(base * (nhis_rate / 100))
+        ltci = int(nhis * (ltci_rate / 100))
+        ei = int(base * (ei_rate / 100))
+        
+        deductions = nps + nhis + ltci + ei
+        bonus = 0
+        net_pay = base + bonus - deductions
+        
+        existing = db.query(Payroll).filter(Payroll.employee_id == emp.id, Payroll.payment_month == payload.payment_month).first()
+        if existing:
+            existing.base_salary = base
+            existing.bonus = bonus
+            existing.deductions = deductions
+            existing.net_pay = net_pay
+        else:
+            new_payroll = Payroll(
+                employee_id=emp.id,
+                payment_month=payload.payment_month,
+                base_salary=base,
+                bonus=bonus,
+                deductions=deductions,
+                net_pay=net_pay,
+                payment_date=date.today()
+            )
+            db.add(new_payroll)
+        generated_count += 1
+        
+    db.commit()
+    return {"message": f"{generated_count}명의 급여 대장이 자동 산출되었습니다."}
