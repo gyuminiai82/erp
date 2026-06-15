@@ -9,7 +9,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
 
   const tabs = [
     { name: "회사 기본 정보", path: "/admin/settings/company" },
-    { name: "시스템 및 급여 정책", path: "/admin/settings/rules" },
+    { name: "사번 생성 규칙", path: "/admin/settings/rules" },
+    { name: "급여 및 보험 정책", path: "/admin/settings/payroll" },
     { name: "근태 기준 설정", path: "/admin/settings/attendance" },
   ];
 

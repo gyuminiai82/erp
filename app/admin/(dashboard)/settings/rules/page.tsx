@@ -8,12 +8,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     emp_no_prefix: "EMP",
     emp_no_year_format: "YY",
-    emp_no_length: 3,
-    national_pension_rate: 0.045,
-    health_insurance_rate: 0.03545,
-    long_term_care_rate: 0.1295,
-    employment_insurance_rate: 0.009,
-    overtime_multiplier: 1.5
+    emp_no_length: 3
   });
   const [preview, setPreview] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -26,12 +21,7 @@ export default function SettingsPage() {
         setSettings({
           emp_no_prefix: data.emp_no_prefix || "EMP",
           emp_no_year_format: data.emp_no_year_format || "YY",
-          emp_no_length: data.emp_no_length || 3,
-          national_pension_rate: data.national_pension_rate ?? 0.045,
-          health_insurance_rate: data.health_insurance_rate ?? 0.03545,
-          long_term_care_rate: data.long_term_care_rate ?? 0.1295,
-          employment_insurance_rate: data.employment_insurance_rate ?? 0.009,
-          overtime_multiplier: data.overtime_multiplier ?? 1.5
+          emp_no_length: data.emp_no_length || 3
         });
       })
       .catch(err => console.error(err));
@@ -51,12 +41,7 @@ export default function SettingsPage() {
       const payload = {
         emp_no_prefix: settings.emp_no_prefix,
         emp_no_year_format: settings.emp_no_year_format,
-        emp_no_length: Number(settings.emp_no_length),
-        national_pension_rate: Number(settings.national_pension_rate),
-        health_insurance_rate: Number(settings.health_insurance_rate),
-        long_term_care_rate: Number(settings.long_term_care_rate),
-        employment_insurance_rate: Number(settings.employment_insurance_rate),
-        overtime_multiplier: Number(settings.overtime_multiplier)
+        emp_no_length: Number(settings.emp_no_length)
       };
       
       const res = await fetch("/api/settings", {
@@ -157,88 +142,6 @@ export default function SettingsPage() {
             <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">실시간 미리보기</span>
               <span className="text-2xl font-mono font-bold text-[#107C41] tracking-tight">{preview}</span>
-            </div>
-          </div>
-          
-          {/* 급여 및 4대보험 정책 섹션 */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mt-6">
-            <div className="flex items-center mb-4">
-              <div className="bg-green-50 p-2 rounded-lg mr-3">
-                <Settings2 className="w-5 h-5 text-green-600" />
-              </div>
-              <h2 className="text-lg font-bold text-gray-900">급여 및 4대보험 정책</h2>
-            </div>
-            
-            <p className="text-sm text-gray-500 mb-6">
-              매년 변경되는 4대 보험 요율과 초과근무 수당 배수를 설정합니다. 이 값은 사원 급여 자동 계산에 반영됩니다.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">국민연금 요율 (%)</label>
-                <div className="relative">
-                  <input 
-                    type="number" step="0.001"
-                    value={settings.national_pension_rate * 100} 
-                    onChange={e => setSettings({...settings, national_pension_rate: Number(e.target.value) / 100})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
-                  />
-                  <span className="absolute right-3 top-2 text-gray-400">%</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">건강보험 요율 (%)</label>
-                <div className="relative">
-                  <input 
-                    type="number" step="0.001"
-                    value={settings.health_insurance_rate * 100} 
-                    onChange={e => setSettings({...settings, health_insurance_rate: Number(e.target.value) / 100})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
-                  />
-                  <span className="absolute right-3 top-2 text-gray-400">%</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">고용보험 요율 (%)</label>
-                <div className="relative">
-                  <input 
-                    type="number" step="0.001"
-                    value={settings.employment_insurance_rate * 100} 
-                    onChange={e => setSettings({...settings, employment_insurance_rate: Number(e.target.value) / 100})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
-                  />
-                  <span className="absolute right-3 top-2 text-gray-400">%</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">장기요양보험 요율 (%)</label>
-                <div className="relative">
-                  <input 
-                    type="number" step="0.001"
-                    value={settings.long_term_care_rate * 100} 
-                    onChange={e => setSettings({...settings, long_term_care_rate: Number(e.target.value) / 100})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
-                  />
-                  <span className="absolute right-3 top-2 text-gray-400">%</span>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">건보료 대비 비율 (예: 12.95%)</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">초과근무 수당 배수</label>
-                <div className="relative">
-                  <input 
-                    type="number" step="0.1"
-                    value={settings.overtime_multiplier} 
-                    onChange={e => setSettings({...settings, overtime_multiplier: Number(e.target.value)})}
-                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
-                  />
-                  <span className="absolute right-3 top-2 text-gray-400">배</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
