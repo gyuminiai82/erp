@@ -181,8 +181,8 @@ export default function AttendanceStatusPage() {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
-          <div className="min-w-[800px]">
+        <div className="w-full overflow-hidden border-t border-gray-100">
+          <div className="w-full min-w-[800px]">
             <div className="flex border-b border-gray-200 bg-white sticky top-0 z-10">
               <div className="w-48 flex-shrink-0 p-3 font-semibold text-sm text-gray-600 border-r border-gray-200 flex items-center">
                 직원 정보
