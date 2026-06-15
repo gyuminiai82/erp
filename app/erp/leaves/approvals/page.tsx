@@ -103,18 +103,18 @@ export default function LeaveApprovalsPage() {
                 leaves.map((l) => (
                   <tr key={l.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-6">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center text-blue-600">
                           <User className="w-4 h-4" />
                         </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{l.employee?.name || '알 수 없음'}</div>
-                          <div className="text-xs text-gray-500">
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <span className="font-medium text-gray-900">{l.employee?.name || '알 수 없음'}</span>
+                          <span className="text-xs text-gray-500 border-l border-gray-300 pl-2">
                             {l.employee?.department || '-'} • {l.employee?.position || '-'}
-                            {l.remaining_balance !== undefined && l.remaining_balance !== null && (
-                              <span className="ml-2 font-semibold text-blue-600 bg-blue-50 px-1 py-0.5 rounded">잔여: {l.remaining_balance}일</span>
-                            )}
-                          </div>
+                          </span>
+                          {l.remaining_balance !== undefined && l.remaining_balance !== null && (
+                            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">잔여: {l.remaining_balance}일</span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -123,11 +123,11 @@ export default function LeaveApprovalsPage() {
                         {l.leave_type}
                       </span>
                     </td>
-                    <td className="py-3 px-6">
+                    <td className="py-3 px-6 whitespace-nowrap">
                       {l.start_date === l.end_date ? (
                         <span className="font-medium text-gray-800">{l.start_date}</span>
                       ) : (
-                        <span className="font-medium text-gray-800">{l.start_date} <br/><span className="text-gray-400 font-normal">~</span> {l.end_date}</span>
+                        <span className="font-medium text-gray-800">{l.start_date} <span className="text-gray-400 font-normal mx-1">~</span> {l.end_date}</span>
                       )}
                     </td>
                     <td className="py-3 px-6 text-gray-600 max-w-xs truncate" title={l.reason}>
@@ -136,34 +136,36 @@ export default function LeaveApprovalsPage() {
                     <td className="py-3 px-6 text-center">
                       {getStatusBadge(l.status)}
                     </td>
-                    <td className="py-3 px-6 text-right space-x-2">
-                      {l.status === '대기' && (
-                        <>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700"
-                            onClick={() => handleStatusUpdate(l.id, '승인')}
-                            disabled={loading}
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            승인
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
-                            onClick={() => handleStatusUpdate(l.id, '반려')}
-                            disabled={loading}
-                          >
-                            <X className="w-4 h-4 mr-1" />
-                            반려
-                          </Button>
-                        </>
-                      )}
-                      {l.status !== '대기' && (
-                        <span className="text-xs text-gray-400">처리 완료</span>
-                      )}
+                    <td className="py-3 px-6">
+                      <div className="flex items-center justify-end gap-2">
+                        {l.status === '대기' && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100 hover:text-green-700 whitespace-nowrap"
+                              onClick={() => handleStatusUpdate(l.id, '승인')}
+                              disabled={loading}
+                            >
+                              <Check className="w-4 h-4 mr-1" />
+                              승인
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700 whitespace-nowrap"
+                              onClick={() => handleStatusUpdate(l.id, '반려')}
+                              disabled={loading}
+                            >
+                              <X className="w-4 h-4 mr-1" />
+                              반려
+                            </Button>
+                          </>
+                        )}
+                        {l.status !== '대기' && (
+                          <span className="text-xs text-gray-400 whitespace-nowrap">처리 완료</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

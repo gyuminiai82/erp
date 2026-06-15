@@ -270,21 +270,11 @@ export default function EmployeesPage() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('사원목록');
 
-    const defaultCols = [
-      { header: '사번', key: 'emp_no', width: 12 },
-      { header: '이름', key: 'name', width: 10 },
-      { header: '소속 부서', key: 'department', width: 15 },
-      { header: '직급', key: 'position', width: 10 },
-      { header: '상태', key: 'status', width: 10 },
-      { header: '연락처', key: 'phone', width: 18 },
-      { header: '이메일', key: 'email', width: 25 },
-      { header: '입사일', key: 'hire_date', width: 12 },
-      { header: '생년월일', key: 'birth_date', width: 12 },
-      { header: '성별', key: 'gender', width: 8 },
-      { header: '주민등록번호', key: 'resident_num', width: 18 },
-      { header: '주소', key: 'address', width: 40 },
-      { header: '고용형태', key: 'employment_type', width: 12 },
-    ];
+    const baseCols = columns.map(c => ({
+      header: c.headerName,
+      key: c.field,
+      width: c.width ? Math.max(10, c.width / 10) : 15
+    }));
 
     try {
       const saved = localStorage.getItem("erp_employees_grid_columns");
@@ -293,36 +283,26 @@ export default function EmployeesPage() {
         const orderedCols: any[] = [];
         const added: any[] = [];
         savedFields.forEach((field: string) => {
-          const col = defaultCols.find(c => c.key === field);
+          const col = baseCols.find(c => c.key === field);
           if (col) orderedCols.push(col);
         });
-        defaultCols.forEach(c => {
+        baseCols.forEach(c => {
           if (!orderedCols.includes(c)) added.push(c);
         });
         worksheet.columns = [...orderedCols, ...added];
       } else {
-        worksheet.columns = defaultCols;
+        worksheet.columns = baseCols;
       }
     } catch (e) {
-      worksheet.columns = defaultCols;
+      worksheet.columns = baseCols;
     }
 
     employees.forEach(emp => {
-      worksheet.addRow({
-        emp_no: emp.emp_no,
-        name: emp.name,
-        department: emp.department || '',
-        position: emp.position || '',
-        status: emp.status || '',
-        phone: emp.phone || '',
-        email: emp.email || '',
-        hire_date: emp.hire_date || '',
-        birth_date: emp.birth_date || '',
-        gender: emp.gender || '',
-        resident_num: emp.resident_num || '',
-        address: emp.address || '',
-        employment_type: emp.employment_type || ''
-      });
+      const rowData: any = { ...emp };
+      const roleObj = ROLE_OPTIONS.find(r => r.id === emp.role);
+      if (roleObj) rowData.role = roleObj.name;
+      if (emp.resident_num) rowData.resident_num = maskResidentNum(emp.resident_num);
+      worksheet.addRow(rowData);
     });
 
     worksheet.eachRow((row, rowNumber) => {
