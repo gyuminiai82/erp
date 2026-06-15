@@ -1,9 +1,31 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, Save, X, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, ChevronRight, GripVertical } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { useDialog } from "@/components/providers/DialogProvider";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableRow({ code, children }: { code: any, children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: code.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1 : 0,
+    backgroundColor: isDragging ? '#f8fafc' : undefined,
+  };
+  return (
+    <tr ref={setNodeRef} style={style} className="hover:bg-gray-50/50 transition-colors group relative">
+      <td className="w-10 px-2 py-4 text-center cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500" {...attributes} {...listeners}>
+        <GripVertical className="w-4 h-4 inline-block" />
+      </td>
+      {children}
+    </tr>
+  );
+}
+
 
 export default function CommonCodesPage() {
   const [groups, setGroups] = useState<any[]>([]);
@@ -206,7 +228,39 @@ export default function CommonCodesPage() {
     }
   };
 
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      const oldIndex = codes.findIndex((c) => c.id === active.id);
+      const newIndex = codes.findIndex((c) => c.id === over.id);
+      const newCodes = arrayMove(codes, oldIndex, newIndex);
+      
+      // Update sort_order locally
+      const updatedCodes = newCodes.map((c, index) => ({ ...c, sort_order: index + 1 }));
+      setCodes(updatedCodes);
+
+      // Save to server
+      try {
+        const payload = updatedCodes.map(c => ({ id: c.id, sort_order: c.sort_order }));
+        await fetch("/api/common-codes/reorder/batch", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.error("Reorder failed", e);
+      }
+    }
+  };
+
   if (loadingGroups) return <div className="p-8 text-gray-500">데이터를 불러오는 중...</div>;
+
 
   return (
     <div className="flex flex-col h-full">
@@ -280,6 +334,7 @@ export default function CommonCodesPage() {
                 <table className="w-full text-left text-sm whitespace-nowrap">
                   <thead className="bg-white text-gray-500 text-xs uppercase sticky top-0 z-10 shadow-sm">
                     <tr>
+                      <th className="w-10 px-2 py-4 border-b border-gray-100"></th>
                       <th className="px-6 py-4 font-medium border-b border-gray-100">코드</th>
                       <th className="px-6 py-4 font-medium border-b border-gray-100">이름(라벨)</th>
                       <th className="px-6 py-4 font-medium border-b border-gray-100">정렬 순서</th>
@@ -287,13 +342,16 @@ export default function CommonCodesPage() {
                       <th className="px-6 py-4 font-medium text-right border-b border-gray-100">관리</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <tbody className="divide-y divide-gray-50">
                     {loadingCodes ? (
-                      <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-400">불러오는 중...</td></tr>
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">불러오는 중...</td></tr>
                     ) : codes.length === 0 ? (
-                      <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-400">등록된 상세 코드가 없습니다.</td></tr>
-                    ) : codes.map(code => (
-                      <tr key={code.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">등록된 상세 코드가 없습니다.</td></tr>
+                    ) : (
+                      <SortableContext items={codes.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                        {codes.map(code => (
+                          <SortableRow key={code.id} code={code}>
                         {editingCodeId === code.id ? (
                           <>
                             <td className="px-6 py-3">
@@ -336,9 +394,12 @@ export default function CommonCodesPage() {
                             </td>
                           </>
                         )}
-                      </tr>
-                    ))}
+                      </SortableRow>
+                        ))}
+                      </SortableContext>
+                    )}
                   </tbody>
+                  </DndContext>
                 </table>
               </div>
             </>

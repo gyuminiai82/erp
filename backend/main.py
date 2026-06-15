@@ -247,6 +247,17 @@ def update_common_code(code_id: int, item: CommonCodeUpdate, db: Session = Depen
     db.refresh(db_item)
     return {"id": db_item.id, "code": db_item.code, "name": db_item.name, "group_code": db_item.group_code, "sort_order": db_item.sort_order, "is_active": db_item.is_active}
 
+class CommonCodeReorderItem(BaseModel):
+    id: int
+    sort_order: int
+
+@app.put("/api/common-codes/reorder/batch")
+def reorder_common_codes(items: List[CommonCodeReorderItem], db: Session = Depends(get_db)):
+    for item in items:
+        db.query(models.CommonCode).filter(models.CommonCode.id == item.id).update({"sort_order": item.sort_order})
+    db.commit()
+    return {"message": "순서가 성공적으로 변경되었습니다."}
+
 @app.delete("/api/common-codes/{code_id}")
 def delete_common_code(code_id: int, db: Session = Depends(get_db)):
     from fastapi import HTTPException
