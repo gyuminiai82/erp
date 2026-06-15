@@ -8,3 +8,4 @@ psutil
 pydantic
 passlib
 psycopg2-binary
+holidays
