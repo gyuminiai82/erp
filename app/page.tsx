@@ -117,11 +117,11 @@ export default function Home() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 bg-[#f0f2f5] overflow-auto flex justify-center">
+            <div className="p-6 bg-[#f0f2f5] overflow-auto flex justify-center items-start">
               <img 
                 src="/erd.png" 
                 alt="Entity Relationship Diagram" 
-                className="w-auto h-auto max-w-none rounded shadow-md bg-white"
+                className="shrink-0 max-w-none rounded shadow-md bg-white"
               />
             </div>
           </div>
