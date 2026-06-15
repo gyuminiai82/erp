@@ -249,9 +249,20 @@ class AuditLog(Base):
     created_at = Column(DateTime, default=func.now(), index=True)
     event_title = Column(String, index=True)
     event_desc = Column(String)
-    user_email = Column(String, index=True)
-    ip_address = Column(String)
-    severity = Column(String, index=True)  # INFO, WARNING, HIGH, SYSTEM
+    
+    # 기존 식별자
+    user_email = Column(String, index=True, nullable=True)
+    ip_address = Column(String, nullable=True)
+    severity = Column(String, index=True, default="INFO")  # INFO, WARNING, HIGH, SYSTEM
+    
+    # 추가된 식별자 및 페이로드
+    user_id = Column(Integer, nullable=True, index=True)
+    emp_no = Column(String, nullable=True, index=True)
+    user_name = Column(String, nullable=True)
+    
+    target_resource = Column(String, nullable=True, index=True)
+    action_type = Column(String, nullable=True, index=True)
+    payload = Column(Text, nullable=True)  # JSON 형태의 문자열 저장
 
 class Appointment(Base):
     __tablename__ = "appointments"

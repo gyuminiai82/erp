@@ -331,17 +331,17 @@ export default function CommonCodesPage() {
                 </Button>
               </div>
               <div className="flex-1 overflow-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-white text-gray-500 text-xs uppercase sticky top-0 z-10 shadow-sm">
-                    <tr>
-                      <th className="w-10 px-2 py-4 border-b border-gray-100"></th>
-                      <th className="px-6 py-4 font-medium border-b border-gray-100">코드</th>
-                      <th className="px-6 py-4 font-medium border-b border-gray-100">이름(라벨)</th>
-                      <th className="px-6 py-4 font-medium text-center border-b border-gray-100">상태</th>
-                      <th className="px-6 py-4 font-medium text-right border-b border-gray-100">관리</th>
-                    </tr>
-                  </thead>
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead className="bg-white text-gray-500 text-xs uppercase sticky top-0 z-10 shadow-sm">
+                      <tr>
+                        <th className="w-10 px-2 py-4 border-b border-gray-100"></th>
+                        <th className="px-6 py-4 font-medium border-b border-gray-100">코드</th>
+                        <th className="px-6 py-4 font-medium border-b border-gray-100">이름(라벨)</th>
+                        <th className="px-6 py-4 font-medium text-center border-b border-gray-100">상태</th>
+                        <th className="px-6 py-4 font-medium text-right border-b border-gray-100">관리</th>
+                      </tr>
+                    </thead>
                     <tbody className="divide-y divide-gray-50">
                     {loadingCodes ? (
                       <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">불러오는 중...</td></tr>
@@ -393,9 +393,9 @@ export default function CommonCodesPage() {
                         ))}
                       </SortableContext>
                     )}
-                  </tbody>
-                  </DndContext>
-                </table>
+                    </tbody>
+                  </table>
+                </DndContext>
               </div>
             </>
           ) : (

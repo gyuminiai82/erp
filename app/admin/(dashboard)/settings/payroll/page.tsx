@@ -9,9 +9,9 @@ export default function PayrollSettingsPage() {
     emp_no_prefix: "EMP",
     emp_no_year_format: "YY",
     emp_no_length: 3,
-    national_pension_rate: 0.045,
-    health_insurance_rate: 0.03545,
-    long_term_care_rate: 0.1295,
+    national_pension_rate: 0.0475,
+    health_insurance_rate: 0.03595,
+    long_term_care_rate: 0.1314,
     employment_insurance_rate: 0.009,
     overtime_multiplier: 1.5
   });
@@ -26,9 +26,9 @@ export default function PayrollSettingsPage() {
           emp_no_prefix: data.emp_no_prefix || "EMP",
           emp_no_year_format: data.emp_no_year_format || "YY",
           emp_no_length: data.emp_no_length || 3,
-          national_pension_rate: data.national_pension_rate ?? 0.045,
-          health_insurance_rate: data.health_insurance_rate ?? 0.03545,
-          long_term_care_rate: data.long_term_care_rate ?? 0.1295,
+          national_pension_rate: data.national_pension_rate ?? 0.0475,
+          health_insurance_rate: data.health_insurance_rate ?? 0.03595,
+          long_term_care_rate: data.long_term_care_rate ?? 0.1314,
           employment_insurance_rate: data.employment_insurance_rate ?? 0.009,
           overtime_multiplier: data.overtime_multiplier ?? 1.5
         });
