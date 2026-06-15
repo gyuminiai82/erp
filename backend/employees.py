@@ -37,6 +37,7 @@ class EmployeeUpdateRequest(BaseModel):
     status: Optional[str] = None
     hire_date: Optional[str] = None
     base_salary: Optional[int] = None
+    role: Optional[str] = None
 
 class EmployeeBulkUpdateRequest(BaseModel):
     employees: List[EmployeeUpdateRequest]
@@ -250,6 +251,15 @@ def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depe
             if emp_data.resident_num is not None: emp.resident_num = crypto.encrypt_data(emp_data.resident_num)
             if emp_data.status is not None: emp.status = emp_data.status
             if emp_data.base_salary is not None: emp.base_salary = emp_data.base_salary
+            
+            if emp_data.role is not None:
+                new_role = db.query(models.Role).filter(models.Role.name == emp_data.role).first()
+                if new_role:
+                    emp_role = db.query(models.EmployeeRole).filter(models.EmployeeRole.employee_id == emp.id).first()
+                    if emp_role:
+                        emp_role.role_id = new_role.id
+                    else:
+                        db.add(models.EmployeeRole(employee_id=emp.id, role_id=new_role.id))
             
             if emp_data.hire_date:
                 try: emp.hire_date = datetime.strptime(emp_data.hire_date, "%Y-%m-%d").date()

@@ -352,6 +352,15 @@ export default function EmployeesPage() {
       ]
     },
     { field: 'hire_date', headerName: '입사일', width: 120, editable: true },
+    { 
+      field: 'role', 
+      headerName: '시스템 권한', 
+      width: 150,
+      editable: true,
+      editType: 'select',
+      options: ROLE_OPTIONS.map(r => ({ label: r.name, value: r.id })),
+      renderCell: (v) => ROLE_OPTIONS.find(r => r.id === v)?.name || '일반 사원'
+    },
     { field: 'email', headerName: '이메일', width: 180, editable: true },
     { field: 'birth_date', headerName: '생년월일', width: 120, editable: true },
     { 
@@ -595,7 +604,17 @@ export default function EmployeesPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
-                    <Input type="number" value={newEmp.base_salary} onChange={e => setNewEmp({...newEmp, base_salary: Number(e.target.value)})} placeholder="3000000" />
+                    <Input 
+                      type="text" 
+                      value={newEmp.base_salary === 0 ? '' : newEmp.base_salary.toLocaleString()} 
+                      onChange={e => {
+                        const rawValue = e.target.value.replace(/,/g, '');
+                        if (rawValue === '' || /^\d+$/.test(rawValue)) {
+                          setNewEmp({...newEmp, base_salary: Number(rawValue) || 0});
+                        }
+                      }} 
+                      placeholder="3,000,000" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">시스템 권한</label>
