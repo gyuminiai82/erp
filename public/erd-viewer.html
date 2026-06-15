@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERD Viewer</title>
     <style>
-        body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #f8f9fa; }
+        body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #ffffff; }
         vuerd-app { width: 100%; height: 100%; display: block; }
     </style>
+    <!-- 데이터 로드 (window.VUERD_DATA에 할당됨) -->
+    <script src="/vuerd-data.js"></script>
 </head>
 <body>
     <vuerd-app></vuerd-app>
@@ -16,21 +18,14 @@
     <script type="module">
         import 'https://cdn.jsdelivr.net/npm/vuerd/dist/vuerd.min.js';
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const vuerdApp = document.querySelector('vuerd-app');
             
-            try {
-                // public 폴더에 위치한 erp.vuerd.json 파일을 읽어옴
-                const response = await fetch('/erp.vuerd.json');
-                if (!response.ok) throw new Error('ERD 데이터를 불러오는데 실패했습니다.');
-                const jsonText = await response.text();
-                
-                // vuerd-app 엘리먼트에 데이터 로드
-                vuerdApp.load(jsonText);
-                
-            } catch (err) {
-                console.error('ERD 로드 오류:', err);
-                document.body.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-family:sans-serif;">ERD 데이터를 불러올 수 없습니다. (${err.message})</div>`;
+            if (window.VUERD_DATA) {
+                // vuerd-app 엘리먼트에 직접 JSON 객체를 문자열로 변환하여 로드
+                vuerdApp.load(JSON.stringify(window.VUERD_DATA));
+            } else {
+                document.body.innerHTML = `<div style="padding:20px;text-align:center;color:#666;font-family:sans-serif;">ERD 데이터를 찾을 수 없습니다.</div>`;
             }
         });
     </script>
