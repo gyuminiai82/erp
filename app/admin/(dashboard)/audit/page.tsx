@@ -12,6 +12,21 @@ export default function AuditLogsPage() {
   const [keyword, setKeyword] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedLogId, setExpandedLogId] = useState<number | null>(null);
+
+  // Payload 포맷팅 (원 단위 등 콤마 처리)
+  const formatValue = (key: string, val: any) => {
+    if (typeof val === 'number') {
+      const isMoneyField = key.includes('salary') || key.includes('bonus') || key.includes('pay') || key.includes('deduction') || key.includes('amount') || key.includes('pension') || key.includes('insurance');
+      const isRate = key.includes('rate') || key.includes('multiplier');
+      
+      if (isMoneyField && !isRate) {
+        return val.toLocaleString() + '원';
+      }
+      return val;
+    }
+    return val ?? '-';
+  };
 
   useEffect(() => {
     fetchLogs();
@@ -130,6 +145,7 @@ export default function AuditLogsPage() {
           <table className="w-full text-left text-sm whitespace-nowrap min-w-[800px]">
             <thead className="bg-gray-50/80 text-gray-500 text-xs uppercase sticky top-0 z-10 backdrop-blur-sm">
               <tr>
+                <th className="px-6 py-4 font-semibold w-10"></th>
                 <th className="px-6 py-4 font-semibold w-48">발생 일시</th>
                 <th className="px-6 py-4 font-semibold w-24 text-center">위험도</th>
                 <th className="px-6 py-4 font-semibold min-w-[200px]">이벤트 제목 및 상세</th>
@@ -147,30 +163,95 @@ export default function AuditLogsPage() {
               ) : (
                 logs.map((log) => {
                   const ui = getSeverityUI(log.severity);
+                  const isExpanded = expandedLogId === log.id;
+                  const hasPayload = !!log.payload;
+                  let parsedPayload: any = null;
+                  try {
+                    if (hasPayload) parsedPayload = JSON.parse(log.payload);
+                  } catch (e) {}
+
                   return (
-                    <tr key={log.id} className="hover:bg-blue-50/30 transition-colors">
-                      <td className="px-6 py-4 text-gray-500 font-mono text-[13px]">{formatDateTime(log.created_at)}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ui.badge}`}>
-                          {ui.label}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center mb-1">
-                          {ui.icon}
-                          <span className="font-semibold text-gray-900">{log.event_title}</span>
-                        </div>
-                        <div className="text-xs text-gray-500 ml-6 break-all whitespace-normal max-w-lg leading-relaxed">
-                          {log.event_desc}
-                        </div>
-                      </td>
-                      <td className={`px-6 py-4 font-medium ${log.severity === 'HIGH' ? 'text-red-600' : 'text-gray-700'}`}>
-                        {log.user_email === 'unknown' ? '미확인 사용자' : log.user_email}
-                      </td>
-                      <td className="px-6 py-4 text-gray-500 font-mono text-xs">
-                        {log.ip_address}
-                      </td>
-                    </tr>
+                    <React.Fragment key={log.id}>
+                      <tr 
+                        className={`hover:bg-blue-50/30 transition-colors ${hasPayload ? 'cursor-pointer' : ''}`}
+                        onClick={() => hasPayload && setExpandedLogId(isExpanded ? null : log.id)}
+                      >
+                        <td className="px-4 py-4 text-gray-400 text-center">
+                          {hasPayload && (
+                            <ChevronRight className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-gray-500 font-mono text-[13px]">{formatDateTime(log.created_at)}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ui.badge}`}>
+                            {ui.label}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center mb-1">
+                            {ui.icon}
+                            <span className="font-semibold text-gray-900">{log.event_title}</span>
+                          </div>
+                          <div className="text-xs text-gray-500 ml-6 break-all whitespace-normal max-w-lg leading-relaxed">
+                            {log.event_desc}
+                          </div>
+                        </td>
+                        <td className={`px-6 py-4 font-medium ${log.severity === 'HIGH' ? 'text-red-600' : 'text-gray-700'}`}>
+                          {log.user_email === 'unknown' ? '미확인 사용자' : log.user_email}
+                        </td>
+                        <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                          {log.ip_address}
+                        </td>
+                      </tr>
+                      {isExpanded && parsedPayload && (
+                        <tr className="bg-gray-50/50">
+                          <td colSpan={6} className="px-10 py-6 border-b border-gray-100">
+                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm max-w-4xl">
+                              <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center">
+                                <Database className="w-4 h-4 mr-2 text-blue-500" />
+                                변경 상세 내역 (Diff)
+                              </h4>
+                              {parsedPayload.old && parsedPayload.new ? (
+                                <div className="grid grid-cols-2 gap-6">
+                                  <div className="bg-red-50/50 rounded-lg p-4 border border-red-100">
+                                    <div className="text-xs font-bold text-red-600 uppercase tracking-wider mb-3">변경 전 (Old)</div>
+                                    <div className="space-y-2">
+                                      {Object.entries(parsedPayload.old).map(([k, v]: [string, any]) => (
+                                        <div key={k} className="flex justify-between text-sm">
+                                          <span className="text-gray-600 font-medium">{k}</span>
+                                          <span className="text-gray-900 font-mono">{formatValue(k, v)}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <div className="bg-green-50/50 rounded-lg p-4 border border-green-100">
+                                    <div className="text-xs font-bold text-green-600 uppercase tracking-wider mb-3">변경 후 (New)</div>
+                                    <div className="space-y-2">
+                                      {Object.entries(parsedPayload.new).map(([k, v]: [string, any]) => {
+                                        const oldV = parsedPayload.old[k];
+                                        const isChanged = oldV !== v;
+                                        return (
+                                          <div key={k} className={`flex justify-between text-sm ${isChanged ? 'bg-green-100 -mx-1 px-1 rounded' : ''}`}>
+                                            <span className="text-gray-600 font-medium">{k}</span>
+                                            <span className={`font-mono ${isChanged ? 'text-green-700 font-bold' : 'text-gray-900'}`}>
+                                              {formatValue(k, v)}
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <pre className="bg-gray-50 p-4 rounded-lg text-xs font-mono text-gray-700 overflow-auto">
+                                  {JSON.stringify(parsedPayload, null, 2)}
+                                </pre>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })
               )}

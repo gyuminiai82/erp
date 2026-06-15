@@ -17,6 +17,9 @@ class AuditLogResponse(BaseModel):
     user_email: str
     ip_address: str
     severity: str
+    target_resource: Optional[str] = None
+    action_type: Optional[str] = None
+    payload: Optional[str] = None
 
     class Config:
         from_attributes = True
