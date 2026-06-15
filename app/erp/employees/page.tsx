@@ -16,6 +16,33 @@ const ROLE_OPTIONS = [
   { id: 'employee', name: '일반 사원' },
 ];
 
+const formatPhoneNumber = (value: string) => {
+  if (!value) return '';
+  const number = value.replace(/[^0-9]/g, '');
+  let res = '';
+
+  if (number.length < 3) {
+    return number;
+  } else if (number.startsWith('02')) {
+    if (number.length <= 5) {
+      res = number.replace(/(\d{2})(\d{1,3})/, '$1-$2');
+    } else if (number.length <= 9) {
+      res = number.replace(/(\d{2})(\d{3})(\d{1,4})/, '$1-$2-$3');
+    } else {
+      res = number.replace(/(\d{2})(\d{4})(\d{1,4})/, '$1-$2-$3');
+    }
+  } else {
+    if (number.length <= 6) {
+      res = number.replace(/(\d{3})(\d{1,3})/, '$1-$2');
+    } else if (number.length <= 10) {
+      res = number.replace(/(\d{3})(\d{3})(\d{1,4})/, '$1-$2-$3');
+    } else {
+      res = number.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+    }
+  }
+  return res;
+};
+
 export default function EmployeesPage() {
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
@@ -414,8 +441,13 @@ export default function EmployeesPage() {
   ];
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {
+    let finalValue = value;
+    if (field === 'phone') {
+      finalValue = formatPhoneNumber(value || '');
+    }
+
     const updated = [...employees];
-    updated[rowIndex] = { ...updated[rowIndex], [field]: value, _state: 'U' };
+    updated[rowIndex] = { ...updated[rowIndex], [field]: finalValue, _state: 'U' };
     setEmployees(updated);
     
     // Update allEmployees as well so filters don't erase changes
@@ -656,7 +688,7 @@ export default function EmployeesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
-                    <Input value={newEmpData.phone} onChange={e => setNewEmpData({...newEmpData, phone: e.target.value})} placeholder="010-0000-0000" />
+                    <Input value={newEmpData.phone} onChange={e => setNewEmpData({...newEmpData, phone: formatPhoneNumber(e.target.value)})} placeholder="010-0000-0000" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
