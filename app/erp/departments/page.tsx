@@ -402,11 +402,7 @@ export default function DepartmentsPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">직급명</label>
                 <Input value={posForm.name} onChange={e => setPosForm({...posForm, name: e.target.value})} placeholder="사원, 대리 등" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">레벨 (정렬 순서)</label>
-                <Input type="number" value={posForm.level} onChange={e => setPosForm({...posForm, level: Number(e.target.value)})} />
-                <p className="text-xs text-gray-500 mt-1">숫자가 작을수록 높은 직급입니다. (예: 사장 1, 팀장 5, 사원 10)</p>
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
                 <Input value={posForm.description} onChange={e => setPosForm({...posForm, description: e.target.value})} placeholder="직급 설명" />
