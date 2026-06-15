@@ -61,22 +61,27 @@ export default function Home() {
         </div>
 
         {/* Architecture & ERD Buttons */}
-        <div className="mt-12 pt-8 border-t border-slate-100 flex flex-wrap items-center justify-center gap-4">
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-[#107C41] transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
-          >
-            <FileImage className="w-4 h-4" />
-            <span>시스템 구성도 보기</span>
-          </button>
+        <div className="mt-12 pt-8 border-t border-slate-100 flex flex-col items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-[#107C41] transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
+            >
+              <FileImage className="w-4 h-4" />
+              <span>시스템 구성도 보기</span>
+            </button>
 
-          <button 
-            onClick={() => setIsErdModalOpen(true)}
-            className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-blue-500 transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
-          >
-            <Database className="w-4 h-4" />
-            <span>데이터베이스 구조 (ERD) 보기</span>
-          </button>
+            <button 
+              onClick={() => setIsErdModalOpen(true)}
+              className="inline-flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-blue-500 transition-colors bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full border border-slate-200"
+            >
+              <Database className="w-4 h-4" />
+              <span>데이터베이스 구조 (ERD) 보기</span>
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            * 하나의 EC2 인스턴스에서 5개의 Docker 컨테이너를 구동하고 있어 속도가 다소 느릴 수 있습니다.
+          </p>
         </div>
       </div>
 
