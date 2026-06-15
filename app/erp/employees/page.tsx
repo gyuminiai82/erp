@@ -26,13 +26,7 @@ export default function EmployeesPage() {
   const [loading, setLoading] = useState(true);
   const { showAlert, showConfirm } = useDialog();
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
-  const [newEmp, setNewEmp] = useState({ 
-    name: '', email: '', department_id: '', position_id: '', role_id: 'employee',
-    phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0
-  });
-
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchDept, setSearchDept] = useState('');
   const [searchPos, setSearchPos] = useState('');
@@ -81,38 +75,27 @@ export default function EmployeesPage() {
     return defaultMsg;
   };
 
-  const handleCreate = async () => {
-    try {
-      const res = await fetch("/api/employees", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: newEmp.name,
-          email: newEmp.email,
-          department_id: newEmp.department_id ? Number(newEmp.department_id) : null,
-          position_id: newEmp.position_id ? Number(newEmp.position_id) : null,
-          role_id: newEmp.role_id || "employee",
-          phone: newEmp.phone || null,
-          birth_date: newEmp.birth_date || null,
-          gender: newEmp.gender || null,
-          address: newEmp.address || null,
-          employment_type: newEmp.employment_type || "정규직",
-          resident_num: newEmp.resident_num || null,
-          base_salary: Number(newEmp.base_salary) || 0,
-        })
-      });
-      
-      if (res.ok) {
-        setIsModalOpen(false);
-        setNewEmp({ name: '', email: '', department_id: '', position_id: '', role_id: 'employee', phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0 });
-        fetchData();
-      } else {
-        const data = await res.json();
-        await showAlert(formatApiError(data.detail, "생성 실패"), { type: "error" });
-      }
-    } catch (e) {
-      console.error(e);
-    }
+  const handleAddRow = () => {
+    const newTempEmp = {
+      id: `temp_${Date.now()}`,
+      emp_no: '자동 채번',
+      name: '',
+      email: '',
+      department: '',
+      position: '',
+      role: 'employee',
+      phone: '',
+      birth_date: '',
+      gender: '남성',
+      address: '',
+      employment_type: '정규직',
+      resident_num: '',
+      base_salary: 0,
+      status: '재직',
+      hire_date: new Date().toISOString().split('T')[0],
+      _state: 'C'
+    };
+    setEmployees([newTempEmp, ...employees]);
   };
 
   const handleBulkDelete = async () => {
@@ -129,16 +112,23 @@ export default function EmployeesPage() {
 
   const handleSave = async () => {
     // Collect rows to delete and update
+    const rowsToCreate = employees.filter(e => e._state === 'C');
     const rowsToDelete = employees.filter(e => e._state === 'D');
     const rowsToUpdate = employees.filter(e => e._state === 'U');
     
-    if (rowsToDelete.length === 0 && rowsToUpdate.length === 0) {
+    if (rowsToCreate.length === 0 && rowsToDelete.length === 0 && rowsToUpdate.length === 0) {
       await showAlert("저장할 변경사항이 없습니다.", { type: "info" });
       return;
     }
 
-    const totalChanges = rowsToDelete.length + rowsToUpdate.length;
-    const confirmed = await showConfirm(`총 ${totalChanges}건의 변경사항(수정 ${rowsToUpdate.length}건, 삭제 ${rowsToDelete.length}건)을 저장하시겠습니까?`, { type: "warning" });
+    const invalidCreate = rowsToCreate.find(e => !e.name || !e.email);
+    if (invalidCreate) {
+      await showAlert("신규 등록 시 이름과 이메일은 필수입니다.", { type: "warning" });
+      return;
+    }
+
+    const totalChanges = rowsToCreate.length + rowsToDelete.length + rowsToUpdate.length;
+    const confirmed = await showConfirm(`총 ${totalChanges}건의 변경사항(신규 ${rowsToCreate.length}건, 수정 ${rowsToUpdate.length}건, 삭제 ${rowsToDelete.length}건)을 저장하시겠습니까?`, { type: "warning" });
     if (!confirmed) return;
     
     try {
@@ -153,6 +143,35 @@ export default function EmployeesPage() {
         if (!delRes.ok) {
           const data = await delRes.json();
           throw new Error(formatApiError(data.detail, "삭제 실패"));
+        }
+      }
+
+      // Handle creations
+      if (rowsToCreate.length > 0) {
+        const createPayload = rowsToCreate.map(e => ({
+          name: e.name,
+          email: e.email,
+          department: e.department,
+          position: e.position,
+          role: e.role,
+          phone: e.phone,
+          birth_date: e.birth_date,
+          gender: e.gender,
+          address: e.address,
+          employment_type: e.employment_type,
+          resident_num: e.resident_num,
+          base_salary: Number(e.base_salary) || 0,
+          hire_date: e.hire_date
+        }));
+
+        const creRes = await fetch(`/api/employees/bulk-create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ employees: createPayload })
+        });
+        if (!creRes.ok) {
+          const data = await creRes.json();
+          throw new Error(formatApiError(data.detail, "등록 실패"));
         }
       }
 
@@ -467,7 +486,7 @@ export default function EmployeesPage() {
 
             {/* Right side: Action buttons */}
             <div className="flex flex-wrap justify-start xl:justify-end gap-2 w-full xl:w-auto">
-              {employees.some(e => e._state === 'D' || e._state === 'U') && (
+              {employees.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U') && (
                 <>
                   <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
                     <Undo2 className="w-4 h-4 mr-2" />
@@ -489,9 +508,9 @@ export default function EmployeesPage() {
                 <FileDown className="w-4 h-4 mr-2" />
                 엑셀 다운로드
               </Button>
-              <Button onClick={() => setIsModalOpen(true)} className="shrink-0">
-                <UserPlus className="w-4 h-4 mr-2" />
-                신규 사원 등록
+              <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
+                <Plus className="w-4 h-4 mr-2" />
+                행 추가
               </Button>
             </div>
           </div>
@@ -511,131 +530,6 @@ export default function EmployeesPage() {
           </div>
         </div>
       </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
-              <h3 className="text-lg font-bold text-gray-900">신규 사원 등록</h3>
-            </div>
-            <div className="p-6 overflow-y-auto space-y-6">
-              
-              {/* 기본 정보 */}
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 border-b pb-2">기본 정보</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
-                    <Input value={newEmp.name} onChange={e => setNewEmp({...newEmp, name: e.target.value})} placeholder="홍길동" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
-                    <Input type="email" value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})} placeholder="hong@minstudio.com" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">연락처</label>
-                    <Input value={newEmp.phone} onChange={e => setNewEmp({...newEmp, phone: e.target.value})} placeholder="010-0000-0000" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">생년월일</label>
-                    <Input type="date" value={newEmp.birth_date} onChange={e => setNewEmp({...newEmp, birth_date: e.target.value})} />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">성별</label>
-                    <select 
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newEmp.gender}
-                      onChange={e => setNewEmp({...newEmp, gender: e.target.value})}
-                    >
-                      <option value="남성">남성</option>
-                      <option value="여성">여성</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
-                    <Input value={newEmp.resident_num} onChange={e => setNewEmp({...newEmp, resident_num: e.target.value})} placeholder="900101-1******" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
-                    <Input value={newEmp.address} onChange={e => setNewEmp({...newEmp, address: e.target.value})} placeholder="서울시 강남구..." />
-                  </div>
-                </div>
-              </div>
-
-              {/* 인사 정보 */}
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 border-b pb-2">인사 정보</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">부서 지정</label>
-                    <select 
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newEmp.department_id}
-                      onChange={e => setNewEmp({...newEmp, department_id: e.target.value})}
-                    >
-                      <option value="">부서 선택</option>
-                      {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">직급 지정</label>
-                    <select 
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newEmp.position_id}
-                      onChange={e => setNewEmp({...newEmp, position_id: e.target.value})}
-                    >
-                      <option value="">직급 선택</option>
-                      {positions.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">고용 형태</label>
-                    <select 
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newEmp.employment_type}
-                      onChange={e => setNewEmp({...newEmp, employment_type: e.target.value})}
-                    >
-                      <option value="정규직">정규직</option>
-                      <option value="계약직">계약직</option>
-                      <option value="아르바이트">아르바이트</option>
-                      <option value="인턴">인턴</option>
-                      <option value="프리랜서">프리랜서</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
-                    <Input 
-                      type="text" 
-                      value={newEmp.base_salary === 0 ? '' : newEmp.base_salary.toLocaleString()} 
-                      onChange={e => {
-                        const rawValue = e.target.value.replace(/,/g, '');
-                        if (rawValue === '' || /^\d+$/.test(rawValue)) {
-                          setNewEmp({...newEmp, base_salary: Number(rawValue) || 0});
-                        }
-                      }} 
-                      placeholder="3,000,000" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">시스템 권한</label>
-                    <select 
-                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newEmp.role_id}
-                      onChange={e => setNewEmp({...newEmp, role_id: e.target.value})}
-                    >
-                      {ROLE_OPTIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
-              <Button variant="outline" onClick={() => setIsModalOpen(false)}>취소</Button>
-              <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white">등록하기</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

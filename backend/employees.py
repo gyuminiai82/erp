@@ -48,15 +48,51 @@ class EmployeeCreateRequest(BaseModel):
     email: str
     department_id: Optional[int] = None
     position_id: Optional[int] = None
-    role_id: str = "employee"
+    role_id: Optional[str] = None
+    phone: Optional[str] = None
+    birth_date: Optional[str] = None
+    gender: Optional[str] = None
+    address: Optional[str] = None
+    employment_type: Optional[str] = None
+    resident_num: Optional[str] = None
+    base_salary: Optional[int] = None
+
+class EmployeeInlineCreateRequest(BaseModel):
+    name: str
+    email: str
+    department: Optional[str] = None
+    position: Optional[str] = None
+    role: Optional[str] = None
+    phone: Optional[str] = None
+    birth_date: Optional[str] = None
+    gender: Optional[str] = None
+    address: Optional[str] = None
+    employment_type: Optional[str] = None
+    resident_num: Optional[str] = None
+    base_salary: Optional[int] = None
+    hire_date: Optional[str] = None
+
+class EmployeeBulkCreateRequest(BaseModel):
+    employees: List[EmployeeInlineCreateRequest]
+    base_salary: Optional[int] = 0
+
+class EmployeeBulkCreateItem(BaseModel):
+    name: str
+    email: str
+    department: Optional[str] = None
+    position: Optional[str] = None
+    role: Optional[str] = "employee"
     phone: Optional[str] = None
     birth_date: Optional[str] = None
     gender: Optional[str] = None
     address: Optional[str] = None
     employment_type: str = "정규직"
     resident_num: Optional[str] = None
-    profile_image_url: Optional[str] = None
     base_salary: Optional[int] = 0
+    hire_date: Optional[str] = None
+
+class EmployeeBulkCreateRequest(BaseModel):
+    employees: List[EmployeeBulkCreateItem]
 
 @router.get("/departments")
 def get_departments(db: Session = Depends(get_db)):
@@ -148,6 +184,88 @@ def update_employee_role(emp_id: int, payload: RoleUpdateRequest, db: Session = 
     
     return {"message": "Role updated successfully", "new_role": payload.role_id}
 
+@router.post("/bulk-create")
+def bulk_create_employees(payload: EmployeeBulkCreateRequest, db: Session = Depends(get_db)):
+    # Get configuration for emp_no generation
+    setting = db.query(models.SystemSetting).first()
+    prefix = setting.emp_no_prefix if setting else "EMP"
+    year_format = setting.emp_no_year_format if setting else "YY"
+    seq_length = setting.emp_no_length if setting else 3
+    year_str = ""
+    current_year = datetime.now().year
+    if year_format == "YY":
+        year_str = str(current_year)[-2:]
+    elif year_format == "YYYY":
+        year_str = str(current_year)
+    base_prefix = f"{prefix}{year_str}"
+    
+    # Pre-fetch ID mappings
+    dept_map = {d.name: d.id for d in db.query(models.Department).all()}
+    pos_map = {p.name: p.id for p in db.query(models.Position).all()}
+    role_map = {r.id: r.id for r in db.query(models.Role).all()} # Typically role IDs are 'admin', 'employee', etc.
+    
+    created_count = 0
+    
+    for emp_data in payload.employees:
+        # Generate next emp_no
+        latest_emp = db.query(models.Employee).filter(models.Employee.emp_no.like(f"{base_prefix}%")).order_by(models.Employee.emp_no.desc()).first()
+        next_seq = 1
+        if latest_emp and latest_emp.emp_no.startswith(base_prefix):
+            seq_str = latest_emp.emp_no[len(base_prefix):]
+            if seq_str.isdigit():
+                next_seq = int(seq_str) + 1
+        final_emp_no = f"{base_prefix}{str(next_seq).zfill(seq_length)}"
+
+        existing = db.query(models.Employee).filter(models.Employee.emp_no == final_emp_no).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="사번 생성 중 충돌이 발생했습니다. 다시 시도해주세요.")
+        
+        existing_email = db.query(models.Employee).filter(models.Employee.email == emp_data.email).first()
+        if existing_email:
+            raise HTTPException(status_code=400, detail=f"이미 존재하는 이메일입니다: {emp_data.email}")
+            
+        dept_id = dept_map.get(emp_data.department) if emp_data.department else None
+        pos_id = pos_map.get(emp_data.position) if emp_data.position else None
+
+        new_emp = models.Employee(
+            emp_no=final_emp_no,
+            name=emp_data.name,
+            email=emp_data.email,
+            department_id=dept_id,
+            position_id=pos_id,
+            phone=emp_data.phone,
+            birth_date=emp_data.birth_date,
+            gender=emp_data.gender,
+            address=emp_data.address,
+            employment_type=emp_data.employment_type or "정규직",
+            status="재직",
+            hire_date=emp_data.hire_date or datetime.now().date(),
+            base_salary=emp_data.base_salary or 0,
+        )
+        
+        if emp_data.resident_num:
+            try:
+                new_emp.resident_num = crypto.encrypt_data(emp_data.resident_num)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"암호화 오류: {str(e)}")
+
+        default_password = final_emp_no
+        new_emp.password_hash = get_password_hash(default_password)
+        
+        db.add(new_emp)
+        db.commit()
+        db.refresh(new_emp)
+        
+        # Add role
+        role_id_to_assign = role_map.get(emp_data.role, "employee")
+        new_emp_role = models.EmployeeRole(employee_id=new_emp.id, role_id=role_id_to_assign)
+        db.add(new_emp_role)
+        db.commit()
+        
+        created_count += 1
+
+    return {"message": f"{created_count} employees created successfully"}
+
 @router.post("")
 def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db)):
     # Generate actual emp_no
@@ -209,6 +327,85 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         db.commit()
 
     return {"message": "사원이 성공적으로 등록되었습니다.", "id": new_emp.id}
+
+@router.post("/bulk-create")
+def bulk_create_employees(payload: EmployeeBulkCreateRequest, db: Session = Depends(get_db)):
+    if not payload.employees:
+        return {"message": "등록할 사원이 없습니다."}
+        
+    setting = db.query(models.SystemSetting).first()
+    prefix = setting.emp_no_prefix if setting else "EMP"
+    year_format = setting.emp_no_year_format if setting else "YY"
+    seq_length = setting.emp_no_length if setting else 3
+    year_str = ""
+    current_year = datetime.now().year
+    if year_format == "YY":
+        year_str = str(current_year)[-2:]
+    elif year_format == "YYYY":
+        year_str = str(current_year)
+    base_prefix = f"{prefix}{year_str}"
+    
+    # Get highest sequence number
+    latest_emp = db.query(models.Employee).filter(models.Employee.emp_no.like(f"{base_prefix}%")).order_by(models.Employee.emp_no.desc()).first()
+    next_seq = 1
+    if latest_emp and latest_emp.emp_no.startswith(base_prefix):
+        seq_str = latest_emp.emp_no[len(base_prefix):]
+        if seq_str.isdigit():
+            next_seq = int(seq_str) + 1
+
+    dept_map = {d.name: d.id for d in db.query(models.Department).all()}
+    pos_map = {p.name: p.id for p in db.query(models.Position).all()}
+    
+    created_ids = []
+    
+    for emp_data in payload.employees:
+        final_emp_no = f"{base_prefix}{str(next_seq).zfill(seq_length)}"
+        next_seq += 1
+        
+        # Check email conflict
+        existing_email = db.query(models.Employee).filter(models.Employee.email == emp_data.email).first()
+        if existing_email:
+            raise HTTPException(status_code=400, detail=f"이미 존재하는 이메일입니다: {emp_data.email}")
+            
+        new_emp = models.Employee(
+            emp_no=final_emp_no,
+            name=emp_data.name,
+            email=emp_data.email,
+            department_id=dept_map.get(emp_data.department) if emp_data.department else None,
+            position_id=pos_map.get(emp_data.position) if emp_data.position else None,
+            password_hash=get_password_hash("1234"),
+            must_change_password=True,
+            phone=emp_data.phone,
+            gender=emp_data.gender,
+            address=emp_data.address,
+            employment_type=emp_data.employment_type,
+            resident_num=crypto.encrypt_data(emp_data.resident_num) if emp_data.resident_num else None,
+            base_salary=emp_data.base_salary
+        )
+        
+        if emp_data.hire_date:
+            try: new_emp.hire_date = datetime.strptime(emp_data.hire_date, "%Y-%m-%d").date()
+            except: new_emp.hire_date = datetime.now().date()
+        else:
+            new_emp.hire_date = datetime.now().date()
+            
+        if emp_data.birth_date:
+            try: new_emp.birth_date = datetime.strptime(emp_data.birth_date, "%Y-%m-%d").date()
+            except: pass
+            
+        db.add(new_emp)
+        db.flush() # To get new_emp.id
+        created_ids.append(new_emp.id)
+        
+        emp_role = db.query(models.Role).filter(models.Role.name == emp_data.role).first()
+        if not emp_role:
+            emp_role = db.query(models.Role).filter(models.Role.name == "employee").first()
+            
+        if emp_role:
+            db.add(models.EmployeeRole(employee_id=new_emp.id, role_id=emp_role.id))
+            
+    db.commit()
+    return {"message": f"{len(created_ids)}명의 사원이 성공적으로 등록되었습니다."}
 
 @router.post("/bulk-delete")
 def bulk_delete_employees(payload: EmployeeBulkDeleteRequest, db: Session = Depends(get_db)):
