@@ -702,10 +702,12 @@ export default function EmployeesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
                     <Input value={newEmpData.resident_num} onChange={e => setNewEmpData({...newEmpData, resident_num: formatResidentNum(e.target.value)})} placeholder="000000-0000000" />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
-                    <Input value={newEmpData.address} onChange={e => setNewEmpData({...newEmpData, address: e.target.value})} placeholder="서울특별시 강남구..." />
-                  </div>
+                  {/* 빈 칸으로 두어 주민등록번호가 과도하게 길어지는 것을 방지 */}
+                  <div></div>
+                </div>
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
+                  <Input value={newEmpData.address} onChange={e => setNewEmpData({...newEmpData, address: e.target.value})} placeholder="서울특별시 강남구..." />
                 </div>
               </form>
             </div>

@@ -90,6 +90,7 @@ class EmployeeBulkCreateItem(BaseModel):
     resident_num: Optional[str] = None
     base_salary: Optional[int] = 0
     hire_date: Optional[str] = None
+    status: Optional[str] = "재직"
 
 class EmployeeBulkCreateRequest(BaseModel):
     employees: List[EmployeeBulkCreateItem]
@@ -227,6 +228,9 @@ def bulk_create_employees(payload: EmployeeBulkCreateRequest, db: Session = Depe
         dept_id = dept_map.get(emp_data.department) if emp_data.department else None
         pos_id = pos_map.get(emp_data.position) if emp_data.position else None
 
+        def safe_date(d):
+            return None if d == "" else d
+
         new_emp = models.Employee(
             emp_no=final_emp_no,
             name=emp_data.name,
@@ -234,12 +238,12 @@ def bulk_create_employees(payload: EmployeeBulkCreateRequest, db: Session = Depe
             department_id=dept_id,
             position_id=pos_id,
             phone=emp_data.phone,
-            birth_date=emp_data.birth_date,
+            birth_date=safe_date(emp_data.birth_date),
             gender=emp_data.gender,
             address=emp_data.address,
             employment_type=emp_data.employment_type or "정규직",
-            status="재직",
-            hire_date=emp_data.hire_date or datetime.now().date(),
+            status=emp_data.status or "재직",
+            hire_date=safe_date(emp_data.hire_date) or datetime.now().date(),
             base_salary=emp_data.base_salary or 0,
         )
         
