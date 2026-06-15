@@ -1,61 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { LayoutDashboard, Menu as MenuIcon, ShieldCheck, FileText, Settings, LogOut, Bell, Search, Users, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
-const WebSocketContext = createContext<{
-  activeSessions: number;
-  systemMetrics: any;
-}>({ activeSessions: 0, systemMetrics: null });
-
-export const useWebSocket = () => useContext(WebSocketContext);
+import { WebSocketProvider } from './WebSocketProvider';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [activeSessions, setActiveSessions] = useState(0);
-  const [systemMetrics, setSystemMetrics] = useState<any>(null);
-
-  useEffect(() => {
-    let ws: WebSocket;
-    let reconnectTimer: NodeJS.Timeout;
-    let isUnmounted = false;
-
-    const connect = () => {
-      ws = new WebSocket('ws://localhost:8000/api/ws');
-      
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'active_sessions') {
-            setActiveSessions(data.count);
-          } else if (data.type === 'system_metrics') {
-            setSystemMetrics(data.data);
-          }
-        } catch (e) {
-          console.error("WS message error", e);
-        }
-      };
-
-      ws.onclose = () => {
-        if (!isUnmounted) {
-          reconnectTimer = setTimeout(connect, 3000);
-        }
-      };
-    };
-
-    connect();
-
-    return () => {
-      isUnmounted = true;
-      clearTimeout(reconnectTimer);
-      if (ws) {
-        ws.onclose = null;
-        ws.close();
-      }
-    };
-  }, []);
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
 
@@ -169,11 +120,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <WebSocketContext.Provider value={{ activeSessions, systemMetrics }}>
+        <WebSocketProvider>
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#f8f9fc] p-6">
             {children}
           </main>
-        </WebSocketContext.Provider>
+        </WebSocketProvider>
       </main>
     </div>
   );

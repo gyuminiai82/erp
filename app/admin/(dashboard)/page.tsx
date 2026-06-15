@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Users, ShieldAlert, Activity, Database, HardDrive, AlertTriangle, Cpu, Terminal } from 'lucide-react';
-import { useWebSocket } from './layout';
-
+import { useWebSocket } from './WebSocketProvider';
 export default function AdminDashboardPage() {
   const { activeSessions, systemMetrics } = useWebSocket();
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
