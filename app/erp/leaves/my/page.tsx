@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Clock, Send, CheckCircle2, XCircle, Clock4, FileText, PieChart } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function LeaveApplicationPage() {
+  const { showAlert } = useDialog();
   const [leaves, setLeaves] = useState<any[]>([]);
   const [form, setForm] = useState({
     start_date: '',
@@ -57,8 +59,16 @@ export default function LeaveApplicationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.start_date > form.end_date) {
-      alert("종료일이 시작일보다 빠를 수 없습니다.");
+      await showAlert("종료일이 시작일보다 빠를 수 없습니다.", { type: "warning" });
       return;
+    }
+    
+    // Check remaining balance for annual leaves
+    if (['연차', '오전반차', '오후반차'].includes(form.leave_type)) {
+      if (balance && balance.remaining_days <= 0) {
+        await showAlert("잔여 연차가 없습니다. 휴가를 신청할 수 없습니다.", { type: "error" });
+        return;
+      }
     }
     
     setLoading(true);
@@ -74,17 +84,17 @@ export default function LeaveApplicationPage() {
       });
       
       if (res.ok) {
-        alert("휴가 신청이 완료되었습니다. 관리자 승인을 기다려주세요.");
+        await showAlert("휴가 신청이 완료되었습니다. 관리자 승인을 기다려주세요.", { type: "success" });
         setForm(f => ({ ...f, reason: '' }));
         fetchMyLeaves();
         fetchBalance();
       } else {
         const err = await res.json();
-        alert(`신청 실패: ${err.detail || '알 수 없는 오류'}`);
+        await showAlert(`신청 실패: ${err.detail || '알 수 없는 오류'}`, { type: "error" });
       }
     } catch (e) {
       console.error(e);
-      alert("휴가 신청 중 오류가 발생했습니다.");
+      await showAlert("휴가 신청 중 오류가 발생했습니다.", { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -193,10 +203,19 @@ export default function LeaveApplicationPage() {
               />
             </div>
             
-            <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-              <Send className="w-4 h-4 mr-2" />
-              {loading ? '신청 중...' : '휴가 신청하기'}
-            </Button>
+            {(() => {
+              const isLeaveDisabled = ['연차', '오전반차', '오후반차'].includes(form.leave_type) && balance && balance.remaining_days <= 0;
+              return (
+                <Button 
+                  type="submit" 
+                  disabled={loading} 
+                  className={`w-full text-white ${isLeaveDisabled ? 'bg-gray-400 hover:bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'}`}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {loading ? '신청 중...' : '휴가 신청하기'}
+                </Button>
+              );
+            })()}
           </form>
         </div>
 
