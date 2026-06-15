@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarCheck, Check, X, User, Clock4, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function LeaveApprovalsPage() {
+  const { showAlert, showConfirm } = useDialog();
   const [leaves, setLeaves] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +32,8 @@ export default function LeaveApprovalsPage() {
   }, []);
 
   const handleStatusUpdate = async (id: number, status: string) => {
-    if (!confirm(`정말로 ${status} 처리하시겠습니까?`)) return;
+    const isConfirm = await showConfirm(`정말로 ${status} 처리하시겠습니까?`);
+    if (!isConfirm) return;
     
     setLoading(true);
     try {
@@ -45,15 +48,15 @@ export default function LeaveApprovalsPage() {
       });
       
       if (res.ok) {
-        alert(`${status} 처리되었습니다.`);
+        await showAlert(`${status} 처리되었습니다.`, { type: 'success' });
         fetchAllLeaves();
       } else {
         const err = await res.json();
-        alert(`처리 실패: ${err.detail || '알 수 없는 오류'}`);
+        await showAlert(`처리 실패: ${err.detail || '알 수 없는 오류'}`, { type: 'error' });
       }
     } catch (e) {
       console.error(e);
-      alert("처리 중 오류가 발생했습니다.");
+      await showAlert("처리 중 오류가 발생했습니다.", { type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -88,8 +91,8 @@ export default function LeaveApprovalsPage() {
                 <th className="py-3 px-6 font-semibold">휴가 종류</th>
                 <th className="py-3 px-6 font-semibold">기간</th>
                 <th className="py-3 px-6 font-semibold">사유</th>
-                <th className="py-3 px-6 font-semibold text-center">현재 상태</th>
-                <th className="py-3 px-6 font-semibold text-right">결재 액션</th>
+                <th className="py-3 px-6 font-semibold w-35">현재 상태</th>
+                <th className="py-3 px-6 font-semibold w-20">결재</th>
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-gray-100">

@@ -587,7 +587,7 @@ export default function EmployeesPage() {
               </Button>
               <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
                 <Plus className="w-4 h-4 mr-2" />
-                행 추가
+                사원 추가
               </Button>
             </div>
           </div>
