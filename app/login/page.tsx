@@ -84,7 +84,6 @@ export default function LoginPage() {
             <Activity className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-5xl font-bold tracking-tight mb-6 leading-tight">
-            Next-Gen<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-[#107C41]">MINSTUDIO ERP</span>
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed mb-8">
