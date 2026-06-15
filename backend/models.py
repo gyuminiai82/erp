@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time, func, Float
+from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, Boolean, Time, func, Float, Text
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -73,6 +73,8 @@ class Employee(Base):
     
     attendances = relationship("Attendance", back_populates="employee")
     leave_requests = relationship("LeaveRequest", foreign_keys="LeaveRequest.employee_id", back_populates="employee")
+    leave_approvals = relationship("LeaveRequest", foreign_keys="LeaveRequest.approver_id", back_populates="approver")
+    
     payrolls = relationship("Payroll", back_populates="employee")
     roles = relationship("EmployeeRole", back_populates="employee")
 

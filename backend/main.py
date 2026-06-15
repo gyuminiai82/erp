@@ -19,6 +19,7 @@ import positions_api
 import appointments_api
 import audit_logs_api
 import leaves_api
+import payrolls_api
 import models
 from database import engine, SessionLocal
 import psutil
@@ -56,6 +57,7 @@ app.include_router(positions_api.router)
 app.include_router(appointments_api.router)
 app.include_router(audit_logs_api.router)
 app.include_router(leaves_api.router)
+app.include_router(payrolls_api.router)
 
 models.Base.metadata.create_all(bind=engine)
 

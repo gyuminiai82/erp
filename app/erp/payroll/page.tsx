@@ -1,0 +1,382 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, Edit, Trash2, X, Download } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+interface Payroll {
+  id: int;
+  employee_id: int;
+  payment_month: string;
+  base_salary: int;
+  bonus: int;
+  deductions: int;
+  net_pay: int;
+  payment_date: string;
+  employee_name?: string;
+  employee_no?: string;
+  department_name?: string;
+}
+
+interface Employee {
+  id: int;
+  emp_no: string;
+  name: string;
+  department_name?: string;
+}
+
+export default function PayrollsPage() {
+  const router = useRouter();
+  const [payrolls, setPayrolls] = useState<Payroll[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  
+  // 현재 월 설정 (YYYY-MM)
+  const [currentMonth, setCurrentMonth] = useState<string>(
+    new Date().toISOString().slice(0, 7)
+  );
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentPayroll, setCurrentPayroll] = useState<Partial<Payroll>>({});
+  
+  const token = typeof window !== 'undefined' ? localStorage.getItem('erp_token') || localStorage.getItem('erp_access_token') || localStorage.getItem('token') : null;
+
+  useEffect(() => {
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    fetchPayrolls();
+    fetchEmployees();
+  }, [currentMonth, token, router]);
+
+  const fetchPayrolls = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/payrolls?month=${currentMonth}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('급여 대장 데이터를 불러오는데 실패했습니다.');
+      const data = await res.json();
+      setPayrolls(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const res = await fetch(`/api/employees`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setEmployees(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleOpenModal = (payroll?: Payroll) => {
+    if (payroll) {
+      setEditMode(true);
+      setCurrentPayroll(payroll);
+    } else {
+      setEditMode(false);
+      // 신규 입력 기본값
+      setCurrentPayroll({
+        payment_month: currentMonth,
+        base_salary: 0,
+        bonus: 0,
+        deductions: 0,
+        payment_date: new Date().toISOString().slice(0, 10)
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentPayroll({});
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPayroll.employee_id || !currentPayroll.base_salary) {
+      alert('필수 정보를 입력해주세요.');
+      return;
+    }
+
+    try {
+      const url = editMode ? `/api/payrolls/${currentPayroll.id}` : '/api/payrolls';
+      const method = editMode ? 'PUT' : 'POST';
+      
+      const payload = {
+        employee_id: currentPayroll.employee_id,
+        payment_month: currentPayroll.payment_month,
+        base_salary: Number(currentPayroll.base_salary),
+        bonus: Number(currentPayroll.bonus || 0),
+        deductions: Number(currentPayroll.deductions || 0),
+        payment_date: currentPayroll.payment_date
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('급여 정보 저장에 실패했습니다.');
+      
+      handleCloseModal();
+      fetchPayrolls();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDelete = async (id: int) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      const res = await fetch(`/api/payrolls/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('삭제 실패');
+      fetchPayrolls();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  // 실수령액 자동 계산용 함수 (모달 내부)
+  const calculateNetPay = () => {
+    const base = Number(currentPayroll.base_salary || 0);
+    const bonus = Number(currentPayroll.bonus || 0);
+    const deductions = Number(currentPayroll.deductions || 0);
+    return base + bonus - deductions;
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">급여 대장 관리</h1>
+          <p className="text-gray-500 mt-1">월별 사원 급여 및 명세서를 관리합니다.</p>
+        </div>
+        <div className="mt-4 sm:mt-0 flex gap-3">
+          <input 
+            type="month" 
+            value={currentMonth}
+            onChange={(e) => setCurrentMonth(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+          />
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            급여 등록
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+          {error}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 text-sm font-medium">
+                <th className="px-6 py-4">사번/이름</th>
+                <th className="px-6 py-4">부서</th>
+                <th className="px-6 py-4 text-right">기본급</th>
+                <th className="px-6 py-4 text-right">상여금</th>
+                <th className="px-6 py-4 text-right">공제액</th>
+                <th className="px-6 py-4 text-right text-[#107C41]">실수령액</th>
+                <th className="px-6 py-4 text-center">지급일</th>
+                <th className="px-6 py-4 text-center">관리</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                    <div className="animate-pulse flex flex-col items-center">
+                      <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
+                      데이터를 불러오는 중입니다...
+                    </div>
+                  </td>
+                </tr>
+              ) : payrolls.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                    선택한 월({currentMonth})의 급여 데이터가 없습니다.
+                  </td>
+                </tr>
+              ) : (
+                payrolls.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-gray-900">{p.employee_name}</div>
+                      <div className="text-xs text-gray-500">{p.employee_no}</div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{p.department_name || '-'}</td>
+                    <td className="px-6 py-4 text-right">{p.base_salary.toLocaleString()}원</td>
+                    <td className="px-6 py-4 text-right">{p.bonus.toLocaleString()}원</td>
+                    <td className="px-6 py-4 text-right text-red-500">-{p.deductions.toLocaleString()}원</td>
+                    <td className="px-6 py-4 text-right font-bold text-[#107C41]">{p.net_pay.toLocaleString()}원</td>
+                    <td className="px-6 py-4 text-center text-gray-600">{p.payment_date}</td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <button onClick={() => handleOpenModal(p)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDelete(p.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h2 className="text-lg font-bold text-gray-800">
+                {editMode ? '급여 명세 수정' : '신규 급여 등록'}
+              </h2>
+              <button onClick={handleCloseModal} className="p-2 text-gray-400 hover:bg-gray-200 rounded-full transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <form id="payroll-form" onSubmit={handleSave} className="space-y-4">
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">대상 사원</label>
+                    <select 
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+                      value={currentPayroll.employee_id || ''}
+                      onChange={(e) => setCurrentPayroll({...currentPayroll, employee_id: Number(e.target.value)})}
+                      required
+                      disabled={editMode}
+                    >
+                      <option value="">사원 선택</option>
+                      {employees.map(emp => (
+                        <option key={emp.id} value={emp.id}>{emp.name} ({emp.department_name || '부서미지정'})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">귀속 월</label>
+                    <input 
+                      type="month"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+                      value={currentPayroll.payment_month || ''}
+                      onChange={(e) => setCurrentPayroll({...currentPayroll, payment_month: e.target.value})}
+                      required
+                      disabled={editMode}
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
+                  <input 
+                    type="number"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+                    value={currentPayroll.base_salary || ''}
+                    onChange={(e) => setCurrentPayroll({...currentPayroll, base_salary: Number(e.target.value)})}
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">상여금 (원)</label>
+                    <input 
+                      type="number"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+                      value={currentPayroll.bonus || ''}
+                      onChange={(e) => setCurrentPayroll({...currentPayroll, bonus: Number(e.target.value)})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">공제액 (원)</label>
+                    <input 
+                      type="number"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+                      value={currentPayroll.deductions || ''}
+                      onChange={(e) => setCurrentPayroll({...currentPayroll, deductions: Number(e.target.value)})}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">실지급일</label>
+                  <input 
+                    type="date"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+                    value={currentPayroll.payment_date || ''}
+                    onChange={(e) => setCurrentPayroll({...currentPayroll, payment_date: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="mt-6 p-4 bg-[#f0fdf4] rounded-xl border border-green-100">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700 font-medium">예상 실수령액</span>
+                    <span className="text-2xl font-bold text-[#107C41]">
+                      {calculateNetPay().toLocaleString()} 원
+                    </span>
+                  </div>
+                </div>
+              </form>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 mt-auto">
+              <button 
+                type="button" 
+                onClick={handleCloseModal}
+                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                취소
+              </button>
+              <button 
+                type="submit" 
+                form="payroll-form"
+                className="px-5 py-2.5 text-white font-medium bg-[#107C41] rounded-xl hover:bg-green-700 transition-colors shadow-md shadow-green-600/20"
+              >
+                {editMode ? '수정 내용 저장' : '급여 대장 등록'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
