@@ -5,13 +5,13 @@ import { Search, Plus, Edit, Trash2, X, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Payroll {
-  id: int;
-  employee_id: int;
+  id: number;
+  employee_id: number;
   payment_month: string;
-  base_salary: int;
-  bonus: int;
-  deductions: int;
-  net_pay: int;
+  base_salary: number;
+  bonus: number;
+  deductions: number;
+  net_pay: number;
   payment_date: string;
   employee_name?: string;
   employee_no?: string;
@@ -19,7 +19,7 @@ interface Payroll {
 }
 
 interface Employee {
-  id: int;
+  id: number;
   emp_no: string;
   name: string;
   department_name?: string;
@@ -144,7 +144,7 @@ export default function PayrollsPage() {
     }
   };
 
-  const handleDelete = async (id: int) => {
+  const handleDelete = async (id: number) => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       const res = await fetch(`/api/payrolls/${id}`, {
@@ -156,6 +156,27 @@ export default function PayrollsPage() {
     } catch (err: any) {
       alert(err.message);
     }
+  };
+
+  const handleNumberInput = (field: keyof Payroll, value: string) => {
+    const numericValue = value.replace(/,/g, '');
+    let num = 0;
+    if (numericValue !== '' && !isNaN(Number(numericValue))) {
+      num = Number(numericValue);
+    }
+
+    const updatedPayroll = { ...currentPayroll, [field]: num };
+
+    // 기본급 또는 상여금 입력 시 한국 4대보험 등 평균 공제율(약 9.4%)을 적용하여 공제액 자동 계산
+    if (field === 'base_salary' || field === 'bonus') {
+      const base = field === 'base_salary' ? num : Number(currentPayroll.base_salary || 0);
+      const bonus = field === 'bonus' ? num : Number(currentPayroll.bonus || 0);
+      
+      const estimatedDeduction = Math.floor((base + bonus) * 0.094);
+      updatedPayroll.deductions = Math.floor(estimatedDeduction / 10) * 10; // 10원 단위 절사
+    }
+
+    setCurrentPayroll(updatedPayroll);
   };
 
   // 실수령액 자동 계산용 함수 (모달 내부)
@@ -307,10 +328,10 @@ export default function PayrollsPage() {
                 <div className="pt-4 border-t border-gray-100">
                   <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
                   <input 
-                    type="number"
+                    type="text"
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                    value={currentPayroll.base_salary || ''}
-                    onChange={(e) => setCurrentPayroll({...currentPayroll, base_salary: Number(e.target.value)})}
+                    value={currentPayroll.base_salary ? currentPayroll.base_salary.toLocaleString() : ''}
+                    onChange={(e) => handleNumberInput('base_salary', e.target.value)}
                     required
                   />
                 </div>
@@ -319,19 +340,19 @@ export default function PayrollsPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">상여금 (원)</label>
                     <input 
-                      type="number"
+                      type="text"
                       className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                      value={currentPayroll.bonus || ''}
-                      onChange={(e) => setCurrentPayroll({...currentPayroll, bonus: Number(e.target.value)})}
+                      value={currentPayroll.bonus ? currentPayroll.bonus.toLocaleString() : ''}
+                      onChange={(e) => handleNumberInput('bonus', e.target.value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">공제액 (원)</label>
                     <input 
-                      type="number"
+                      type="text"
                       className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                      value={currentPayroll.deductions || ''}
-                      onChange={(e) => setCurrentPayroll({...currentPayroll, deductions: Number(e.target.value)})}
+                      value={currentPayroll.deductions ? currentPayroll.deductions.toLocaleString() : ''}
+                      onChange={(e) => handleNumberInput('deductions', e.target.value)}
                     />
                   </div>
                 </div>
