@@ -117,12 +117,12 @@ export default function Home() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="bg-white overflow-hidden flex items-center justify-center w-full" style={{ height: '70vh' }}>
-              <iframe 
-                src="/erd-viewer.html" 
-                title="Entity Relationship Diagram Viewer" 
-                className="w-full h-full border-0 rounded-b-2xl"
-              ></iframe>
+            <div className="p-6 bg-gray-50/50 overflow-y-auto flex flex-col items-center justify-center">
+              <img 
+                src="/erd.png" 
+                alt="Entity Relationship Diagram" 
+                className="w-full h-auto max-w-4xl rounded-lg shadow-sm border border-gray-200 bg-white"
+              />
             </div>
           </div>
         </div>
