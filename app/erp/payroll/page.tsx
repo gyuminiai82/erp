@@ -310,43 +310,40 @@ export default function PayrollsPage() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">급여 대장 관리</h1>
-          <p className="text-gray-500 mt-1">월별 사원 급여 및 명세서를 관리합니다.</p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex gap-3">
-          <input 
-            type="month" 
-            value={currentMonth}
-            onChange={(e) => setCurrentMonth(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-          />
-          <button 
-            onClick={handleBulkGenerate}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            일괄 자동 산출
-          </button>
-          <button 
-            onClick={() => handleOpenModal()}
-            className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            수동 등록
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-
-      {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100">
+          <div className="flex items-center">
+            <input 
+              type="month" 
+              value={currentMonth}
+              onChange={(e) => setCurrentMonth(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+            />
+          </div>
+          <div className="flex flex-wrap justify-end gap-2 w-full sm:w-auto">
+            <button 
+              onClick={handleBulkGenerate}
+              className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              일괄 자동 산출
+            </button>
+            <button 
+              onClick={() => handleOpenModal()}
+              className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              수동 등록
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 mx-4 my-4 rounded-lg">
+            {error}
+          </div>
+        )}
+
         {loading ? (
           <div className="px-6 py-8 text-center text-gray-500">
             <div className="animate-pulse flex flex-col items-center">
