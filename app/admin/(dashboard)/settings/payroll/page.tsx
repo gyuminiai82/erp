@@ -101,7 +101,7 @@ export default function PayrollSettingsPage() {
               <div className="relative">
                 <input 
                   type="number" step="0.001"
-                  value={settings.national_pension_rate * 100} 
+                  value={Number((settings.national_pension_rate * 100).toFixed(3))} 
                   onChange={e => setSettings({...settings, national_pension_rate: Number(e.target.value) / 100})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
                 />
@@ -114,7 +114,7 @@ export default function PayrollSettingsPage() {
               <div className="relative">
                 <input 
                   type="number" step="0.001"
-                  value={settings.health_insurance_rate * 100} 
+                  value={Number((settings.health_insurance_rate * 100).toFixed(3))} 
                   onChange={e => setSettings({...settings, health_insurance_rate: Number(e.target.value) / 100})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
                 />
@@ -127,7 +127,7 @@ export default function PayrollSettingsPage() {
               <div className="relative">
                 <input 
                   type="number" step="0.001"
-                  value={settings.employment_insurance_rate * 100} 
+                  value={Number((settings.employment_insurance_rate * 100).toFixed(3))} 
                   onChange={e => setSettings({...settings, employment_insurance_rate: Number(e.target.value) / 100})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
                 />
@@ -140,7 +140,7 @@ export default function PayrollSettingsPage() {
               <div className="relative">
                 <input 
                   type="number" step="0.001"
-                  value={settings.long_term_care_rate * 100} 
+                  value={Number((settings.long_term_care_rate * 100).toFixed(3))} 
                   onChange={e => setSettings({...settings, long_term_care_rate: Number(e.target.value) / 100})}
                   className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all pr-8"
                 />
