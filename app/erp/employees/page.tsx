@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { useDialog } from "@/components/providers/DialogProvider";
 
+const ROLE_OPTIONS = [
+  { id: 'master', name: '사내 총괄 관리자' },
+  { id: 'hr_manager', name: '인사 담당자' },
+  { id: 'dept_head', name: '부서장' },
+  { id: 'employee', name: '일반 사원' },
+];
+
 export default function EmployeesPage() {
   const [allEmployees, setAllEmployees] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
@@ -22,7 +29,7 @@ export default function EmployeesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [newEmp, setNewEmp] = useState({ 
-    name: '', email: '', department_id: '', position_id: '',
+    name: '', email: '', department_id: '', position_id: '', role_id: 'employee',
     phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0
   });
 
@@ -97,7 +104,7 @@ export default function EmployeesPage() {
       
       if (res.ok) {
         setIsModalOpen(false);
-        setNewEmp({ name: '', email: '', department_id: '', position_id: '', phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0 });
+        setNewEmp({ name: '', email: '', department_id: '', position_id: '', role_id: 'employee', phone: '', birth_date: '', gender: '남성', address: '', employment_type: '정규직', resident_num: '', base_salary: 0 });
         fetchData();
       } else {
         const data = await res.json();
@@ -589,6 +596,16 @@ export default function EmployeesPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
                     <Input type="number" value={newEmp.base_salary} onChange={e => setNewEmp({...newEmp, base_salary: Number(e.target.value)})} placeholder="3000000" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">시스템 권한</label>
+                    <select 
+                      className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      value={newEmp.role_id}
+                      onChange={e => setNewEmp({...newEmp, role_id: e.target.value})}
+                    >
+                      {ROLE_OPTIONS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                    </select>
                   </div>
                 </div>
               </div>
