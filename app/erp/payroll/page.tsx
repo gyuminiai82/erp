@@ -35,6 +35,8 @@ export default function PayrollsPage() {
     new Date().toISOString().slice(0, 7)
   );
   
+  const [systemSettings, setSystemSettings] = useState<any>(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -51,7 +53,22 @@ export default function PayrollsPage() {
     }
     fetchPayrolls();
     fetchEmployees();
+    fetchSystemSettings();
   }, [currentMonth, token, router]);
+
+  const fetchSystemSettings = async () => {
+    try {
+      const res = await fetch('/api/settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSystemSettings(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch system settings", err);
+    }
+  };
 
   const fetchPayrolls = async () => {
     try {
@@ -167,12 +184,22 @@ export default function PayrollsPage() {
 
     const updatedPayroll = { ...currentPayroll, [field]: num };
 
-    // 기본급 또는 상여금 입력 시 한국 4대보험 등 평균 공제율(약 9.4%)을 적용하여 공제액 자동 계산
+    // 기본급 또는 상여금 입력 시 관리자가 설정한 4대보험 공제율 적용
     if (field === 'base_salary' || field === 'bonus') {
       const base = field === 'base_salary' ? num : Number(currentPayroll.base_salary || 0);
       const bonus = field === 'bonus' ? num : Number(currentPayroll.bonus || 0);
       
-      const estimatedDeduction = Math.floor((base + bonus) * 0.094);
+      let deductionRate = 0.094; // fallback
+      if (systemSettings) {
+        const np = systemSettings.national_pension_rate || 0.045;
+        const hi = systemSettings.health_insurance_rate || 0.03545;
+        const ltc = systemSettings.long_term_care_rate || 0.1295;
+        const ei = systemSettings.employment_insurance_rate || 0.009;
+        // 총 공제율 = 국민 + 건강 + (건강*장기요양) + 고용
+        deductionRate = np + hi + (hi * ltc) + ei;
+      }
+
+      const estimatedDeduction = Math.floor((base + bonus) * deductionRate);
       updatedPayroll.deductions = Math.floor(estimatedDeduction / 10) * 10; // 10원 단위 절사
     }
 

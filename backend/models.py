@@ -206,6 +206,13 @@ class SystemSetting(Base):
     emp_no_prefix = Column(String, default="EMP")
     emp_no_year_format = Column(String, default="YY")
     emp_no_length = Column(Integer, default=3)
+    
+    # 신규 추가: 세분화된 급여 및 보험료율 설정
+    national_pension_rate = Column(Float, default=0.045)        # 국민연금 4.5%
+    health_insurance_rate = Column(Float, default=0.03545)      # 건강보험 3.545%
+    long_term_care_rate = Column(Float, default=0.1295)         # 장기요양보험 (건보료의 12.95%)
+    employment_insurance_rate = Column(Float, default=0.009)    # 고용보험 0.9%
+    overtime_multiplier = Column(Float, default=1.5)            # 초과근무 배수
 
 class CompanyInfo(Base):
     __tablename__ = "company_info"
