@@ -44,6 +44,25 @@ def create_policy(policy: AttendancePolicyCreate, db: Session = Depends(get_db))
     db.add(new_policy)
     db.commit()
     db.refresh(new_policy)
+    
+    import json
+    def default_serializer(obj):
+        from datetime import time
+        if isinstance(obj, time):
+            return obj.strftime("%H:%M:%S")
+        raise TypeError(f"Type {type(obj)} not serializable")
+        
+    audit = models.AuditLog(
+        event_title="근태 기준 설정 추가",
+        event_desc=f"새로운 근태 정책 '{new_policy.name}'이(가) 추가되었습니다.",
+        severity="INFO",
+        target_resource="AttendancePolicy",
+        action_type="INSERT",
+        payload=json.dumps({"new": policy.dict()}, ensure_ascii=False, default=default_serializer)
+    )
+    db.add(audit)
+    db.commit()
+    
     return new_policy
 
 @router.put("/{policy_id}", response_model=AttendancePolicyResponse)
@@ -55,11 +74,46 @@ def update_policy(policy_id: int, policy: AttendancePolicyCreate, db: Session = 
     if policy.is_default and not existing.is_default:
         db.query(models.AttendancePolicy).update({"is_default": False})
         
+    old_data = {
+        "name": existing.name,
+        "policy_type": existing.policy_type,
+        "work_start_time": existing.work_start_time,
+        "work_end_time": existing.work_end_time,
+        "break_start_time": existing.break_start_time,
+        "break_end_time": existing.break_end_time,
+        "break_time_mins": existing.break_time_mins,
+        "core_time_start": existing.core_time_start,
+        "core_time_end": existing.core_time_end,
+        "required_work_hours": existing.required_work_hours,
+        "is_default": existing.is_default
+    }
+        
     for k, v in policy.dict().items():
         setattr(existing, k, v)
         
     db.commit()
     db.refresh(existing)
+    
+    new_data = policy.dict()
+    if old_data != new_data:
+        import json
+        def default_serializer(obj):
+            from datetime import time
+            if isinstance(obj, time):
+                return obj.strftime("%H:%M:%S")
+            raise TypeError(f"Type {type(obj)} not serializable")
+            
+        audit = models.AuditLog(
+            event_title="근태 기준 설정 변경",
+            event_desc=f"근태 정책 '{existing.name}'의 정보가 변경되었습니다.",
+            severity="INFO",
+            target_resource="AttendancePolicy",
+            action_type="UPDATE",
+            payload=json.dumps({"old": old_data, "new": new_data}, ensure_ascii=False, default=default_serializer)
+        )
+        db.add(audit)
+        db.commit()
+        
     return existing
 
 @router.delete("/{policy_id}")
@@ -71,6 +125,39 @@ def delete_policy(policy_id: int, db: Session = Depends(get_db)):
     if policy.is_default:
         raise HTTPException(status_code=400, detail="Cannot delete the default policy")
         
+    old_data = {
+        "name": policy.name,
+        "policy_type": policy.policy_type,
+        "work_start_time": policy.work_start_time,
+        "work_end_time": policy.work_end_time,
+        "break_start_time": policy.break_start_time,
+        "break_end_time": policy.break_end_time,
+        "break_time_mins": policy.break_time_mins,
+        "core_time_start": policy.core_time_start,
+        "core_time_end": policy.core_time_end,
+        "required_work_hours": policy.required_work_hours,
+        "is_default": policy.is_default
+    }
+        
     db.delete(policy)
     db.commit()
+    
+    import json
+    def default_serializer(obj):
+        from datetime import time
+        if isinstance(obj, time):
+            return obj.strftime("%H:%M:%S")
+        raise TypeError(f"Type {type(obj)} not serializable")
+        
+    audit = models.AuditLog(
+        event_title="근태 기준 설정 삭제",
+        event_desc=f"근태 정책 '{old_data['name']}'이(가) 삭제되었습니다.",
+        severity="INFO",
+        target_resource="AttendancePolicy",
+        action_type="DELETE",
+        payload=json.dumps({"old": old_data}, ensure_ascii=False, default=default_serializer)
+    )
+    db.add(audit)
+    db.commit()
+    
     return {"message": "Deleted successfully"}
