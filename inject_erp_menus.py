@@ -59,18 +59,19 @@ def inject_menus():
                 ]
             },
             {
+                "name": "생산 관리",
+                "icon": "Factory",
+                "submenus": [
+                    {"name": "품목 관리", "url": "/erp/mes/items", "roles": ["master"]},
+                    {"name": "작업지시 관리", "url": "/erp/mes/work-orders", "roles": ["master"]}
+                ]
+            },
+            {
                 "name": "전자결재",
                 "icon": "FileSignature",
                 "submenus": [
                     {"name": "기안 작성", "url": "/erp/drafts", "roles": ["master", "hr_manager", "dept_head", "employee"]},
                     {"name": "결재함", "url": "/erp/approvals", "roles": ["master", "hr_manager", "dept_head"]}
-                ]
-            },
-            {
-                "name": "시스템 관리",
-                "icon": "Settings",
-                "submenus": [
-                    {"name": "공통 코드 관리", "url": "/erp/system/common-codes", "roles": ["master"]}
                 ]
             }
         ]
