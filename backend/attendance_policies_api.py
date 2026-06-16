@@ -6,6 +6,8 @@ from datetime import time
 
 import models
 from database import get_db
+from auth import get_current_user_info
+from fastapi import Request
 
 router = APIRouter(prefix="/api/attendance-policies", tags=["AttendancePolicies"])
 
@@ -35,7 +37,12 @@ def get_policies(db: Session = Depends(get_db)):
     return db.query(models.AttendancePolicy).order_by(models.AttendancePolicy.id.asc()).all()
 
 @router.post("", response_model=AttendancePolicyResponse)
-def create_policy(policy: AttendancePolicyCreate, db: Session = Depends(get_db)):
+def create_policy(
+    request: Request,
+    policy: AttendancePolicyCreate, 
+    db: Session = Depends(get_db),
+    user_info: dict = Depends(get_current_user_info)
+):
     if policy.is_default:
         # Unset other defaults
         db.query(models.AttendancePolicy).update({"is_default": False})
@@ -55,6 +62,9 @@ def create_policy(policy: AttendancePolicyCreate, db: Session = Depends(get_db))
     audit = models.AuditLog(
         event_title="근태 기준 설정 추가",
         event_desc=f"새로운 근태 정책 '{new_policy.name}'이(가) 추가되었습니다.",
+        user_name=user_info.get("name", "Unknown"),
+        user_email=user_info.get("email", "Unknown"),
+        ip_address=request.client.host if request.client else "Unknown",
         severity="INFO",
         target_resource="AttendancePolicy",
         action_type="INSERT",
@@ -66,7 +76,13 @@ def create_policy(policy: AttendancePolicyCreate, db: Session = Depends(get_db))
     return new_policy
 
 @router.put("/{policy_id}", response_model=AttendancePolicyResponse)
-def update_policy(policy_id: int, policy: AttendancePolicyCreate, db: Session = Depends(get_db)):
+def update_policy(
+    request: Request,
+    policy_id: int, 
+    policy: AttendancePolicyCreate, 
+    db: Session = Depends(get_db),
+    user_info: dict = Depends(get_current_user_info)
+):
     existing = db.query(models.AttendancePolicy).filter_by(id=policy_id).first()
     if not existing:
         raise HTTPException(status_code=404, detail="Policy not found")
@@ -106,6 +122,9 @@ def update_policy(policy_id: int, policy: AttendancePolicyCreate, db: Session = 
         audit = models.AuditLog(
             event_title="근태 기준 설정 변경",
             event_desc=f"근태 정책 '{existing.name}'의 정보가 변경되었습니다.",
+            user_name=user_info.get("name", "Unknown"),
+            user_email=user_info.get("email", "Unknown"),
+            ip_address=request.client.host if request.client else "Unknown",
             severity="INFO",
             target_resource="AttendancePolicy",
             action_type="UPDATE",
@@ -117,7 +136,12 @@ def update_policy(policy_id: int, policy: AttendancePolicyCreate, db: Session = 
     return existing
 
 @router.delete("/{policy_id}")
-def delete_policy(policy_id: int, db: Session = Depends(get_db)):
+def delete_policy(
+    request: Request,
+    policy_id: int, 
+    db: Session = Depends(get_db),
+    user_info: dict = Depends(get_current_user_info)
+):
     policy = db.query(models.AttendancePolicy).filter_by(id=policy_id).first()
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
@@ -152,6 +176,9 @@ def delete_policy(policy_id: int, db: Session = Depends(get_db)):
     audit = models.AuditLog(
         event_title="근태 기준 설정 삭제",
         event_desc=f"근태 정책 '{old_data['name']}'이(가) 삭제되었습니다.",
+        user_name=user_info.get("name", "Unknown"),
+        user_email=user_info.get("email", "Unknown"),
+        ip_address=request.client.host if request.client else "Unknown",
         severity="INFO",
         target_resource="AttendancePolicy",
         action_type="DELETE",

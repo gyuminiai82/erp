@@ -14,8 +14,8 @@ class AuditLogResponse(BaseModel):
     created_at: datetime
     event_title: str
     event_desc: str
-    user_email: str
-    ip_address: str
+    user_email: Optional[str] = None
+    ip_address: Optional[str] = None
     severity: str
     target_resource: Optional[str] = None
     action_type: Optional[str] = None

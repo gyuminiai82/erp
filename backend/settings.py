@@ -4,6 +4,8 @@ from pydantic import BaseModel
 
 import models
 from database import get_db
+from auth import get_current_user_info
+from fastapi import Request
 
 router = APIRouter(prefix="/api/settings", tags=["Settings"])
 
@@ -44,7 +46,12 @@ def get_settings(db: Session = Depends(get_db)):
     return setting
 
 @router.put("", response_model=SystemSettingSchema)
-def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db)):
+def update_settings(
+    request: Request,
+    payload: SystemSettingSchema, 
+    db: Session = Depends(get_db),
+    user_info: dict = Depends(get_current_user_info)
+):
     setting = db.query(models.SystemSetting).first()
     if not setting:
         raise HTTPException(status_code=404, detail="설정을 찾을 수 없습니다.")
@@ -98,9 +105,9 @@ def update_settings(payload: SystemSettingSchema, db: Session = Depends(get_db))
         audit = models.AuditLog(
             event_title="시스템 환경설정 변경",
             event_desc="사번 생성 규칙 또는 급여/보험 정책이 변경되었습니다.",
-            user_name="SysAdmin",
-            user_email="admin@minstudio.com",
-            ip_address="127.0.0.1",
+            user_name=user_info.get("name", "Unknown"),
+            user_email=user_info.get("email", "Unknown"),
+            ip_address=request.client.host if request.client else "Unknown",
             severity="WARNING",
             target_resource="system_settings",
             action_type="UPDATE",

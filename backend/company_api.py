@@ -5,6 +5,8 @@ from typing import Optional
 
 import models
 from database import get_db
+from auth import get_current_user_info
+from fastapi import Request
 
 router = APIRouter(prefix="/api/company", tags=["CompanyInfo"])
 
@@ -31,7 +33,12 @@ def get_company_info(db: Session = Depends(get_db)):
     return info
 
 @router.put("", response_model=CompanyInfoSchema)
-def update_company_info(data: CompanyInfoSchema, db: Session = Depends(get_db)):
+def update_company_info(
+    request: Request,
+    data: CompanyInfoSchema, 
+    db: Session = Depends(get_db),
+    user_info: dict = Depends(get_current_user_info)
+):
     info = db.query(models.CompanyInfo).first()
     if not info:
         info = models.CompanyInfo()
@@ -73,6 +80,9 @@ def update_company_info(data: CompanyInfoSchema, db: Session = Depends(get_db)):
         audit = models.AuditLog(
             event_title="회사 정보 변경",
             event_desc="대표자명 등 회사 기본 정보가 변경되었습니다.",
+            user_name=user_info.get("name", "Unknown"),
+            user_email=user_info.get("email", "Unknown"),
+            ip_address=request.client.host if request.client else "Unknown",
             severity="INFO",
             target_resource="CompanyInfo",
             action_type="UPDATE",
