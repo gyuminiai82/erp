@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, FileText, Download } from 'lucide-react';
 import { useDialog } from "@/components/providers/DialogProvider";
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 export default function MyPayslipPage() {
@@ -81,12 +81,13 @@ export default function MyPayslipPage() {
     
     setIsDownloading(true);
     try {
-      const canvas = await html2canvas(pdfRef.current, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = await toPng(pdfRef.current, { cacheBust: true, pixelRatio: 2 });
       const pdf = new jsPDF('p', 'mm', 'a4');
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const elWidth = pdfRef.current.offsetWidth;
+      const elHeight = pdfRef.current.offsetHeight;
+      const pdfHeight = (elHeight * pdfWidth) / elWidth;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`급여명세서_${currentMonth}_${currentPayroll.employee_name}.pdf`);
