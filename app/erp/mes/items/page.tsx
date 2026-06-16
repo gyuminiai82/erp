@@ -54,11 +54,23 @@ export default function ItemsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">품목 관리</h1>
-        <Button onClick={createItem}>+ 품목 등록</Button>
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">품목 관리</h1>
+          <p className="text-gray-500">생산에 필요한 원자재, 반제품, 완제품의 품목을 관리합니다.</p>
+        </div>
       </div>
-      <DataGrid data={items} columns={columns} />
+      
+      <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+        <div className="p-4 bg-gray-50/50 border-b border-gray-200 flex justify-end">
+          <Button onClick={createItem} className="bg-slate-800 hover:bg-slate-700 text-white shadow-sm border border-slate-800">
+            + 품목 등록
+          </Button>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <DataGrid data={items} columns={columns} showCheckboxes={true} />
+        </div>
+      </div>
     </div>
   );
 }
