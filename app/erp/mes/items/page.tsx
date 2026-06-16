@@ -56,7 +56,7 @@ export default function ItemsPage() {
         <h1 className="text-2xl font-bold">품목 관리</h1>
         <Button onClick={createItem}>+ 품목 등록</Button>
       </div>
-      <DataGrid rows={items} columns={columns} />
+      <DataGrid data={items} columns={columns} />
     </div>
   );
 }

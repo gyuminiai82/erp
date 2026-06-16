@@ -59,7 +59,7 @@ export default function WorkOrdersPage() {
         <h1 className="text-2xl font-bold">작업 지시서 관리</h1>
         <Button onClick={createOrder}>+ 작업 지시서 발행</Button>
       </div>
-      <DataGrid rows={orders} columns={columns} />
+      <DataGrid data={orders} columns={columns} />
     </div>
   );
 }
