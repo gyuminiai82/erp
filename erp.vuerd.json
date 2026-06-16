@@ -53,7 +53,9 @@
       "c908ae05961347feb4aa8bde7a361008",
       "976826598aba485f8fa3c4eccb32ae8c",
       "4d70e66d9e504aff8315bb715162fdf4",
-      "0c14688c22ff4f33a6d3e6967256e4b7"
+      "0c14688c22ff4f33a6d3e6967256e4b7",
+      "7b822da4224a441da4ec2c652ab88309",
+      "7f3cb13508424b86ba5cf0206f05d663"
     ],
     "relationshipIds": [
       "10f12f2983c448e2b0bf92591481be3d",
@@ -70,7 +72,8 @@
       "97da8444d28c434192503050c857eecf",
       "205df3583c9b4762a124a98bdcda8ce7",
       "bc5d670aaf6644d7b619dc72bcf1a44a",
-      "e97422ed929041fa86a85702699b65a6"
+      "e97422ed929041fa86a85702699b65a6",
+      "7ad889f2030c4f28aa84abdd9796e780"
     ],
     "indexIds": [],
     "memoIds": []
@@ -882,6 +885,76 @@
         "meta": {
           "updateAt": 1781583224988,
           "createAt": 1781583224988
+        }
+      },
+      "7b822da4224a441da4ec2c652ab88309": {
+        "id": "7b822da4224a441da4ec2c652ab88309",
+        "name": "journal_entries",
+        "comment": "전표 마스터",
+        "columnIds": [
+          "c4f350d9a06a4c7884baf3311d1b5a1d",
+          "279222e5143a4d41ab6bb86d1e3c7b4b",
+          "63ca3d8167444503b7eb2e2023d6d1ff",
+          "6b74bfba3d3e438789c18319b4b78a52",
+          "e22bd2d366ed40f1978d6af47cdf7cd2",
+          "2b30b976e4a742b1b4b986e975705d1f",
+          "c85aab237a004bfcad59d3d8fe5aece7"
+        ],
+        "seqColumnIds": [
+          "c4f350d9a06a4c7884baf3311d1b5a1d",
+          "279222e5143a4d41ab6bb86d1e3c7b4b",
+          "63ca3d8167444503b7eb2e2023d6d1ff",
+          "6b74bfba3d3e438789c18319b4b78a52",
+          "e22bd2d366ed40f1978d6af47cdf7cd2",
+          "2b30b976e4a742b1b4b986e975705d1f",
+          "c85aab237a004bfcad59d3d8fe5aece7"
+        ],
+        "ui": {
+          "x": 100,
+          "y": 100,
+          "zIndex": 2,
+          "widthName": 120,
+          "widthComment": 100,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "7f3cb13508424b86ba5cf0206f05d663": {
+        "id": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "journal_entry_lines",
+        "comment": "전표 라인",
+        "columnIds": [
+          "d045a9cac96a4e2dae925a81d41f2585",
+          "5dfdfaf9bdc0484b9ad183804125f22b",
+          "493668e8f0d44a7f9353512de83f1080",
+          "463e201a62fb4451a1e741fb1091ca9c",
+          "a23be20565c44d33ab8bbe47c7b50ab5",
+          "8311cd03fb764e9f9586d7734e50c786",
+          "c7b0968302ff4964a64b405d6576f2b1"
+        ],
+        "seqColumnIds": [
+          "d045a9cac96a4e2dae925a81d41f2585",
+          "5dfdfaf9bdc0484b9ad183804125f22b",
+          "493668e8f0d44a7f9353512de83f1080",
+          "463e201a62fb4451a1e741fb1091ca9c",
+          "a23be20565c44d33ab8bbe47c7b50ab5",
+          "8311cd03fb764e9f9586d7734e50c786",
+          "c7b0968302ff4964a64b405d6576f2b1"
+        ],
+        "ui": {
+          "x": 500,
+          "y": 100,
+          "zIndex": 2,
+          "widthName": 150,
+          "widthComment": 100,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
         }
       }
     },
@@ -4105,6 +4178,356 @@
           "updateAt": 1781583224988,
           "createAt": 1781583224988
         }
+      },
+      "c4f350d9a06a4c7884baf3311d1b5a1d": {
+        "id": "c4f350d9a06a4c7884baf3311d1b5a1d",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "id",
+        "comment": "PK",
+        "dataType": "INT",
+        "default": "",
+        "options": {
+          "autoIncrement": true,
+          "primaryKey": true,
+          "unique": false,
+          "notNull": true
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "279222e5143a4d41ab6bb86d1e3c7b4b": {
+        "id": "279222e5143a4d41ab6bb86d1e3c7b4b",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "entry_date",
+        "comment": "전표일자",
+        "dataType": "DATE",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": true
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "63ca3d8167444503b7eb2e2023d6d1ff": {
+        "id": "63ca3d8167444503b7eb2e2023d6d1ff",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "entry_type",
+        "comment": "유형",
+        "dataType": "VARCHAR(50)",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "6b74bfba3d3e438789c18319b4b78a52": {
+        "id": "6b74bfba3d3e438789c18319b4b78a52",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "description",
+        "comment": "적요",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "e22bd2d366ed40f1978d6af47cdf7cd2": {
+        "id": "e22bd2d366ed40f1978d6af47cdf7cd2",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "status",
+        "comment": "상태",
+        "dataType": "VARCHAR(50)",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "2b30b976e4a742b1b4b986e975705d1f": {
+        "id": "2b30b976e4a742b1b4b986e975705d1f",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "creator_id",
+        "comment": "작성자",
+        "dataType": "INT",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "c85aab237a004bfcad59d3d8fe5aece7": {
+        "id": "c85aab237a004bfcad59d3d8fe5aece7",
+        "tableId": "7b822da4224a441da4ec2c652ab88309",
+        "name": "approver_id",
+        "comment": "승인자",
+        "dataType": "INT",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "d045a9cac96a4e2dae925a81d41f2585": {
+        "id": "d045a9cac96a4e2dae925a81d41f2585",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "id",
+        "comment": "PK",
+        "dataType": "INT",
+        "default": "",
+        "options": {
+          "autoIncrement": true,
+          "primaryKey": true,
+          "unique": false,
+          "notNull": true
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "5dfdfaf9bdc0484b9ad183804125f22b": {
+        "id": "5dfdfaf9bdc0484b9ad183804125f22b",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "journal_entry_id",
+        "comment": "전표 마스터 FK",
+        "dataType": "INT",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": true
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "493668e8f0d44a7f9353512de83f1080": {
+        "id": "493668e8f0d44a7f9353512de83f1080",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "account_code",
+        "comment": "계정 코드",
+        "dataType": "VARCHAR(50)",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "463e201a62fb4451a1e741fb1091ca9c": {
+        "id": "463e201a62fb4451a1e741fb1091ca9c",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "account_name",
+        "comment": "계정명",
+        "dataType": "VARCHAR(100)",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "a23be20565c44d33ab8bbe47c7b50ab5": {
+        "id": "a23be20565c44d33ab8bbe47c7b50ab5",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "debit",
+        "comment": "차변",
+        "dataType": "FLOAT",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "8311cd03fb764e9f9586d7734e50c786": {
+        "id": "8311cd03fb764e9f9586d7734e50c786",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "credit",
+        "comment": "대변",
+        "dataType": "FLOAT",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "c7b0968302ff4964a64b405d6576f2b1": {
+        "id": "c7b0968302ff4964a64b405d6576f2b1",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "description",
+        "comment": "적요",
+        "dataType": "VARCHAR(255)",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
       }
     },
     "relationshipEntities": {
@@ -4522,6 +4945,34 @@
           "x": 1160.0454,
           "y": 1299.5455,
           "direction": 4
+        },
+        "meta": {
+          "updateAt": 1781225924433,
+          "createAt": 1781225924433
+        }
+      },
+      "7ad889f2030c4f28aa84abdd9796e780": {
+        "id": "7ad889f2030c4f28aa84abdd9796e780",
+        "identification": false,
+        "relationshipType": "ZeroOneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "7b822da4224a441da4ec2c652ab88309",
+          "columnIds": [
+            "c4f350d9a06a4c7884baf3311d1b5a1d"
+          ],
+          "x": 220,
+          "y": 100,
+          "direction": "right"
+        },
+        "end": {
+          "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+          "columnIds": [
+            "5dfdfaf9bdc0484b9ad183804125f22b"
+          ],
+          "x": 500,
+          "y": 100,
+          "direction": "left"
         },
         "meta": {
           "updateAt": 1781225924433,

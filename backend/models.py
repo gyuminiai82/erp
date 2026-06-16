@@ -310,6 +310,12 @@ class Item(Base):
     item_type = Column(String)  # 완제품, 반제품, 원자재
     unit = Column(String)       # EA, KG, L 등
     standard = Column(String, nullable=True) # 규격
+    standard_cost = Column(Float, default=0.0)  # 표준 단가
+    safety_stock = Column(Float, default=0.0)   # 안전 재고
+    current_stock = Column(Float, default=0.0)  # 현재 재고
+    lead_time = Column(Integer, default=0)      # 리드 타임(일)
+    is_lot_tracked = Column(Boolean, default=False) # 로트 관리 여부
+    location = Column(String, nullable=True)    # 창고 위치
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -342,3 +348,33 @@ class WorkOrder(Base):
 
     item = relationship("Item")
     manager = relationship("Employee")
+
+class JournalEntry(Base):
+    __tablename__ = "journal_entries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    entry_date = Column(Date, nullable=False, index=True)
+    entry_type = Column(String, default="대체") # 입금, 출금, 대체
+    description = Column(String, nullable=True)
+    status = Column(String, default="작성중") # 작성중, 승인요청, 승인완료
+    creator_id = Column(Integer, ForeignKey("employees.id"))
+    approver_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    creator = relationship("Employee", foreign_keys=[creator_id])
+    approver = relationship("Employee", foreign_keys=[approver_id])
+    lines = relationship("JournalEntryLine", back_populates="journal_entry", cascade="all, delete-orphan")
+
+class JournalEntryLine(Base):
+    __tablename__ = "journal_entry_lines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    journal_entry_id = Column(Integer, ForeignKey("journal_entries.id", ondelete="CASCADE"), index=True)
+    account_code = Column(String, index=True)
+    account_name = Column(String)
+    debit = Column(Float, default=0.0)  # 차변
+    credit = Column(Float, default=0.0) # 대변
+    description = Column(String, nullable=True)
+
+    journal_entry = relationship("JournalEntry", back_populates="lines")

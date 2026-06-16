@@ -43,7 +43,7 @@ def inject_menus():
                 "name": "회계/재무 관리",
                 "icon": "Calculator",
                 "submenus": [
-                    {"name": "전표 관리", "url": "/erp/vouchers", "roles": ["master"]},
+                    {"name": "전표 관리", "url": "/erp/accounting/journals", "roles": ["master"]},
                     {"name": "계정과목", "url": "/erp/accounts", "roles": ["master"]},
                     {"name": "자금 현황", "url": "/erp/funds", "roles": ["master"]},
                     {"name": "재무제표", "url": "/erp/statements", "roles": ["master"]}
