@@ -28,6 +28,45 @@ def get_current_employee(credentials: HTTPAuthorizationCredentials = Depends(sec
 from sqlalchemy.orm import joinedload
 import calendar
 
+@router.get("/my")
+def get_my_attendances(year: int, month: int, emp: models.Employee = Depends(get_current_employee), db: Session = Depends(get_db)):
+    start_date = date(year, month, 1)
+    end_date = date(year, month, calendar.monthrange(year, month)[1])
+    
+    records = db.query(models.Attendance).filter(
+        models.Attendance.employee_id == emp.id,
+        models.Attendance.work_date >= start_date,
+        models.Attendance.work_date <= end_date
+    ).all()
+    
+    result = []
+    for r in records:
+        result.append({
+            "id": r.id,
+            "work_date": r.work_date,
+            "check_in": r.check_in,
+            "check_out": r.check_out,
+            "status": r.status,
+        })
+        
+    leaves_query = db.query(models.LeaveRequest).filter(
+        models.LeaveRequest.employee_id == emp.id,
+        models.LeaveRequest.status == '승인',
+        models.LeaveRequest.start_date <= end_date,
+        models.LeaveRequest.end_date >= start_date
+    ).all()
+
+    leaves = []
+    for l in leaves_query:
+        leaves.append({
+            "id": l.id,
+            "start_date": l.start_date,
+            "end_date": l.end_date,
+            "leave_type": l.leave_type,
+        })
+
+    return {"attendances": result, "leaves": leaves}
+
 @router.get("/all")
 def get_all_attendances(year: int, month: int, emp: models.Employee = Depends(get_current_employee), db: Session = Depends(get_db)):
     start_date = date(year, month, 1)

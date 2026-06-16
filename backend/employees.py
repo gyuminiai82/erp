@@ -8,6 +8,8 @@ import models
 from database import get_db
 from auth import get_password_hash
 import crypto
+from auth import get_current_employee
+import json
 
 router = APIRouter(
     prefix="/api/employees",
@@ -412,7 +414,7 @@ def bulk_create_employees(payload: EmployeeBulkCreateRequest, db: Session = Depe
     return {"message": f"{len(created_ids)}명의 사원이 성공적으로 등록되었습니다."}
 
 @router.post("/bulk-delete")
-def bulk_delete_employees(payload: EmployeeBulkDeleteRequest, db: Session = Depends(get_db)):
+def bulk_delete_employees(payload: EmployeeBulkDeleteRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     emps = db.query(models.Employee).filter(models.Employee.id.in_(payload.employee_ids)).all()
     if not emps:
         raise HTTPException(status_code=404, detail="No employees found")
@@ -421,10 +423,25 @@ def bulk_delete_employees(payload: EmployeeBulkDeleteRequest, db: Session = Depe
         emp.deleted_at = datetime.now()
     
     db.commit()
+    
+    try:
+        audit = models.AuditLog(
+            event_title="사원 일괄 삭제",
+            event_desc=f"{len(emps)}명의 사원을 삭제했습니다.",
+            user_name=current_user.name if current_user else "시스템",
+            user_email=current_user.email if current_user else "system",
+            payload=json.dumps({"deleted_ids": payload.employee_ids}, ensure_ascii=False)
+        )
+        db.add(audit)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print("AuditLog error:", e)
+        
     return {"message": f"{len(emps)}명의 사원이 삭제되었습니다."}
 
 @router.put("/bulk-update")
-def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depends(get_db)):
+def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     dept_map = {d.name: d.id for d in db.query(models.Department).all()}
     pos_map = {p.name: p.id for p in db.query(models.Position).all()}
     
@@ -467,4 +484,19 @@ def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depe
                 except: pass
                 
     db.commit()
+    
+    try:
+        audit = models.AuditLog(
+            event_title="사원 일괄 수정",
+            event_desc=f"{len(payload.employees)}명의 사원 정보를 수정했습니다.",
+            user_name=current_user.name if current_user else "시스템",
+            user_email=current_user.email if current_user else "system",
+            payload=json.dumps({"updated_count": len(payload.employees)}, ensure_ascii=False)
+        )
+        db.add(audit)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print("AuditLog error:", e)
+        
     return {"message": f"{len(payload.employees)}명의 사원이 수정되었습니다."}
