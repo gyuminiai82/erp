@@ -75,19 +75,42 @@ export default function ItemsPage() {
     }
   };
 
+  const handleDataChange = async (rowIndex: number, field: string, newValue: any) => {
+    const updatedItem = { ...items[rowIndex], [field]: newValue };
+    
+    // Optimistic UI update
+    const newItems = [...items];
+    newItems[rowIndex] = updatedItem;
+    setItems(newItems);
+
+    try {
+      const res = await fetch(`/api/mes/items/${updatedItem.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedItem)
+      });
+      if (!res.ok) {
+        throw new Error("수정 실패");
+      }
+    } catch (err) {
+      showAlert("데이터 수정 중 오류가 발생했습니다.", { type: "error" });
+      fetchItems(); // Revert on failure
+    }
+  };
+
   const columns = [
-    { field: "item_code", headerName: "품목코드", width: 150 },
-    { field: "item_name", headerName: "품목명", width: 220, renderCell: (val: any) => <span>{val}</span> },
-    { field: "item_type", headerName: "유형", width: 100 },
-    { field: "standard", headerName: "규격", width: 160, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
-    { field: "current_stock", headerName: "현재고", width: 100, renderCell: (val: any, row: any) => {
-        return <div className="text-right w-full">{val.toLocaleString()} <span className="text-xs font-normal text-gray-500">{row.unit}</span></div>;
+    { field: "item_code", headerName: "품목코드", width: 150, editable: true },
+    { field: "item_name", headerName: "품목명", width: 220, editable: true, renderCell: (val: any) => <span>{val}</span> },
+    { field: "item_type", headerName: "유형", width: 100, editable: true },
+    { field: "standard", headerName: "규격", width: 160, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
+    { field: "current_stock", headerName: "현재고", width: 100, editable: true, renderCell: (val: any, row: any) => {
+        return <div className="text-right w-full">{Number(val).toLocaleString()} <span className="text-xs font-normal text-gray-500">{row.unit}</span></div>;
       }
     },
-    { field: "safety_stock", headerName: "안전재고", width: 90, renderCell: (val: any) => <div className="text-right w-full text-gray-600">{val.toLocaleString()}</div> },
-    { field: "standard_cost", headerName: "표준단가", width: 120, renderCell: (val: any) => <div className="text-right w-full">{val.toLocaleString()}원</div> },
-    { field: "lead_time", headerName: "L/T", width: 70, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
-    { field: "location", headerName: "창고위치", width: 140, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
+    { field: "safety_stock", headerName: "안전재고", width: 90, editable: true, renderCell: (val: any) => <div className="text-right w-full text-gray-600">{Number(val).toLocaleString()}</div> },
+    { field: "standard_cost", headerName: "표준단가", width: 120, editable: true, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
+    { field: "lead_time", headerName: "L/T", width: 70, editable: true, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
+    { field: "location", headerName: "창고위치", width: 140, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
   ];
 
   return (
@@ -109,7 +132,7 @@ export default function ItemsPage() {
           </div>
           
           <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-            <DataGrid data={items} columns={columns} showCheckboxes={true} />
+            <DataGrid data={items} columns={columns} showCheckboxes={true} onDataChange={handleDataChange} />
           </div>
         </div>
       </div>
