@@ -355,7 +355,9 @@ export default function PayrollsPage() {
             선택한 월({currentMonth})의 급여 데이터가 없습니다.
           </div>
         ) : (
-          <DataGrid columns={columns} data={payrolls} />
+          <div className="flex flex-col h-[calc(100vh-280px)] min-h-[400px]">
+            <DataGrid columns={columns} data={payrolls} />
+          </div>
         )}
       </div>
 
