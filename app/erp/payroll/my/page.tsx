@@ -101,6 +101,18 @@ export default function MyPayslipPage() {
 
   const currentPayroll = payrolls.length > 0 ? payrolls[0] : null;
 
+  // 세부 내역 동적 계산 (백엔드와 동일한 요율 적용)
+  let nps = 0, nhis = 0, ltci = 0, ei = 0, calculatedDeductions = 0, otherDeductions = 0;
+  if (currentPayroll) {
+    const totalSalary = currentPayroll.base_salary + currentPayroll.bonus;
+    nps = Math.floor(totalSalary * 0.045);
+    nhis = Math.floor(totalSalary * 0.03545);
+    ltci = Math.floor(nhis * 0.1295);
+    ei = Math.floor(totalSalary * 0.009);
+    calculatedDeductions = Math.floor((nps + nhis + ltci + ei) / 10) * 10;
+    otherDeductions = currentPayroll.deductions - calculatedDeductions;
+  }
+
   return (
     <div className="w-full h-full flex flex-col p-6">
       <div className="flex flex-col sm:flex-row justify-between items-end mb-8">
@@ -172,13 +184,21 @@ export default function MyPayslipPage() {
                   <span className="w-2 h-6 bg-blue-500 rounded-full mr-2"></span>
                   지급 내역
                 </h3>
-                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
+                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-3 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">기본급</span>
                     <span className="font-semibold text-gray-800">{currentPayroll.base_salary.toLocaleString()} 원</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">상여 및 수당</span>
+                    <span className="text-gray-600">식대 (비과세)</span>
+                    <span className="font-semibold text-gray-800">0 원</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">직책 수당</span>
+                    <span className="font-semibold text-gray-800">0 원</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">연장 및 휴일근로수당</span>
                     <span className="font-semibold text-gray-800">{currentPayroll.bonus.toLocaleString()} 원</span>
                   </div>
                   <div className="pt-4 mt-2 border-t border-gray-200 flex justify-between items-center">
@@ -194,11 +214,29 @@ export default function MyPayslipPage() {
                   <span className="w-2 h-6 bg-red-500 rounded-full mr-2"></span>
                   공제 내역
                 </h3>
-                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
+                <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-3 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">4대보험 및 세금 (합계)</span>
-                    <span className="font-semibold text-gray-800">{currentPayroll.deductions.toLocaleString()} 원</span>
+                    <span className="text-gray-600">국민연금 (4.5%)</span>
+                    <span className="font-semibold text-gray-800">{nps.toLocaleString()} 원</span>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">건강보험 (3.545%)</span>
+                    <span className="font-semibold text-gray-800">{nhis.toLocaleString()} 원</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">장기요양보험 (12.95%)</span>
+                    <span className="font-semibold text-gray-800">{ltci.toLocaleString()} 원</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">고용보험 (0.9%)</span>
+                    <span className="font-semibold text-gray-800">{ei.toLocaleString()} 원</span>
+                  </div>
+                  {otherDeductions > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">소득세 및 기타</span>
+                      <span className="font-semibold text-gray-800">{otherDeductions.toLocaleString()} 원</span>
+                    </div>
+                  )}
                   <div className="pt-4 mt-2 border-t border-gray-200 flex justify-between items-center">
                     <span className="font-bold text-gray-700">공제 총액</span>
                     <span className="font-bold text-red-500 text-lg">{currentPayroll.deductions.toLocaleString()} 원</span>
