@@ -88,12 +88,6 @@ export default function ItemsPage() {
     { field: "standard_cost", headerName: "표준단가", width: 120, renderCell: (val: any) => <div className="text-right w-full">{val.toLocaleString()}원</div> },
     { field: "lead_time", headerName: "L/T", width: 70, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
     { field: "location", headerName: "창고위치", width: 140, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
-    { field: "is_lot_tracked", headerName: "LOT", width: 70, renderCell: (val: any) => (
-        <div className="w-full flex justify-center text-gray-600">
-          {val ? <span>추적</span> : <span>-</span>}
-        </div>
-      )
-    },
   ];
 
   return (
