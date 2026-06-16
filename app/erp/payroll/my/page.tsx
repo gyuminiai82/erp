@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, FileText, Download } from 'lucide-react';
 import { useDialog } from "@/components/providers/DialogProvider";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 export default function MyPayslipPage() {
   const [currentMonth, setCurrentMonth] = useState<string>("");
   const [payrolls, setPayrolls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { showAlert } = useDialog();
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const today = new Date();
@@ -72,8 +76,26 @@ export default function MyPayslipPage() {
     setCurrentMonth(`${newY}-${newM.toString().padStart(2, '0')}`);
   };
 
-  const handleDownload = () => {
-    showAlert("명세서 PDF 다운로드 기능은 준비 중입니다.", { type: "info" });
+  const handleDownload = async () => {
+    if (!currentPayroll || !pdfRef.current) return;
+    
+    setIsDownloading(true);
+    try {
+      const canvas = await html2canvas(pdfRef.current, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`급여명세서_${currentMonth}_${currentPayroll.employee_name}.pdf`);
+    } catch (error) {
+      console.error("PDF 생성 중 오류 발생:", error);
+      showAlert("PDF 다운로드 중 오류가 발생했습니다.", { type: "error" });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const currentPayroll = payrolls.length > 0 ? payrolls[0] : null;
@@ -102,8 +124,16 @@ export default function MyPayslipPage() {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-          <button onClick={handleDownload} className="flex items-center px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors shadow-sm font-medium">
-            <Download className="w-4 h-4 mr-2" />
+          <button 
+            onClick={handleDownload} 
+            disabled={!currentPayroll || isDownloading}
+            className="flex items-center px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm font-medium"
+          >
+            {isDownloading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
             명세서 다운로드
           </button>
         </div>
@@ -114,7 +144,7 @@ export default function MyPayslipPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#107C41]"></div>
         </div>
       ) : currentPayroll ? (
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden relative">
+        <div ref={pdfRef} className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden relative">
           {/* Header Pattern */}
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#107C41] to-emerald-400"></div>
           
