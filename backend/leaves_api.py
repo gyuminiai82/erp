@@ -278,3 +278,19 @@ def update_leave_status(leave_id: int, req: LeaveRequestStatusUpdate, emp: model
         "approver_id": leave.approver_id,
         "employee": emp_base
     }
+
+@router.delete("/{leave_id}")
+def delete_leave(leave_id: int, emp: models.Employee = Depends(get_current_employee), db: Session = Depends(get_db)):
+    leave = db.query(models.LeaveRequest).filter(models.LeaveRequest.id == leave_id).first()
+    if not leave:
+        raise HTTPException(status_code=404, detail="Leave request not found")
+        
+    if leave.employee_id != emp.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this leave request")
+        
+    if leave.status != "대기":
+        raise HTTPException(status_code=400, detail="Only pending leave requests can be deleted")
+        
+    db.delete(leave)
+    db.commit()
+    return {"detail": "Leave request deleted successfully"}

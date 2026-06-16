@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function LeaveApplicationPage() {
-  const { showAlert } = useDialog();
+  const { showAlert, showConfirm } = useDialog();
   const [leaves, setLeaves] = useState<any[]>([]);
   const [form, setForm] = useState({
     start_date: '',
@@ -97,6 +97,32 @@ export default function LeaveApplicationPage() {
       await showAlert("휴가 신청 중 오류가 발생했습니다.", { type: "error" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelLeave = async (id: number) => {
+    const confirmed = await showConfirm("정말 휴가 신청을 취소하시겠습니까?", { type: "warning" });
+    if (!confirmed) return;
+    
+    try {
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+      const res = await fetch(`/api/leaves/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (res.ok) {
+        await showAlert("휴가 신청이 취소되었습니다.", { type: "success" });
+        fetchMyLeaves();
+      } else {
+        const err = await res.json();
+        await showAlert(`취소 실패: ${err.detail || '알 수 없는 오류'}`, { type: "error" });
+      }
+    } catch (e) {
+      console.error(e);
+      await showAlert("취소 중 오류가 발생했습니다.", { type: "error" });
     }
   };
 
@@ -234,12 +260,13 @@ export default function LeaveApplicationPage() {
                   <th className="py-3 px-6 font-semibold">종류</th>
                   <th className="py-3 px-6 font-semibold">사유</th>
                   <th className="py-3 px-6 font-semibold text-center">결재 상태</th>
+                  <th className="py-3 px-6 font-semibold text-center">관리</th>
                 </tr>
               </thead>
               <tbody className="text-sm divide-y divide-gray-100">
                 {leaves.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-10 text-center text-gray-500">
+                    <td colSpan={5} className="py-10 text-center text-gray-500">
                       휴가 신청 내역이 없습니다.
                     </td>
                   </tr>
@@ -263,6 +290,18 @@ export default function LeaveApplicationPage() {
                       </td>
                       <td className="py-3 px-6 text-center">
                         {getStatusBadge(l.status)}
+                      </td>
+                      <td className="py-3 px-6 text-center">
+                        {l.status === '대기' ? (
+                          <button 
+                            onClick={() => handleCancelLeave(l.id)}
+                            className="text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded border border-red-200 transition-colors shadow-sm"
+                          >
+                            취소
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )}
                       </td>
                     </tr>
                   ))
