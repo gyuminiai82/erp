@@ -339,17 +339,6 @@ export default function PayrollsPage() {
 
   const columns: ColumnDef[] = [
     {
-      field: '_state',
-      headerName: '상태',
-      width: 60,
-      renderCell: (val: any) => {
-        if (val === 'C' || val === 'I') return <span className="text-blue-500 font-bold bg-blue-50 px-2 py-0.5 rounded text-xs">I</span>;
-        if (val === 'U') return <span className="text-orange-500 font-bold bg-orange-50 px-2 py-0.5 rounded text-xs">U</span>;
-        if (val === 'D') return <span className="text-red-500 font-bold bg-red-50 px-2 py-0.5 rounded text-xs line-through">D</span>;
-        return <span className="text-gray-400 text-xs">-</span>;
-      }
-    },
-    {
       field: 'employee_no',
       headerName: '사번',
       width: 100,
@@ -358,9 +347,6 @@ export default function PayrollsPage() {
       field: 'employee_id',
       headerName: '이름',
       width: 120,
-      editable: true,
-      editType: 'select',
-      options: employees.map(e => ({ label: `${e.name} (${e.department_name || '미지정'})`, value: e.id })),
       renderCell: (val: any, row: any) => <span>{row.employee_name || '-'}</span>
     },
     {
@@ -385,17 +371,74 @@ export default function PayrollsPage() {
     },
     {
       field: 'bonus',
-      headerName: '상여금',
-      width: 130,
+      headerName: '상여/수당',
+      width: 110,
       editable: true,
       renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
     },
     {
+      field: 'nps',
+      headerName: '국민연금',
+      width: 100,
+      renderCell: (val: any, row: any) => {
+        const total = Number(row.base_salary || 0) + Number(row.bonus || 0);
+        const amt = Math.floor(total * 0.045);
+        return <div className="text-right w-full text-red-500/80">-{amt.toLocaleString()}</div>;
+      }
+    },
+    {
+      field: 'hi',
+      headerName: '건강보험',
+      width: 100,
+      renderCell: (val: any, row: any) => {
+        const total = Number(row.base_salary || 0) + Number(row.bonus || 0);
+        const amt = Math.floor(total * 0.03545);
+        return <div className="text-right w-full text-red-500/80">-{amt.toLocaleString()}</div>;
+      }
+    },
+    {
+      field: 'ltci',
+      headerName: '장기요양',
+      width: 90,
+      renderCell: (val: any, row: any) => {
+        const total = Number(row.base_salary || 0) + Number(row.bonus || 0);
+        const hi = Math.floor(total * 0.03545);
+        const amt = Math.floor(hi * 0.1295);
+        return <div className="text-right w-full text-red-500/80">-{amt.toLocaleString()}</div>;
+      }
+    },
+    {
+      field: 'ei',
+      headerName: '고용보험',
+      width: 90,
+      renderCell: (val: any, row: any) => {
+        const total = Number(row.base_salary || 0) + Number(row.bonus || 0);
+        const amt = Math.floor(total * 0.009);
+        return <div className="text-right w-full text-red-500/80">-{amt.toLocaleString()}</div>;
+      }
+    },
+    {
+      field: 'tax',
+      headerName: '소득세등',
+      width: 90,
+      renderCell: (val: any, row: any) => {
+        const total = Number(row.base_salary || 0) + Number(row.bonus || 0);
+        const nps = Math.floor(total * 0.045);
+        const hi = Math.floor(total * 0.03545);
+        const ltci = Math.floor(hi * 0.1295);
+        const ei = Math.floor(total * 0.009);
+        const calcDed = Math.floor((nps + hi + ltci + ei) / 10) * 10;
+        const diff = Number(row.deductions || 0) - calcDed;
+        const amt = diff > 0 ? diff : 0;
+        return <div className="text-right w-full text-red-500/80">-{amt.toLocaleString()}</div>;
+      }
+    },
+    {
       field: 'deductions',
-      headerName: '공제액',
-      width: 130,
+      headerName: '공제총액',
+      width: 110,
       editable: true,
-      renderCell: (val: any) => <div className="text-right w-full text-red-500">-{Number(val).toLocaleString()}원</div>
+      renderCell: (val: any) => <div className="text-right w-full text-red-500 font-medium">-{Number(val).toLocaleString()}원</div>
     },
     {
       field: 'net_pay',
