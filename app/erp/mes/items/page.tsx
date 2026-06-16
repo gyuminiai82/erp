@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { DataGrid } from "@/components/ui/DataGrid";
+import { useState, useEffect, useMemo } from "react";
+import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
 import { useDialog } from "@/components/providers/DialogProvider";
 import { Plus, X, Box, Warehouse, Wrench, ShieldAlert, Tag, Layers, DollarSign, Clock } from "lucide-react";
@@ -25,9 +25,20 @@ export default function ItemsPage() {
   
   const { showAlert } = useDialog();
 
+  const [unitOptions, setUnitOptions] = useState<{label: string, value: string}[]>([]);
+
   useEffect(() => {
     fetchItems();
+    fetchUnitCodes();
   }, []);
+
+  const fetchUnitCodes = async () => {
+    const res = await fetch("/api/common-codes?group=ITEM_UNIT");
+    if (res.ok) {
+      const data = await res.json();
+      setUnitOptions(data.map((c: any) => ({ label: c.name, value: c.code })));
+    }
+  };
 
   const fetchItems = async () => {
     const res = await fetch("/api/mes/items");
@@ -98,20 +109,21 @@ export default function ItemsPage() {
     }
   };
 
-  const columns = [
+  const columns: ColumnDef[] = useMemo(() => [
     { field: "item_code", headerName: "품목코드", width: 150, editable: true },
     { field: "item_name", headerName: "품목명", width: 220, editable: true, renderCell: (val: any) => <span>{val}</span> },
     { field: "item_type", headerName: "유형", width: 100, editable: true },
+    { field: "unit", headerName: "단위", width: 100, editable: true, editType: 'select', options: unitOptions },
     { field: "standard", headerName: "규격", width: 160, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
     { field: "current_stock", headerName: "현재고", width: 100, editable: true, renderCell: (val: any, row: any) => {
-        return <div className="text-right w-full">{Number(val).toLocaleString()} <span className="text-xs font-normal text-gray-500">{row.unit}</span></div>;
+        return <div className="text-right w-full">{Number(val).toLocaleString()}</div>;
       }
     },
     { field: "safety_stock", headerName: "안전재고", width: 90, editable: true, renderCell: (val: any) => <div className="text-right w-full text-gray-600">{Number(val).toLocaleString()}</div> },
     { field: "standard_cost", headerName: "표준단가", width: 120, editable: true, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
     { field: "lead_time", headerName: "L/T", width: 70, editable: true, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
     { field: "location", headerName: "창고위치", width: 140, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
-  ];
+  ], [unitOptions]);
 
   return (
     <div className="p-6">
@@ -180,13 +192,9 @@ export default function ItemsPage() {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">단위 *</label>
                           <select name="unit" value={formData.unit} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
-                            <option value="EA">EA (개)</option>
-                            <option value="SET">SET (세트)</option>
-                            <option value="BOX">BOX (박스)</option>
-                            <option value="REEL">REEL (릴)</option>
-                            <option value="KG">KG (킬로그램)</option>
-                            <option value="L">L (리터)</option>
-                            <option value="M">M (미터)</option>
+                            {unitOptions.map(opt => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
                           </select>
                         </div>
                       </div>
