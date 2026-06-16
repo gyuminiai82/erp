@@ -245,15 +245,14 @@ export default function PayrollsPage() {
 
   const columns: ColumnDef[] = [
     {
+      field: 'employee_no',
+      headerName: '사번',
+      width: 120,
+    },
+    {
       field: 'employee_name',
-      headerName: '사번/이름',
-      width: 180,
-      renderCell: (val: any, row: any) => (
-        <div>
-          <div className="font-medium text-gray-900">{row.employee_name}</div>
-          <div className="text-xs text-gray-500">{row.employee_no}</div>
-        </div>
-      )
+      headerName: '이름',
+      width: 120,
     },
     {
       field: 'department_name',
