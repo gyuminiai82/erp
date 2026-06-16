@@ -79,6 +79,9 @@ jobs:
           docker-compose -f docker-compose.prod.yml pull
           docker-compose -f docker-compose.prod.yml up -d
           
+          # 데이터베이스 마이그레이션 적용 (변경된 테이블/필드 자동 반영)
+          docker-compose -f docker-compose.prod.yml exec -T backend alembic upgrade head
+          
           # Nginx가 재생성된 컨테이너의 새 IP를 바라보도록 리로드/재시작
           docker-compose -f docker-compose.prod.yml restart nginx
           
