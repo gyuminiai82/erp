@@ -209,17 +209,6 @@ export default function ItemsPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1"><Warehouse className="w-3 h-3"/> 창고 위치</label>
                         <input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="ex: 1층 자재창고 A열 3번선반" />
                       </div>
-
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <label className="flex items-center gap-3 cursor-pointer group">
-                          <div className="relative flex items-center justify-center w-5 h-5 border-2 border-gray-400 rounded group-hover:border-indigo-500 transition-colors">
-                            <input type="checkbox" name="is_lot_tracked" checked={formData.is_lot_tracked} onChange={handleInputChange} className="opacity-0 absolute w-full h-full cursor-pointer z-10" />
-                            {formData.is_lot_tracked && <svg className="w-3 h-3 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-                          </div>
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-indigo-700 transition-colors">LOT 추적 관리 대상</span>
-                        </label>
-                        <p className="text-xs text-gray-500 mt-1 ml-8">바코드나 QR을 통해 개별 입출고 이력을 관리해야 하는 품목일 경우 체크하세요.</p>
-                      </div>
                     </div>
                   </div>
                 </div>
