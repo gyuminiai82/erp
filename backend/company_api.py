@@ -76,19 +76,23 @@ def update_company_info(
     db.refresh(info)
     
     if old_info != new_info:
-        import json
-        audit = models.AuditLog(
-            event_title="회사 정보 변경",
-            event_desc="회사 기본 정보가 변경되었습니다.",
-            user_name=user_info.get("name", "Unknown"),
-            user_email=user_info.get("email", "Unknown"),
-            ip_address=request.client.host if request.client else "Unknown",
-            severity="INFO",
-            target_resource="CompanyInfo",
-            action_type="UPDATE",
-            payload=json.dumps({"old": old_info, "new": new_info}, ensure_ascii=False)
-        )
-        db.add(audit)
-        db.commit()
+        try:
+            import json
+            audit = models.AuditLog(
+                event_title="회사 정보 변경",
+                event_desc="회사 기본 정보가 변경되었습니다.",
+                user_name=user_info.get("name", "Unknown"),
+                user_email=user_info.get("email", "Unknown"),
+                ip_address=request.client.host if request.client else "Unknown",
+                severity="INFO",
+                target_resource="CompanyInfo",
+                action_type="UPDATE",
+                payload=json.dumps({"old": old_info, "new": new_info}, ensure_ascii=False)
+            )
+            db.add(audit)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print(f"AuditLog insertion failed: {e}")
         
     return info

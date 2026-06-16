@@ -126,19 +126,23 @@ def update_settings(
             event_title = "시스템 환경설정 변경"
             event_desc = "시스템 환경설정이 변경되었습니다."
 
-        import json
-        audit = models.AuditLog(
-            event_title=event_title,
-            event_desc=event_desc,
-            user_name=user_info.get("name", "Unknown"),
-            user_email=user_info.get("email", "Unknown"),
-            ip_address=request.client.host if request.client else "Unknown",
-            severity="WARNING",
-            target_resource="system_settings",
-            action_type="UPDATE",
-            payload=json.dumps({"old": old_settings, "new": new_settings}, ensure_ascii=False)
-        )
-        db.add(audit)
-        db.commit()
+        try:
+            import json
+            audit = models.AuditLog(
+                event_title=event_title,
+                event_desc=event_desc,
+                user_name=user_info.get("name", "Unknown"),
+                user_email=user_info.get("email", "Unknown"),
+                ip_address=request.client.host if request.client else "Unknown",
+                severity="WARNING",
+                target_resource="system_settings",
+                action_type="UPDATE",
+                payload=json.dumps({"old": old_settings, "new": new_settings}, ensure_ascii=False)
+            )
+            db.add(audit)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print(f"AuditLog insertion failed: {e}")
 
     return setting
