@@ -19,6 +19,7 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        command_timeout: 30m
         script: |
           cd /home/${{ secrets.EC2_USER }}/port_erp
           # 강제로 원격 최신 코드로 덮어쓰기 (EC2 내부 충돌 무시)
