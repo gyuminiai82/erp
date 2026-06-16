@@ -56,9 +56,13 @@ export default function PayrollSettingsPage() {
         holiday_overtime_multiplier: Number(settings.holiday_overtime_multiplier)
       };
       
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch("/api/settings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error("저장 실패");

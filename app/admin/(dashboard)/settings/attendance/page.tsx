@@ -49,9 +49,13 @@ export default function AttendanceSettingsPage() {
         ? `/api/attendance-policies/${formData.id}`
         : `/api/attendance-policies`;
 
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(formData)
       });
       if (!res.ok) throw new Error("저장 실패");
@@ -67,8 +71,10 @@ export default function AttendanceSettingsPage() {
     const confirmed = await showConfirm("정말 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch(`/api/attendance-policies/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       if (!res.ok) {
         const d = await res.json();

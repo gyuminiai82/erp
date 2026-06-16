@@ -43,9 +43,13 @@ export default function CompanySettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
       const res = await fetch("/api/company", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(info)
       });
       if (!res.ok) throw new Error("저장 실패");
