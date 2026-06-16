@@ -62,13 +62,14 @@ export default function ItemsPage() {
       </div>
       
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 bg-gray-50 flex justify-end">
-          <Button onClick={createItem} className="bg-[#107C41] hover:bg-[#0b5c30] text-white">
-            <span className="mr-2">+</span> 품목 추가
-          </Button>
-        </div>
-        <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px]">
-          <div className="flex-1 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex justify-end mb-4">
+            <Button onClick={createItem} className="bg-[#107C41] hover:bg-[#0b5c30] text-white">
+              <span className="mr-2">+</span> 품목 추가
+            </Button>
+          </div>
+          
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
             <DataGrid data={items} columns={columns} showCheckboxes={true} />
           </div>
         </div>
