@@ -6,6 +6,8 @@ from datetime import date
 
 import models
 from database import get_db
+from auth import get_current_employee
+import json
 
 router = APIRouter(prefix="/api/appointments", tags=["Appointments"])
 
@@ -60,7 +62,7 @@ def get_appointments(db: Session = Depends(get_db)):
     return result
 
 @router.post("")
-def create_appointment(data: AppointmentCreate, db: Session = Depends(get_db)):
+def create_appointment(data: AppointmentCreate, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     db_app = models.Appointment(
         employee_id=data.employee_id,
         type=data.type,
@@ -75,10 +77,16 @@ def create_appointment(data: AppointmentCreate, db: Session = Depends(get_db)):
     db.add(db_app)
     db.commit()
     db.refresh(db_app)
+    
+    try:
+        audit = models.AuditLog(event_title="인사 발령 추가", event_desc=f"사원 ID {data.employee_id}에 대한 발령(유형: {data.type})을 추가했습니다.", user_name=current_user.name, user_email=current_user.email, payload=json.dumps({"employee_id": data.employee_id, "type": data.type}))
+        db.add(audit); db.commit()
+    except Exception as e: db.rollback()
+    
     return db_app
 
 @router.put("/{app_id}/status")
-def update_appointment_status(app_id: int, data: AppointmentUpdate, db: Session = Depends(get_db)):
+def update_appointment_status(app_id: int, data: AppointmentUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     db_app = db.query(models.Appointment).filter(models.Appointment.id == app_id).first()
     if not db_app:
         raise HTTPException(status_code=404, detail="발령 내역을 찾을 수 없습니다.")
@@ -99,10 +107,16 @@ def update_appointment_status(app_id: int, data: AppointmentUpdate, db: Session 
                 
     db.commit()
     db.refresh(db_app)
+    
+    try:
+        audit = models.AuditLog(event_title="인사 발령 상태 변경", event_desc=f"발령 ID {app_id}의 상태를 '{data.status}'(으)로 변경했습니다.", user_name=current_user.name, user_email=current_user.email, payload=json.dumps({"app_id": app_id, "status": data.status}))
+        db.add(audit); db.commit()
+    except Exception as e: db.rollback()
+    
     return db_app
 
 @router.delete("/{app_id}")
-def delete_appointment(app_id: int, db: Session = Depends(get_db)):
+def delete_appointment(app_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     db_app = db.query(models.Appointment).filter(models.Appointment.id == app_id).first()
     if not db_app:
         raise HTTPException(status_code=404, detail="발령 내역을 찾을 수 없습니다.")
@@ -112,4 +126,10 @@ def delete_appointment(app_id: int, db: Session = Depends(get_db)):
         
     db.delete(db_app)
     db.commit()
+    
+    try:
+        audit = models.AuditLog(event_title="인사 발령 삭제", event_desc=f"발령 ID {app_id}을(를) 삭제했습니다.", user_name=current_user.name, user_email=current_user.email, payload=json.dumps({"app_id": app_id}))
+        db.add(audit); db.commit()
+    except Exception as e: db.rollback()
+    
     return {"detail": "삭제되었습니다."}

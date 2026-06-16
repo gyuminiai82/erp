@@ -120,3 +120,14 @@ def get_current_user_info(credentials: HTTPAuthorizationCredentials = Depends(se
     except JWTError as e:
         print(f"JWTError: {e}")
         raise HTTPException(status_code=401, detail="Invalid token")
+
+def get_current_employee(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        emp = db.query(models.Employee).filter(models.Employee.email == email).first()
+        if not emp:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        return emp
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
