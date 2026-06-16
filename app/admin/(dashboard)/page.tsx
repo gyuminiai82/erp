@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
                 <tr>
                   <th className="px-6 py-4 font-medium">시간</th>
                   <th className="px-6 py-4 font-medium">이벤트</th>
-                  <th className="px-6 py-4 font-medium">사용자/IP</th>
+                  <th className="px-6 py-4 font-medium">사용자</th>
                   <th className="px-6 py-4 font-medium text-center">위험도</th>
                 </tr>
               </thead>
@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
                         <div className="text-xs text-gray-500 ml-6">{log.event_desc}</div>
                       </td>
                       <td className={`px-6 py-4 ${log.severity === 'HIGH' ? 'text-red-600' : 'text-gray-500'}`}>
-                        {log.user_email === 'unknown' ? `${log.ip_address} (미확인 IP)` : log.user_email}
+                        {log.user_name === 'Unknown' ? '시스템' : log.user_name}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ui.badge}`}>

@@ -149,7 +149,7 @@ export default function AuditLogsPage() {
                 <th className="px-6 py-4 font-semibold w-48">발생 일시</th>
                 <th className="px-6 py-4 font-semibold w-24 text-center">위험도</th>
                 <th className="px-6 py-4 font-semibold min-w-[200px]">이벤트 제목 및 상세</th>
-                <th className="px-6 py-4 font-semibold w-48">사용자/계정</th>
+                <th className="px-6 py-4 font-semibold w-48">사용자</th>
                 <th className="px-6 py-4 font-semibold w-32">접속 IP</th>
               </tr>
             </thead>
@@ -197,7 +197,7 @@ export default function AuditLogsPage() {
                           </div>
                         </td>
                         <td className={`px-6 py-4 font-medium ${log.severity === 'HIGH' ? 'text-red-600' : 'text-gray-700'}`}>
-                          {log.user_email === 'unknown' ? '미확인 사용자' : log.user_email}
+                          {log.user_name === 'Unknown' ? '시스템' : log.user_name}
                         </td>
                         <td className="px-6 py-4 text-gray-500 font-mono text-xs">
                           {log.ip_address}
