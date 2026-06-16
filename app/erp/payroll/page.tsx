@@ -46,6 +46,7 @@ export default function PayrollsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentPayroll, setCurrentPayroll] = useState<Partial<Payroll>>({});
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   
   const token = typeof window !== 'undefined' ? localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token') || localStorage.getItem('token') : null;
 
@@ -309,56 +310,71 @@ export default function PayrollsPage() {
 
   return (
     <div className="w-full">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100">
-          <div className="flex items-center">
-            <input 
-              type="month" 
-              value={currentMonth}
-              onChange={(e) => setCurrentMonth(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-            />
-          </div>
-          <div className="flex flex-wrap justify-end gap-2 w-full sm:w-auto">
-            <button 
-              onClick={handleBulkGenerate}
-              className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              일괄 자동 산출
-            </button>
-            <button 
-              onClick={() => handleOpenModal()}
-              className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              수동 등록
-            </button>
-          </div>
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">급여 대장</h1>
+          <p className="text-gray-500">임직원들의 월별 급여 산출 및 지급 내역을 관리합니다.</p>
         </div>
+      </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 mx-4 my-4 rounded-lg">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="px-6 py-8 text-center text-gray-500">
-            <div className="animate-pulse flex flex-col items-center">
-              <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
-              데이터를 불러오는 중입니다...
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+            <div className="flex items-center">
+              <input 
+                type="month" 
+                value={currentMonth}
+                onChange={(e) => setCurrentMonth(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
+              />
+            </div>
+            <div className="flex flex-wrap justify-end gap-2 w-full sm:w-auto">
+              <button 
+                onClick={handleBulkGenerate}
+                className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                일괄 자동 산출
+              </button>
+              <button 
+                onClick={() => handleOpenModal()}
+                className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                수동 등록
+              </button>
             </div>
           </div>
-        ) : payrolls.length === 0 ? (
-          <div className="px-6 py-12 text-center text-gray-500">
-            선택한 월({currentMonth})의 급여 데이터가 없습니다.
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 mb-4 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-col h-[calc(100vh-280px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+            {loading ? (
+              <div className="flex-1 flex items-center justify-center text-gray-500">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
+                  데이터를 불러오는 중입니다...
+                </div>
+              </div>
+            ) : payrolls.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-gray-500">
+                선택한 월({currentMonth})의 급여 데이터가 없습니다.
+              </div>
+            ) : (
+              <DataGrid 
+                columns={columns} 
+                data={payrolls} 
+                showCheckboxes={true}
+                selectedRowIndices={selectedRowIndices}
+                onSelectionChange={setSelectedRowIndices}
+              />
+            )}
           </div>
-        ) : (
-          <div className="flex flex-col h-[calc(100vh-280px)] min-h-[400px]">
-            <DataGrid columns={columns} data={payrolls} />
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Modal */}
