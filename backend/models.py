@@ -297,3 +297,48 @@ class LeaveBalance(Base):
     used_days = Column(Float, default=0.0)
 
     employee = relationship("Employee")
+
+
+from datetime import datetime, date
+
+class Item(Base):
+    __tablename__ = "items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    item_code = Column(String, unique=True, index=True)
+    item_name = Column(String, index=True)
+    item_type = Column(String)  # 완제품, 반제품, 원자재
+    unit = Column(String)       # EA, KG, L 등
+    standard = Column(String, nullable=True) # 규격
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class BOM(Base):
+    __tablename__ = "boms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    parent_item_id = Column(Integer, ForeignKey("items.id"))
+    child_item_id = Column(Integer, ForeignKey("items.id"))
+    quantity = Column(Float, default=1.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    parent_item = relationship("Item", foreign_keys=[parent_item_id])
+    child_item = relationship("Item", foreign_keys=[child_item_id])
+
+class WorkOrder(Base):
+    __tablename__ = "work_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_no = Column(String, unique=True, index=True)
+    item_id = Column(Integer, ForeignKey("items.id"))
+    planned_quantity = Column(Float, default=1.0)
+    produced_quantity = Column(Float, default=0.0)
+    start_date = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
+    status = Column(String, default="PENDING") # PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+    manager_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    item = relationship("Item")
+    manager = relationship("Employee")
