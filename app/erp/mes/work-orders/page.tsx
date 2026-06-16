@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { DataGrid } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function WorkOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
+  const { showAlert, showPrompt } = useDialog();
 
   useEffect(() => {
     fetchOrders();
@@ -18,11 +20,11 @@ export default function WorkOrdersPage() {
   };
 
   const createOrder = async () => {
-    const orderNo = prompt("지시번호:");
+    const orderNo = await showPrompt("지시번호를 입력하세요:", "");
     if (!orderNo) return;
-    const itemId = prompt("품목 ID (숫자):");
+    const itemId = await showPrompt("품목 ID (숫자)를 입력하세요:", "");
     if (!itemId) return;
-    const quantity = prompt("계획 수량:");
+    const quantity = await showPrompt("계획 수량을 입력하세요:", "");
     if (!quantity) return;
 
     const res = await fetch("/api/mes/work-orders", {
@@ -38,7 +40,7 @@ export default function WorkOrdersPage() {
     if (res.ok) {
       fetchOrders();
     } else {
-      alert("추가 실패");
+      await showAlert("추가 실패", { type: "error" });
     }
   };
 

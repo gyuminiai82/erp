@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { DataGrid } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function ItemsPage() {
   const [items, setItems] = useState<any[]>([]);
+  const { showAlert, showPrompt } = useDialog();
 
   useEffect(() => {
     fetchItems();
@@ -18,15 +20,15 @@ export default function ItemsPage() {
   };
 
   const createItem = async () => {
-    const code = prompt("품목코드:");
+    const code = await showPrompt("품목코드를 입력하세요:", "");
     if (!code) return;
-    const name = prompt("품목명:");
+    const name = await showPrompt("품목명을 입력하세요:", "");
     if (!name) return;
-    const type = prompt("유형(완제품/반제품/원자재):");
+    const type = await showPrompt("유형(완제품/반제품/원자재)을 입력하세요:", "");
     if (!type) return;
-    const unit = prompt("단위(EA/KG/L 등):");
+    const unit = await showPrompt("단위(EA/KG/L 등)를 입력하세요:", "");
     if (!unit) return;
-    const standard = prompt("규격(선택):") || "";
+    const standard = (await showPrompt("규격(선택):", "")) || "";
 
     const res = await fetch("/api/mes/items", {
       method: "POST",
@@ -37,7 +39,7 @@ export default function ItemsPage() {
     if (res.ok) {
       fetchItems();
     } else {
-      alert("추가 실패");
+      await showAlert("추가 실패", { type: "error" });
     }
   };
 

@@ -249,7 +249,7 @@ export default function DepartmentsPage() {
         fetchData();
       } else {
         const data = await res.json();
-        alert(data.detail || "저장 실패");
+        await showAlert(data.detail || "저장 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);

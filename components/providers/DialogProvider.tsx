@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { AlertCircle, CheckCircle, Info } from "lucide-react";
 
-type DialogType = "alert" | "confirm";
+type DialogType = "alert" | "confirm" | "prompt";
 
 interface DialogOptions {
   title?: string;
@@ -14,6 +14,7 @@ interface DialogOptions {
 interface DialogContextValue {
   showAlert: (message: string, options?: Omit<DialogOptions, "message">) => Promise<void>;
   showConfirm: (message: string, options?: Omit<DialogOptions, "message">) => Promise<boolean>;
+  showPrompt: (message: string, defaultValue?: string, options?: Omit<DialogOptions, "message">) => Promise<string | null>;
 }
 
 const DialogContext = createContext<DialogContextValue | undefined>(undefined);
@@ -22,6 +23,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [dialogType, setDialogType] = useState<DialogType>("alert");
   const [dialogOptions, setDialogOptions] = useState<DialogOptions>({ message: "" });
+  const [promptValue, setPromptValue] = useState("");
   const [resolvePromise, setResolvePromise] = useState<((value: any) => void) | null>(null);
 
   const showAlert = (message: string, options?: Omit<DialogOptions, "message">) => {
@@ -42,6 +44,16 @@ export function DialogProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const showPrompt = (message: string, defaultValue: string = "", options?: Omit<DialogOptions, "message">) => {
+    return new Promise<string | null>((resolve) => {
+      setDialogType("prompt");
+      setDialogOptions({ message, ...options });
+      setPromptValue(defaultValue);
+      setResolvePromise(() => resolve);
+      setIsOpen(true);
+    });
+  };
+
   const handleClose = (value: any) => {
     setIsOpen(false);
     if (resolvePromise) {
@@ -51,7 +63,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <DialogContext.Provider value={{ showAlert, showConfirm }}>
+    <DialogContext.Provider value={{ showAlert, showConfirm, showPrompt }}>
       {children}
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity">
@@ -87,23 +99,36 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                   <p className="text-[15px] text-gray-600 break-all whitespace-pre-wrap leading-relaxed">
                     {dialogOptions.message}
                   </p>
+                  {dialogType === "prompt" && (
+                    <input 
+                      type="text" 
+                      className="mt-3 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f62fe] focus:border-[#0f62fe]" 
+                      value={promptValue} 
+                      onChange={(e) => setPromptValue(e.target.value)} 
+                      autoFocus 
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleClose(promptValue);
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             </div>
-            
             <div className="bg-gray-50/80 px-5 py-4 flex justify-end space-x-2 border-t border-gray-100">
-              {dialogType === "confirm" && (
+              {/* Cancel Button */}
+              {(dialogType === "confirm" || dialogType === "prompt") && (
                 <button
                   type="button"
-                  onClick={() => handleClose(false)}
+                  onClick={() => handleClose(dialogType === "prompt" ? null : false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors"
                 >
                   취소
                 </button>
               )}
+              {/* Confirm Button */}
               <button
                 type="button"
-                onClick={() => handleClose(dialogType === "confirm" ? true : undefined)}
+                onClick={() => handleClose(dialogType === "prompt" ? promptValue : (dialogType === "confirm" ? true : undefined))}
                 className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
                   dialogOptions.type === "error" 
                     ? "bg-red-600 hover:bg-red-700 focus:ring-red-500" 

@@ -60,6 +60,18 @@ class PayrollResponse(PayrollBase):
     class Config:
         orm_mode = True
 
+class BulkPayrollCreateRequest(BaseModel):
+    payrolls: List[PayrollCreate]
+
+class PayrollUpdateWithId(PayrollUpdate):
+    id: int
+
+class BulkPayrollUpdateRequest(BaseModel):
+    payrolls: List[PayrollUpdateWithId]
+
+class BulkPayrollDeleteRequest(BaseModel):
+    payroll_ids: List[int]
+
 # CRUD Endpoints
 
 @router.get("", response_model=List[PayrollResponse])
@@ -150,6 +162,42 @@ def delete_payroll(payroll_id: int, db: Session = Depends(get_db), current_user 
     db.delete(db_payroll)
     db.commit()
     return {"ok": True}
+
+@router.post("/bulk-create")
+def bulk_create_payrolls(payload: BulkPayrollCreateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+    created_count = 0
+    for p in payload.payrolls:
+        net_pay = p.base_salary + p.bonus - p.deductions
+        db_payroll = Payroll(**p.dict(), net_pay=net_pay)
+        db.add(db_payroll)
+        created_count += 1
+    db.commit()
+    return {"message": f"{created_count}건의 급여가 등록되었습니다."}
+
+@router.post("/bulk-update")
+def bulk_update_payrolls(payload: BulkPayrollUpdateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+    updated_count = 0
+    for p in payload.payrolls:
+        db_payroll = db.query(Payroll).filter(Payroll.id == p.id).first()
+        if db_payroll:
+            update_data = p.dict(exclude_unset=True, exclude={"id"})
+            for key, value in update_data.items():
+                setattr(db_payroll, key, value)
+            db_payroll.net_pay = db_payroll.base_salary + db_payroll.bonus - db_payroll.deductions
+            updated_count += 1
+    db.commit()
+    return {"message": f"{updated_count}건의 급여가 수정되었습니다."}
+
+@router.post("/bulk-delete")
+def bulk_delete_payrolls(payload: BulkPayrollDeleteRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+    deleted_count = 0
+    for pid in payload.payroll_ids:
+        db_payroll = db.query(Payroll).filter(Payroll.id == pid).first()
+        if db_payroll:
+            db.delete(db_payroll)
+            deleted_count += 1
+    db.commit()
+    return {"message": f"{deleted_count}건의 급여가 삭제되었습니다."}
 
 @router.post("/generate")
 def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):

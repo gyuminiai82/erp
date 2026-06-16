@@ -5,6 +5,7 @@ import * as Icons from 'lucide-react';
 import { Menu, Search, Bell, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [userInfo, setUserInfo] = useState<{name: string, email: string, role_name: string, role_code: string} | null>(null);
   const [attendance, setAttendance] = useState<{check_in?: string, check_out?: string} | null>(null);
   const pathname = usePathname();
+  const { showAlert } = useDialog();
 
   const toggleMenu = (id: number) => {
     setOpenMenuIds(prev => prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]);
@@ -96,10 +98,10 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setAttendance(prev => ({...prev, check_in: data.check_in}));
-        alert(data.message);
+        await showAlert(data.message, { type: "success" });
       } else {
         const err = await res.json();
-        alert(err.detail);
+        await showAlert(err.detail, { type: "error" });
       }
     } catch(e) { console.error(e); }
   };
@@ -114,10 +116,10 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setAttendance(prev => ({...prev, check_out: data.check_out}));
-        alert(data.message);
+        await showAlert(data.message, { type: "success" });
       } else {
         const err = await res.json();
-        alert(err.detail);
+        await showAlert(err.detail, { type: "error" });
       }
     } catch(e) { console.error(e); }
   };

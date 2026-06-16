@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
+import { useDialog } from "@/components/providers/DialogProvider";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -36,6 +37,7 @@ export default function RolesPage() {
   const [selectedRole, setSelectedRole] = useState<number | null>(null);
   const [roleMenus, setRoleMenus] = useState<any[]>([]);
   const [isLoadingMenus, setIsLoadingMenus] = useState(false);
+  const { showAlert } = useDialog();
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -169,7 +171,7 @@ export default function RolesPage() {
         setNewRoleName('');
         setNewRoleDesc('');
       } else {
-        alert("Failed to add role. Name might already exist.");
+        await showAlert("Failed to add role. Name might already exist.", { type: "error" });
       }
     } catch (err) {
       console.error(err);

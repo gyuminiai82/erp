@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit, Trash2, X, Download } from 'lucide-react';
+import { Search, Plus, Trash2, Download, Save, Undo2, FileDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
+import { useDialog } from "@/components/providers/DialogProvider";
+import { Button } from "@/components/ui/Button";
 
 interface Payroll {
-  id: number;
+  id: number | string;
   employee_id: number;
   payment_month: string;
   base_salary: number;
@@ -17,6 +19,7 @@ interface Payroll {
   employee_name?: string;
   employee_no?: string;
   department_name?: string;
+  _state?: 'C' | 'U' | 'D' | '';
 }
 
 interface Employee {
@@ -41,12 +44,8 @@ export default function PayrollsPage() {
   const [systemSettings, setSystemSettings] = useState<any>(null);
   
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [currentPayroll, setCurrentPayroll] = useState<Partial<Payroll>>({});
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
+  const { showAlert, showConfirm } = useDialog();
   
   const token = typeof window !== 'undefined' ? localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token') || localStorage.getItem('token') : null;
 
@@ -82,9 +81,12 @@ export default function PayrollsPage() {
       });
       if (!res.ok) throw new Error('급여 대장 데이터를 불러오는데 실패했습니다.');
       const data = await res.json();
-      setPayrolls(data);
+      // Initialize _state for datagrid
+      const initData = data.map((item: any) => ({ ...item, _state: '' }));
+      setPayrolls(initData);
+      setSelectedRowIndices([]);
     } catch (err: any) {
-      setError(err.message);
+      console.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -105,7 +107,7 @@ export default function PayrollsPage() {
   };
 
   const handleBulkGenerate = async () => {
-    const confirmed = window.confirm(`${currentMonth} 귀속 급여를 일괄 산출하시겠습니까? (기존 데이터가 있다면 덮어씁니다)`);
+    const confirmed = await showConfirm(`${currentMonth} 귀속 급여를 일괄 산출하시겠습니까? (기존 데이터가 있다면 덮어씁니다)`, { type: "warning" });
     if (!confirmed) return;
     
     try {
@@ -122,161 +124,252 @@ export default function PayrollsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "일괄 산출 실패");
       
-      alert(data.message);
+      await showAlert(data.message, { type: "success" });
       fetchPayrolls();
     } catch (err: any) {
-      alert(err.message);
+      await showAlert(err.message, { type: "error" });
       setLoading(false);
     }
   };
 
-  const handleOpenModal = (payroll?: Payroll) => {
-    if (payroll) {
-      setEditMode(true);
-      setCurrentPayroll(payroll);
-    } else {
-      setEditMode(false);
-      // 신규 입력 기본값
-      setCurrentPayroll({
-        payment_month: currentMonth,
-        base_salary: 0,
-        bonus: 0,
-        deductions: 0,
-        payment_date: new Date().toISOString().slice(0, 10)
-      });
+  const handleDataChange = (rowIndex: number, field: string, newValue: any) => {
+    const newData = [...payrolls];
+    const row = { ...newData[rowIndex] };
+
+    // Update field value
+    (row as any)[field] = newValue;
+
+    // Apply _state logic
+    if (row._state !== 'C' && row._state !== 'D') {
+      row._state = 'U';
     }
-    setIsModalOpen(true);
+
+    // Determine deduction rate from settings
+    let deductionRate = 0.094; // fallback
+    if (systemSettings) {
+      const np = systemSettings.national_pension_rate || 0.045;
+      const hi = systemSettings.health_insurance_rate || 0.03545;
+      const ltc = systemSettings.long_term_care_rate || 0.1295;
+      const ei = systemSettings.employment_insurance_rate || 0.009;
+      deductionRate = np + hi + (hi * ltc) + ei;
+    }
+
+    // Calculate deductions when base_salary or bonus changes
+    if (field === 'base_salary' || field === 'bonus') {
+      const base = Number(row.base_salary || 0);
+      const bonus = Number(row.bonus || 0);
+      const estimatedDeduction = Math.floor((base + bonus) * deductionRate);
+      row.deductions = Math.floor(estimatedDeduction / 10) * 10;
+    }
+
+    // Auto calculate net_pay
+    const base = Number(row.base_salary || 0);
+    const bonus = Number(row.bonus || 0);
+    const deductions = Number(row.deductions || 0);
+    row.net_pay = base + bonus - deductions;
+
+    // Find employee info if employee_id changed
+    if (field === 'employee_id') {
+      const emp = employees.find(e => e.id === Number(newValue));
+      if (emp) {
+        row.employee_name = emp.name;
+        row.employee_no = emp.emp_no;
+        row.department_name = emp.department_name;
+      }
+    }
+
+    newData[rowIndex] = row;
+    setPayrolls(newData);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setCurrentPayroll({});
+  const handleAddRow = () => {
+    const newRow: Payroll = {
+      id: `temp-${Date.now()}`,
+      employee_id: employees.length > 0 ? employees[0].id : 0,
+      payment_month: currentMonth,
+      base_salary: 0,
+      bonus: 0,
+      deductions: 0,
+      net_pay: 0,
+      payment_date: new Date().toISOString().slice(0, 10),
+      _state: 'C',
+    };
+    
+    // Autofill employee_name and emp_no if employee exists
+    if (employees.length > 0) {
+      newRow.employee_name = employees[0].name;
+      newRow.employee_no = employees[0].emp_no;
+      newRow.department_name = employees[0].department_name;
+    }
+
+    setPayrolls([newRow, ...payrolls]);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentPayroll.employee_id || !currentPayroll.base_salary) {
-      alert('필수 정보를 입력해주세요.');
+  const handleBulkDelete = async () => {
+    if (selectedRowIndices.length === 0) return;
+    
+    const newPayrolls = payrolls.filter((p, idx) => {
+      if (selectedRowIndices.includes(idx)) {
+        if (p._state === 'C' || String(p.id).startsWith('temp-')) {
+          return false;
+        } else {
+          p._state = 'D';
+          return true;
+        }
+      }
+      return true;
+    });
+
+    setPayrolls(newPayrolls);
+    setSelectedRowIndices([]);
+  };
+
+  const handleCancel = () => {
+    fetchPayrolls();
+  };
+
+  const handleSave = async () => {
+    const rowsToCreate = payrolls.filter(p => p._state === 'C');
+    const rowsToDelete = payrolls.filter(p => p._state === 'D');
+    const rowsToUpdate = payrolls.filter(p => p._state === 'U');
+    
+    if (rowsToCreate.length === 0 && rowsToDelete.length === 0 && rowsToUpdate.length === 0) {
+      await showAlert("저장할 변경사항이 없습니다.", { type: "info" });
       return;
     }
 
+    const totalChanges = rowsToCreate.length + rowsToDelete.length + rowsToUpdate.length;
+    const confirmed = await showConfirm(`총 ${totalChanges}건의 변경사항(신규 ${rowsToCreate.length}건, 수정 ${rowsToUpdate.length}건, 삭제 ${rowsToDelete.length}건)을 저장하시겠습니까?`, { type: "warning" });
+    if (!confirmed) return;
+    
     try {
-      const url = editMode ? `/api/payrolls/${currentPayroll.id}` : '/api/payrolls';
-      const method = editMode ? 'PUT' : 'POST';
-      
-      const payload = {
-        employee_id: currentPayroll.employee_id,
-        payment_month: currentPayroll.payment_month,
-        base_salary: Number(currentPayroll.base_salary),
-        bonus: Number(currentPayroll.bonus || 0),
-        deductions: Number(currentPayroll.deductions || 0),
-        payment_date: currentPayroll.payment_date
-      };
+      setLoading(true);
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('급여 정보 저장에 실패했습니다.');
-      
-      handleCloseModal();
-      fetchPayrolls();
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-    try {
-      const res = await fetch(`/api/payrolls/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('삭제 실패');
-      fetchPayrolls();
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const handleNumberInput = (field: keyof Payroll, value: string) => {
-    const numericValue = value.replace(/,/g, '');
-    let num = 0;
-    if (numericValue !== '' && !isNaN(Number(numericValue))) {
-      num = Number(numericValue);
-    }
-
-    const updatedPayroll = { ...currentPayroll, [field]: num };
-
-    // 기본급 또는 상여금 입력 시 관리자가 설정한 4대보험 공제율 적용
-    if (field === 'base_salary' || field === 'bonus') {
-      const base = field === 'base_salary' ? num : Number(currentPayroll.base_salary || 0);
-      const bonus = field === 'bonus' ? num : Number(currentPayroll.bonus || 0);
-      
-      let deductionRate = 0.094; // fallback
-      if (systemSettings) {
-        const np = systemSettings.national_pension_rate || 0.045;
-        const hi = systemSettings.health_insurance_rate || 0.03545;
-        const ltc = systemSettings.long_term_care_rate || 0.1295;
-        const ei = systemSettings.employment_insurance_rate || 0.009;
-        // 총 공제율 = 국민 + 건강 + (건강*장기요양) + 고용
-        deductionRate = np + hi + (hi * ltc) + ei;
+      // 1. Delete
+      if (rowsToDelete.length > 0) {
+        const idsToDelete = rowsToDelete.map(p => Number(p.id)).filter(id => !isNaN(id));
+        if (idsToDelete.length > 0) {
+          const res = await fetch(`/api/payrolls/bulk-delete`, { 
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ payroll_ids: idsToDelete })
+          });
+          if (!res.ok) throw new Error("일괄 삭제 실패");
+        }
       }
 
-      const estimatedDeduction = Math.floor((base + bonus) * deductionRate);
-      updatedPayroll.deductions = Math.floor(estimatedDeduction / 10) * 10; // 10원 단위 절사
+      // 2. Create
+      if (rowsToCreate.length > 0) {
+        const createPayload = rowsToCreate.map(p => ({
+          employee_id: Number(p.employee_id),
+          payment_month: p.payment_month,
+          base_salary: Number(p.base_salary) || 0,
+          bonus: Number(p.bonus) || 0,
+          deductions: Number(p.deductions) || 0,
+          payment_date: p.payment_date,
+        }));
+
+        const res = await fetch(`/api/payrolls/bulk-create`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ payrolls: createPayload })
+        });
+        if (!res.ok) throw new Error("일괄 등록 실패");
+      }
+
+      // 3. Update
+      if (rowsToUpdate.length > 0) {
+        const updatePayload = rowsToUpdate.map(p => ({
+          id: Number(p.id),
+          base_salary: Number(p.base_salary) || 0,
+          bonus: Number(p.bonus) || 0,
+          deductions: Number(p.deductions) || 0,
+          payment_date: p.payment_date,
+        }));
+
+        const res = await fetch(`/api/payrolls/bulk-update`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ payrolls: updatePayload })
+        });
+        if (!res.ok) throw new Error("일괄 수정 실패");
+      }
+
+      await showAlert("변경사항이 성공적으로 저장되었습니다.", { type: "success" });
+      fetchPayrolls();
+    } catch (err: any) {
+      await showAlert(err.message, { type: "error" });
+      setLoading(false);
     }
-
-    setCurrentPayroll(updatedPayroll);
-  };
-
-  // 실수령액 자동 계산용 함수 (모달 내부)
-  const calculateNetPay = () => {
-    const base = Number(currentPayroll.base_salary || 0);
-    const bonus = Number(currentPayroll.bonus || 0);
-    const deductions = Number(currentPayroll.deductions || 0);
-    return base + bonus - deductions;
   };
 
   const columns: ColumnDef[] = [
     {
-      field: 'employee_no',
-      headerName: '사번',
-      width: 120,
+      field: '_state',
+      headerName: '상태',
+      width: 60,
+      renderCell: (val: any) => {
+        if (val === 'C') return <span className="text-blue-500 font-bold bg-blue-50 px-2 py-0.5 rounded text-xs">신규</span>;
+        if (val === 'U') return <span className="text-orange-500 font-bold bg-orange-50 px-2 py-0.5 rounded text-xs">수정</span>;
+        if (val === 'D') return <span className="text-red-500 font-bold bg-red-50 px-2 py-0.5 rounded text-xs line-through">삭제</span>;
+        return <span className="text-gray-400 text-xs">-</span>;
+      }
     },
     {
-      field: 'employee_name',
+      field: 'employee_no',
+      headerName: '사번',
+      width: 100,
+    },
+    {
+      field: 'employee_id',
       headerName: '이름',
       width: 120,
+      editable: true,
+      editType: 'select',
+      options: employees.map(e => ({ label: `${e.name} (${e.department_name || '미지정'})`, value: e.id })),
+      renderCell: (val: any, row: any) => <span>{row.employee_name || '-'}</span>
     },
     {
       field: 'department_name',
       headerName: '부서',
-      width: 150,
+      width: 120,
       renderCell: (val: any) => <span className="text-gray-600">{val || '-'}</span>
+    },
+    {
+      field: 'payment_month',
+      headerName: '귀속월',
+      width: 100,
+      editable: true,
+      renderCell: (val: any) => <div className="text-center w-full">{val}</div>
     },
     {
       field: 'base_salary',
       headerName: '기본급',
       width: 130,
+      editable: true,
       renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
     },
     {
       field: 'bonus',
       headerName: '상여금',
       width: 130,
+      editable: true,
       renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
     },
     {
       field: 'deductions',
       headerName: '공제액',
       width: 130,
+      editable: true,
       renderCell: (val: any) => <div className="text-right w-full text-red-500">-{Number(val).toLocaleString()}원</div>
     },
     {
@@ -289,22 +382,8 @@ export default function PayrollsPage() {
       field: 'payment_date',
       headerName: '지급일',
       width: 120,
+      editable: true,
       renderCell: (val: any) => <div className="text-center w-full text-gray-600">{val}</div>
-    },
-    {
-      field: 'id',
-      headerName: '관리',
-      width: 100,
-      renderCell: (val: any, row: any) => (
-        <div className="flex items-center justify-center space-x-2 w-full">
-          <button onClick={() => handleOpenModal(row)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-            <Edit className="w-4 h-4" />
-          </button>
-          <button onClick={() => handleDelete(row.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      )
     }
   ];
 
@@ -328,29 +407,40 @@ export default function PayrollsPage() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
               />
             </div>
-            <div className="flex flex-wrap justify-end gap-2 w-full sm:w-auto">
-              <button 
+            
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              <Button 
                 onClick={handleBulkGenerate}
-                className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                variant="outline"
+                className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-colors shadow-sm shrink-0"
               >
                 <Download className="w-4 h-4 mr-2" />
                 일괄 자동 산출
-              </button>
-              <button 
-                onClick={() => handleOpenModal()}
-                className="flex items-center px-4 py-2 bg-[#107C41] text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
-              >
+              </Button>
+              {payrolls.some(p => p._state === 'C' || p._state === 'D' || p._state === 'U') && (
+                <>
+                  <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
+                    <Undo2 className="w-4 h-4 mr-2" />
+                    변경 취소
+                  </Button>
+                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200 shrink-0">
+                    <Save className="w-4 h-4 mr-2" />
+                    변경사항 저장
+                  </Button>
+                </>
+              )}
+              {selectedRowIndices.length > 0 && (
+                <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent shrink-0">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  선택 삭제 ({selectedRowIndices.length})
+                </Button>
+              )}
+              <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
                 <Plus className="w-4 h-4 mr-2" />
-                수동 등록
-              </button>
+                급여 추가
+              </Button>
             </div>
           </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 mb-4 rounded-lg">
-              {error}
-            </div>
-          )}
 
           <div className="flex flex-col h-[calc(100vh-280px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
             {loading ? (
@@ -368,6 +458,7 @@ export default function PayrollsPage() {
               <DataGrid 
                 columns={columns} 
                 data={payrolls} 
+                onDataChange={handleDataChange}
                 showCheckboxes={true}
                 selectedRowIndices={selectedRowIndices}
                 onSelectionChange={setSelectedRowIndices}
@@ -376,125 +467,6 @@ export default function PayrollsPage() {
           </div>
         </div>
       </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h2 className="text-lg font-bold text-gray-800">
-                {editMode ? '급여 명세 수정' : '신규 급여 등록'}
-              </h2>
-              <button onClick={handleCloseModal} className="p-2 text-gray-400 hover:bg-gray-200 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto">
-              <form id="payroll-form" onSubmit={handleSave} className="space-y-4">
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">대상 사원</label>
-                    <select 
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                      value={currentPayroll.employee_id || ''}
-                      onChange={(e) => setCurrentPayroll({...currentPayroll, employee_id: Number(e.target.value)})}
-                      required
-                      disabled={editMode}
-                    >
-                      <option value="">사원 선택</option>
-                      {employees.map(emp => (
-                        <option key={emp.id} value={emp.id}>{emp.name} ({emp.department_name || '부서미지정'})</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">귀속 월</label>
-                    <input 
-                      type="month"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                      value={currentPayroll.payment_month || ''}
-                      onChange={(e) => setCurrentPayroll({...currentPayroll, payment_month: e.target.value})}
-                      required
-                      disabled={editMode}
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">기본급 (원)</label>
-                  <input 
-                    type="text"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                    value={currentPayroll.base_salary ? currentPayroll.base_salary.toLocaleString() : ''}
-                    onChange={(e) => handleNumberInput('base_salary', e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">상여금 (원)</label>
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                      value={currentPayroll.bonus ? currentPayroll.bonus.toLocaleString() : ''}
-                      onChange={(e) => handleNumberInput('bonus', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">공제액 (원)</label>
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                      value={currentPayroll.deductions ? currentPayroll.deductions.toLocaleString() : ''}
-                      onChange={(e) => handleNumberInput('deductions', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">실지급일</label>
-                  <input 
-                    type="date"
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#107C41] focus:border-[#107C41]"
-                    value={currentPayroll.payment_date || ''}
-                    onChange={(e) => setCurrentPayroll({...currentPayroll, payment_date: e.target.value})}
-                    required
-                  />
-                </div>
-
-                <div className="mt-6 p-4 bg-[#f0fdf4] rounded-xl border border-green-100">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700 font-medium">예상 실수령액</span>
-                    <span className="text-2xl font-bold text-[#107C41]">
-                      {calculateNetPay().toLocaleString()} 원
-                    </span>
-                  </div>
-                </div>
-              </form>
-            </div>
-            
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 mt-auto">
-              <button 
-                type="button" 
-                onClick={handleCloseModal}
-                className="px-5 py-2.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
-              >
-                취소
-              </button>
-              <button 
-                type="submit" 
-                form="payroll-form"
-                className="px-5 py-2.5 text-white font-medium bg-[#107C41] rounded-xl hover:bg-green-700 transition-colors shadow-md shadow-green-600/20"
-              >
-                {editMode ? '수정 내용 저장' : '급여 대장 등록'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
