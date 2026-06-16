@@ -773,7 +773,13 @@
           "4b4d23f010a24962ad900addda139d03",
           "68ab33167d2f46c3ac4e4005cb6ce656",
           "9e0bf1cfb5134bfe8171c549e1a28619",
-          "e2de6782270a4cb4bf80a42f4f1c10ac"
+          "e2de6782270a4cb4bf80a42f4f1c10ac",
+          "2fe5fe4078e947d6b406e62c392d51c5",
+          "4742e372190f4fb286651cbdac7d74c7",
+          "45b538a30d0e4fd19e6d30aba0443777",
+          "74b051fdece240f09ab3a7f4b2e1d1d3",
+          "06656c25efaa47b8814dc2bcb0e959f0",
+          "dfdca08714c24b46a09b58e5754148c0"
         ],
         "seqColumnIds": [
           "0a5e93a1190249c2903a8cd99ce2d333",
@@ -783,7 +789,13 @@
           "4b4d23f010a24962ad900addda139d03",
           "68ab33167d2f46c3ac4e4005cb6ce656",
           "9e0bf1cfb5134bfe8171c549e1a28619",
-          "e2de6782270a4cb4bf80a42f4f1c10ac"
+          "e2de6782270a4cb4bf80a42f4f1c10ac",
+          "2fe5fe4078e947d6b406e62c392d51c5",
+          "4742e372190f4fb286651cbdac7d74c7",
+          "45b538a30d0e4fd19e6d30aba0443777",
+          "74b051fdece240f09ab3a7f4b2e1d1d3",
+          "06656c25efaa47b8814dc2bcb0e959f0",
+          "dfdca08714c24b46a09b58e5754148c0"
         ],
         "ui": {
           "x": 100,
@@ -3962,6 +3974,126 @@
           "unique": false,
           "notNull": false
         },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781583224988,
+          "createAt": 1781583224988
+        }
+      },
+      "2fe5fe4078e947d6b406e62c392d51c5": {
+        "id": "2fe5fe4078e947d6b406e62c392d51c5",
+        "tableId": "976826598aba485f8fa3c4eccb32ae8c",
+        "name": "standard_cost",
+        "comment": "표준단가",
+        "dataType": "FLOAT",
+        "default": "0.0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781583224988,
+          "createAt": 1781583224988
+        }
+      },
+      "4742e372190f4fb286651cbdac7d74c7": {
+        "id": "4742e372190f4fb286651cbdac7d74c7",
+        "tableId": "976826598aba485f8fa3c4eccb32ae8c",
+        "name": "safety_stock",
+        "comment": "안전재고",
+        "dataType": "FLOAT",
+        "default": "0.0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781583224988,
+          "createAt": 1781583224988
+        }
+      },
+      "45b538a30d0e4fd19e6d30aba0443777": {
+        "id": "45b538a30d0e4fd19e6d30aba0443777",
+        "tableId": "976826598aba485f8fa3c4eccb32ae8c",
+        "name": "current_stock",
+        "comment": "현재고",
+        "dataType": "FLOAT",
+        "default": "0.0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781583224988,
+          "createAt": 1781583224988
+        }
+      },
+      "74b051fdece240f09ab3a7f4b2e1d1d3": {
+        "id": "74b051fdece240f09ab3a7f4b2e1d1d3",
+        "tableId": "976826598aba485f8fa3c4eccb32ae8c",
+        "name": "lead_time",
+        "comment": "리드타임",
+        "dataType": "INTEGER",
+        "default": "0",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781583224988,
+          "createAt": 1781583224988
+        }
+      },
+      "06656c25efaa47b8814dc2bcb0e959f0": {
+        "id": "06656c25efaa47b8814dc2bcb0e959f0",
+        "tableId": "976826598aba485f8fa3c4eccb32ae8c",
+        "name": "location",
+        "comment": "창고위치",
+        "dataType": "VARCHAR",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781583224988,
+          "createAt": 1781583224988
+        }
+      },
+      "dfdca08714c24b46a09b58e5754148c0": {
+        "id": "dfdca08714c24b46a09b58e5754148c0",
+        "tableId": "976826598aba485f8fa3c4eccb32ae8c",
+        "name": "is_lot_tracked",
+        "comment": "로트추적여부",
+        "dataType": "BOOLEAN",
+        "default": "false",
+        "options": 0,
         "ui": {
           "keys": 0,
           "widthName": 60,
