@@ -9,7 +9,9 @@ import { Plus, X, FileText, PlusCircle, Trash2 } from "lucide-react";
 export default function JournalsPage() {
   const [journals, setJournals] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<boolean>(false);
   
+  const [currentEntryId, setCurrentEntryId] = useState<number | null>(null);
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
   const [entryType, setEntryType] = useState("대체");
   const [description, setDescription] = useState("");
@@ -86,6 +88,33 @@ export default function JournalsPage() {
     }
   };
 
+  const openCreateModal = () => {
+    setViewMode(false);
+    setCurrentEntryId(null);
+    setEntryDate(new Date().toISOString().split("T")[0]);
+    setEntryType("대체");
+    setDescription("");
+    setLines([
+      { account_code: "", account_name: "", debit: 0, credit: 0, description: "" },
+      { account_code: "", account_name: "", debit: 0, credit: 0, description: "" }
+    ]);
+    setIsModalOpen(true);
+  };
+
+  const openViewModal = (journal: any) => {
+    setViewMode(true);
+    setCurrentEntryId(journal.id);
+    setEntryDate(journal.entry_date);
+    setEntryType(journal.entry_type);
+    setDescription(journal.description || "");
+    if (journal.lines && journal.lines.length > 0) {
+      setLines(journal.lines);
+    } else {
+      setLines([{ account_code: "", account_name: "", debit: 0, credit: 0, description: "" }]);
+    }
+    setIsModalOpen(true);
+  };
+
   const columns = [
     { field: "id", headerName: "전표번호", width: 90, renderCell: (val: any) => <div className="text-center w-full">#{val}</div> },
     { field: "entry_date", headerName: "전표일자", width: 120, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
@@ -95,6 +124,11 @@ export default function JournalsPage() {
     { field: "total_credit", headerName: "대변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
     { field: "status", headerName: "상태", width: 100, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
     { field: "creator_name", headerName: "작성자", width: 100, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
+    { field: "actions", headerName: "상세보기", width: 100, renderCell: (_: any, row: any) => (
+      <div className="flex justify-center w-full">
+        <Button variant="outline" size="sm" onClick={() => openViewModal(row)} className="h-7 text-xs px-2 py-0">상세</Button>
+      </div>
+    )},
   ];
 
   return (
@@ -105,7 +139,7 @@ export default function JournalsPage() {
           <p className="text-gray-500">회계의 기본인 분개와 전표 입력을 관리하고 대차평균을 검증합니다.</p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={() => setIsModalOpen(true)} className="bg-[#107C41] hover:bg-[#0b5c30] text-white">
+          <Button onClick={openCreateModal} className="bg-[#107C41] hover:bg-[#0b5c30] text-white">
             <Plus className="w-4 h-4 mr-2" />
             신규 전표 등록
           </Button>
@@ -126,7 +160,7 @@ export default function JournalsPage() {
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#107C41]" />
-                신규 전표 작성
+                {viewMode ? `전표 상세 내역 (#${currentEntryId})` : "신규 전표 작성"}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-5 h-5" />
@@ -137,11 +171,11 @@ export default function JournalsPage() {
               <div className="grid grid-cols-3 gap-6 mb-8">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">전표일자 *</label>
-                  <input type="date" value={entryDate} onChange={e => setEntryDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required />
+                  <input type="date" value={entryDate} onChange={e => setEntryDate(e.target.value)} disabled={viewMode} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500" required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">유형 *</label>
-                  <select value={entryType} onChange={e => setEntryType(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                  <select value={entryType} onChange={e => setEntryType(e.target.value)} disabled={viewMode} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500">
                     <option value="대체">대체 전표</option>
                     <option value="입금">입금 전표</option>
                     <option value="출금">출금 전표</option>
@@ -149,15 +183,17 @@ export default function JournalsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">적요</label>
-                  <input type="text" value={description} onChange={e => setDescription(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="전표 전체 적요" />
+                  <input type="text" value={description} onChange={e => setDescription(e.target.value)} disabled={viewMode} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:text-gray-500" placeholder="전표 전체 적요" />
                 </div>
               </div>
 
               <div className="mb-4 flex justify-between items-end border-b pb-2">
                 <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">전표 라인 (분개)</h3>
-                <Button type="button" variant="outline" size="sm" onClick={handleAddLine} className="h-8">
-                  <PlusCircle className="w-3 h-3 mr-1" /> 라인 추가
-                </Button>
+                {!viewMode && (
+                  <Button type="button" variant="outline" size="sm" onClick={handleAddLine} className="h-8">
+                    <PlusCircle className="w-3 h-3 mr-1" /> 라인 추가
+                  </Button>
+                )}
               </div>
 
               <div className="space-y-2 mb-8">
@@ -172,24 +208,26 @@ export default function JournalsPage() {
                 {lines.map((line, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-2">
-                      <input type="text" value={line.account_code} onChange={e => handleLineChange(idx, "account_code", e.target.value)} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm" placeholder="ex: 101" required />
+                      <input type="text" value={line.account_code} onChange={e => handleLineChange(idx, "account_code", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="ex: 101" required />
                     </div>
                     <div className="col-span-3">
-                      <input type="text" value={line.account_name} onChange={e => handleLineChange(idx, "account_name", e.target.value)} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm" placeholder="보통예금" required />
+                      <input type="text" value={line.account_name} onChange={e => handleLineChange(idx, "account_name", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="보통예금" required />
                     </div>
                     <div className="col-span-2">
-                      <input type="number" value={line.debit} onChange={e => handleLineChange(idx, "debit", e.target.value)} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-blue-600 font-medium bg-blue-50/30" min="0" />
+                      <input type="number" value={line.debit} onChange={e => handleLineChange(idx, "debit", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-blue-600 font-medium bg-blue-50/30 disabled:opacity-70 disabled:bg-gray-50" min="0" />
                     </div>
                     <div className="col-span-2">
-                      <input type="number" value={line.credit} onChange={e => handleLineChange(idx, "credit", e.target.value)} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-red-600 font-medium bg-red-50/30" min="0" />
+                      <input type="number" value={line.credit} onChange={e => handleLineChange(idx, "credit", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-red-600 font-medium bg-red-50/30 disabled:opacity-70 disabled:bg-gray-50" min="0" />
                     </div>
                     <div className="col-span-2">
-                      <input type="text" value={line.description} onChange={e => handleLineChange(idx, "description", e.target.value)} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm" placeholder="상세 내용" />
+                      <input type="text" value={line.description} onChange={e => handleLineChange(idx, "description", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="상세 내용" />
                     </div>
                     <div className="col-span-1 flex justify-center">
-                      <button type="button" onClick={() => handleRemoveLine(idx)} className="p-1 text-gray-400 hover:text-red-500 rounded">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!viewMode && (
+                        <button type="button" onClick={() => handleRemoveLine(idx)} className="p-1 text-gray-400 hover:text-red-500 rounded">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -217,11 +255,13 @@ export default function JournalsPage() {
 
               <div className="flex justify-end gap-3">
                 <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-                  취소
+                  {viewMode ? "닫기" : "취소"}
                 </Button>
-                <Button type="submit" disabled={!isBalanced} className={isBalanced ? "bg-[#107C41] hover:bg-[#0b5c30] text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"}>
-                  전표 등록 완료
-                </Button>
+                {!viewMode && (
+                  <Button type="submit" disabled={!isBalanced} className={isBalanced ? "bg-[#107C41] hover:bg-[#0b5c30] text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"}>
+                    전표 등록 완료
+                  </Button>
+                )}
               </div>
             </form>
           </div>
