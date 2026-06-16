@@ -79,7 +79,7 @@ def update_company_info(
         import json
         audit = models.AuditLog(
             event_title="회사 정보 변경",
-            event_desc="대표자명 등 회사 기본 정보가 변경되었습니다.",
+            event_desc="회사 기본 정보가 변경되었습니다.",
             user_name=user_info.get("name", "Unknown"),
             user_email=user_info.get("email", "Unknown"),
             ip_address=request.client.host if request.client else "Unknown",
