@@ -13,11 +13,29 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [openMenuIds, setOpenMenuIds] = useState<number[]>([]);
   const [userInfo, setUserInfo] = useState<{name: string, email: string, role_name: string, role_code: string} | null>(null);
   const [attendance, setAttendance] = useState<{check_in?: string, check_out?: string} | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const pathname = usePathname();
   const { showAlert } = useDialog();
 
   const toggleMenu = (id: number) => {
     setOpenMenuIds(prev => prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]);
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getWorkDuration = () => {
+    if (!attendance?.check_in) return "00:00:00";
+    const start = new Date(attendance.check_in).getTime();
+    const end = attendance.check_out ? new Date(attendance.check_out).getTime() : currentTime.getTime();
+    const diff = end - start;
+    if (diff < 0) return "00:00:00";
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   useEffect(() => {
@@ -145,56 +163,67 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
           {Array.isArray(menus) && menus.length === 0 ? (
             <div className="px-3 py-2 text-sm text-gray-400 animate-pulse">Loading menus...</div>
           ) : Array.isArray(menus) ? (
-            menus.filter((m: any) => m.parent_id === null).map((parentMenu: any) => {
-              const childMenus = menus.filter((m: any) => m.parent_id === parentMenu.id);
-              const hasChildren = childMenus.length > 0;
-              const isChildActive = childMenus.some((child: any) => pathname === child.url || pathname?.startsWith(`${child.url}/`));
-              const isParentActive = pathname === parentMenu.url || pathname?.startsWith(`${parentMenu.url}/`);
-              const isActive = isParentActive || isChildActive;
-              const isOpen = openMenuIds.includes(parentMenu.id) || isChildActive;
+            (() => {
+              let activeUrl = "";
+              menus.forEach(m => {
+                if (m.url && (pathname === m.url || pathname?.startsWith(`${m.url}/`))) {
+                  if (m.url.length > activeUrl.length) {
+                    activeUrl = m.url;
+                  }
+                }
+              });
 
-              return (
-                <div key={parentMenu.id} className="mb-1">
-                  {hasChildren ? (
-                    <button 
-                      onClick={() => toggleMenu(parentMenu.id)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
-                    >
-                      <div className="flex items-center">
+              return menus.filter((m: any) => m.parent_id === null).map((parentMenu: any) => {
+                const childMenus = menus.filter((m: any) => m.parent_id === parentMenu.id);
+                const hasChildren = childMenus.length > 0;
+                const isChildActive = childMenus.some((child: any) => child.url === activeUrl);
+                const isParentActive = parentMenu.url === activeUrl;
+                const isActive = isParentActive || isChildActive;
+                const isOpen = openMenuIds.includes(parentMenu.id) || isChildActive;
+
+                return (
+                  <div key={parentMenu.id} className="mb-1">
+                    {hasChildren ? (
+                      <button 
+                        onClick={() => toggleMenu(parentMenu.id)}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
+                      >
+                        <div className="flex items-center">
+                          {renderIcon(parentMenu.icon || 'Circle')}
+                          {parentMenu.name}
+                        </div>
+                        <Icons.ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    ) : (
+                      <Link 
+                        href={parentMenu.url || "#"} 
+                        className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
+                      >
                         {renderIcon(parentMenu.icon || 'Circle')}
                         {parentMenu.name}
+                      </Link>
+                    )}
+                    
+                    {hasChildren && isOpen && (
+                      <div className="mt-1 ml-9 pl-1 border-l-2 border-gray-100 space-y-1">
+                        {childMenus.map((childMenu: any) => {
+                          const isChildUrlActive = childMenu.url === activeUrl;
+                          return (
+                            <Link
+                              key={childMenu.id}
+                              href={childMenu.url || "#"}
+                              className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${isChildUrlActive ? 'text-[#107C41] bg-white shadow-sm border border-gray-100' : 'text-gray-500 hover:text-[#107C41] hover:bg-white/60'}`}
+                            >
+                              {childMenu.name}
+                            </Link>
+                          );
+                        })}
                       </div>
-                      <Icons.ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                  ) : (
-                    <Link 
-                      href={parentMenu.url || "#"} 
-                      className={`flex items-center px-3 py-2.5 rounded-lg font-medium transition-all group ${isActive ? 'bg-[#f0fdf4] text-[#107C41]' : 'text-gray-600 hover:bg-[#f0fdf4] hover:text-[#107C41]'}`}
-                    >
-                      {renderIcon(parentMenu.icon || 'Circle')}
-                      {parentMenu.name}
-                    </Link>
-                  )}
-                  
-                  {hasChildren && isOpen && (
-                    <div className="mt-1 ml-9 pl-1 border-l-2 border-gray-100 space-y-1">
-                      {childMenus.map((childMenu: any) => {
-                        const isChildUrlActive = pathname === childMenu.url || pathname?.startsWith(`${childMenu.url}/`);
-                        return (
-                          <Link
-                            key={childMenu.id}
-                            href={childMenu.url || "#"}
-                            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${isChildUrlActive ? 'text-[#107C41] bg-white shadow-sm border border-gray-100' : 'text-gray-500 hover:text-[#107C41] hover:bg-white/60'}`}
-                          >
-                            {childMenu.name}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })
+                    )}
+                  </div>
+                );
+              });
+            })()
           ) : null}
         </nav>
       </aside>
@@ -214,18 +243,32 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
             {userInfo && userInfo.role_code !== 'admin' && (
               <div className="hidden sm:flex items-center mr-2">
                 {!attendance?.check_in ? (
-                  <button onClick={handleClockIn} className="px-4 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors shadow-sm">
+                  <button onClick={handleClockIn} className="flex items-center px-4 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-sm font-bold hover:bg-indigo-100 transition-colors shadow-sm">
+                    <Icons.Play className="w-4 h-4 mr-1.5" />
                     출근하기
                   </button>
                 ) : (
-                  <div className="flex items-center space-x-3 text-sm">
-                    <span className="text-gray-600 font-medium">출근 {new Date(attendance.check_in).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'})}</span>
+                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full py-1 pl-4 pr-1 shadow-inner">
+                    <div className="flex items-center space-x-3 text-sm mr-3">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-400 font-semibold tracking-wider uppercase leading-none mb-1">
+                          출근 {new Date(attendance.check_in).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                        <div className="flex items-center font-mono font-bold text-gray-700 leading-none">
+                          <Icons.Clock className="w-3.5 h-3.5 mr-1.5 text-indigo-500" />
+                          {getWorkDuration()}
+                        </div>
+                      </div>
+                    </div>
                     {!attendance.check_out ? (
-                      <button onClick={handleClockOut} className="px-4 py-1.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-sm">
-                        퇴근하기
+                      <button onClick={handleClockOut} className="flex items-center px-3 py-1 bg-white text-gray-700 border border-gray-200 rounded-full font-bold text-xs hover:bg-gray-100 transition-colors shadow-sm group">
+                        <Icons.Square className="w-3 h-3 mr-1 text-gray-400 group-hover:text-red-500 transition-colors" />
+                        퇴근
                       </button>
                     ) : (
-                      <span className="text-gray-600 font-medium">퇴근 {new Date(attendance.check_out).toLocaleTimeString('ko-KR', {hour: '2-digit', minute:'2-digit'})}</span>
+                      <div className="px-3 py-1 bg-gray-200 text-gray-600 rounded-full font-bold text-xs">
+                        퇴근완료
+                      </div>
                     )}
                   </div>
                 )}
