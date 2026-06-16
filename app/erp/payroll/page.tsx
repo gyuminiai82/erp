@@ -365,16 +365,28 @@ export default function PayrollsPage() {
     {
       field: 'base_salary',
       headerName: '기본급',
-      width: 130,
+      width: 110,
       editable: true,
-      renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
+      renderCell: (val: any) => <div className="text-right w-full text-blue-600/80">{Number(val).toLocaleString()}</div>
+    },
+    {
+      field: 'meal_allowance',
+      headerName: '식대(비과세)',
+      width: 100,
+      renderCell: () => <div className="text-right w-full text-gray-400">0</div>
+    },
+    {
+      field: 'position_allowance',
+      headerName: '직책수당',
+      width: 100,
+      renderCell: () => <div className="text-right w-full text-gray-400">0</div>
     },
     {
       field: 'bonus',
-      headerName: '상여/수당',
+      headerName: '연장/휴일수당',
       width: 110,
       editable: true,
-      renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div>
+      renderCell: (val: any) => <div className="text-right w-full text-blue-600/80">{Number(val).toLocaleString()}</div>
     },
     {
       field: 'nps',
