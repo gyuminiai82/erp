@@ -77,28 +77,20 @@ export default function ItemsPage() {
 
   const columns = [
     { field: "item_code", headerName: "품목코드", width: 150 },
-    { field: "item_name", headerName: "품목명", width: 220, renderCell: (val: any) => <span className="font-semibold">{val}</span> },
-    { field: "item_type", headerName: "유형", width: 100, renderCell: (val: any) => {
-        let color = "bg-gray-100 text-gray-800";
-        if (val === '완제품') color = "bg-blue-100 text-blue-800 border border-blue-200";
-        else if (val === '반제품') color = "bg-purple-100 text-purple-800 border border-purple-200";
-        else if (val === '원자재') color = "bg-green-100 text-green-800 border border-green-200";
-        return <span className={`px-2 py-1 rounded text-xs font-medium ${color}`}>{val}</span>;
-      }
-    },
-    { field: "standard", headerName: "규격", width: 160, renderCell: (val: any) => <span className="text-gray-500 text-sm">{val || '-'}</span> },
+    { field: "item_name", headerName: "품목명", width: 220, renderCell: (val: any) => <span>{val}</span> },
+    { field: "item_type", headerName: "유형", width: 100 },
+    { field: "standard", headerName: "규격", width: 160, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
     { field: "current_stock", headerName: "현재고", width: 100, renderCell: (val: any, row: any) => {
-        const isLow = val <= row.safety_stock;
-        return <div className={`text-right w-full font-bold ${isLow ? 'text-red-600' : 'text-gray-900'}`}>{val.toLocaleString()} <span className="text-xs font-normal text-gray-500">{row.unit}</span></div>;
+        return <div className="text-right w-full">{val.toLocaleString()} <span className="text-xs font-normal text-gray-500">{row.unit}</span></div>;
       }
     },
-    { field: "safety_stock", headerName: "안전재고", width: 90, renderCell: (val: any) => <div className="text-right w-full text-gray-500">{val.toLocaleString()}</div> },
+    { field: "safety_stock", headerName: "안전재고", width: 90, renderCell: (val: any) => <div className="text-right w-full text-gray-600">{val.toLocaleString()}</div> },
     { field: "standard_cost", headerName: "표준단가", width: 120, renderCell: (val: any) => <div className="text-right w-full">{val.toLocaleString()}원</div> },
     { field: "lead_time", headerName: "L/T", width: 70, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
     { field: "location", headerName: "창고위치", width: 140, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
     { field: "is_lot_tracked", headerName: "LOT", width: 70, renderCell: (val: any) => (
-        <div className="w-full flex justify-center">
-          {val ? <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-200">추적</span> : <span className="text-[10px] text-gray-400">-</span>}
+        <div className="w-full flex justify-center text-gray-600">
+          {val ? <span>추적</span> : <span>-</span>}
         </div>
       )
     },
