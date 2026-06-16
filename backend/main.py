@@ -135,6 +135,25 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.on_event("startup")
 async def start_background_tasks():
+    # --- Auto Migrate DB Columns ---
+    try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(engine)
+        with engine.begin() as conn:
+            for table_name, table in models.Base.metadata.tables.items():
+                if not inspector.has_table(table_name):
+                    continue
+                existing_columns = [col['name'] for col in inspector.get_columns(table_name)]
+                for column in table.columns:
+                    if column.name not in existing_columns:
+                        col_type = column.type.compile(engine.dialect)
+                        query = f"ALTER TABLE {table_name} ADD COLUMN {column.name} {col_type}"
+                        print(f"Auto-migrating: {query}")
+                        conn.execute(text(query))
+    except Exception as e:
+        print(f"Auto-migration error: {e}")
+    # -------------------------------
+
     asyncio.create_task(broadcast_metrics_task())
 
 @app.get("/api/departments")
