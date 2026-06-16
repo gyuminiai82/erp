@@ -10,13 +10,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push Frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.prod
+        push: true
+        tags: ghcr.io/gyuminiai82/erp-frontend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push Backend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile.prod
+        push: true
+        tags: ghcr.io/gyuminiai82/erp-backend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.10
       with:
@@ -26,16 +64,20 @@ jobs:
         command_timeout: 30m
         script: |
           cd /home/${{ secrets.EC2_USER }}/port_erp
-          # 강제로 원격 최신 코드로 덮어쓰기 (EC2 내부 충돌 무시)
+          
+          # 강제로 원격 최신 코드로 덮어쓰기
           git fetch --all
           git reset --hard origin/main
           
           # DB 암호를 환경변수로 넘기기 위해 .env 파일 생성
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
           
-          # 확실한 갱신을 위해 프론트엔드 컨테이너 캐시 없이 재빌드 및 재시작
-          docker-compose -f docker-compose.prod.yml build --no-cache frontend
+          # GHCR 로그인 (Public 레포면 생략 가능하지만 만약을 위해)
+          # public 리포지토리의 경우 로그인이 필요 없으므로 생략합니다.
+          
+          # 최신 이미지 풀 및 재시작
+          docker-compose -f docker-compose.prod.yml pull
           docker-compose -f docker-compose.prod.yml up -d
           
           # 오래된 도커 이미지 정리
-          docker image prune -f
+          docker image prune -af
