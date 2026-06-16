@@ -79,5 +79,8 @@ jobs:
           docker-compose -f docker-compose.prod.yml pull
           docker-compose -f docker-compose.prod.yml up -d
           
+          # Nginx가 재생성된 컨테이너의 새 IP를 바라보도록 리로드/재시작
+          docker-compose -f docker-compose.prod.yml restart nginx
+          
           # 오래된 도커 이미지 정리
           docker image prune -af
