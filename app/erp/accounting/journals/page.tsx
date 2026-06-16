@@ -91,15 +91,9 @@ export default function JournalsPage() {
     { field: "entry_date", headerName: "전표일자", width: 120, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
     { field: "entry_type", headerName: "유형", width: 90, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
     { field: "description", headerName: "적요", width: 250 },
-    { field: "total_debit", headerName: "차변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full font-semibold text-blue-600">{Number(val).toLocaleString()}원</div> },
-    { field: "total_credit", headerName: "대변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full font-semibold text-red-600">{Number(val).toLocaleString()}원</div> },
-    { field: "status", headerName: "상태", width: 100, renderCell: (val: any) => (
-      <div className="flex justify-center w-full">
-        <span className={`px-2 py-1 text-xs rounded-full ${val === '승인완료' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-          {val}
-        </span>
-      </div>
-    )},
+    { field: "total_debit", headerName: "차변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
+    { field: "total_credit", headerName: "대변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
+    { field: "status", headerName: "상태", width: 100, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
     { field: "creator_name", headerName: "작성자", width: 100, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
   ];
 
