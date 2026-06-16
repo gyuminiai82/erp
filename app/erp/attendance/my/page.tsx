@@ -111,11 +111,11 @@ export default function MyAttendancePage() {
               <>
                 <span className="text-blue-600 flex items-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1"></span>
-                  {att.check_in?.slice(0, 5) || '-'}
+                  {att.check_in?.substring(11, 16) || '-'}
                 </span>
                 <span className="text-orange-500 flex items-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mr-1"></span>
-                  {att.check_out?.slice(0, 5) || '-'}
+                  {att.check_out?.substring(11, 16) || '-'}
                 </span>
                 {att.status === '지각' && (
                   <span className="absolute bottom-1 right-1 text-[10px] bg-red-100 text-red-600 px-1 rounded">지각</span>
