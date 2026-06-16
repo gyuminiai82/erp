@@ -603,8 +603,7 @@ export default function EmployeesPage() {
             </div>
           </div>
           
-          <div className="flex flex-col h-[600px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-            <div className="h-[calc(100vh-280px)] min-h-[400px]">
+          <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
               <DataGrid 
                 columns={columns} 
                 data={employees} 
@@ -614,7 +613,6 @@ export default function EmployeesPage() {
                 onSelectionChange={setSelectedRowIndices}
                 storageKey="erp_employees_grid_columns"
               />
-            </div>
           </div>
         </div>
       </div>
