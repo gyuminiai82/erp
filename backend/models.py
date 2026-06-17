@@ -471,10 +471,12 @@ class ApprovalDocument(Base):
     title = Column(String(200), nullable=False)
     content = Column(Text)
     status = Column(String(20), default="DRAFT") # DRAFT, IN_PROGRESS, APPROVED, REJECTED
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     drafter = relationship("Employee", foreign_keys=[drafter_id])
+    project = relationship("Project", foreign_keys=[project_id])
     approval_lines = relationship("ApprovalLine", back_populates="document", cascade="all, delete")
 
 

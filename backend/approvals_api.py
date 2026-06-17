@@ -17,6 +17,8 @@ class DraftApprovalRequest(BaseModel):
     document_type: str
     title: str
     content: str
+    project_id: Optional[int] = None
+    is_draft: bool = False
     approvers: List[ApproverInput]
 
 @router.post("/draft")
@@ -32,7 +34,8 @@ def draft_approval(payload: DraftApprovalRequest, db: Session = Depends(get_db),
         document_type=payload.document_type,
         title=payload.title,
         content=payload.content,
-        status="IN_PROGRESS"
+        project_id=payload.project_id,
+        status="DRAFT" if payload.is_draft else "IN_PROGRESS"
     )
     db.add(new_doc)
     db.commit()
