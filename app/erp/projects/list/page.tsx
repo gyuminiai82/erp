@@ -22,8 +22,8 @@ export default function ProjectListPage() {
     if (t) {
       setToken(t);
       fetch('/api/projects', { headers: { Authorization: `Bearer ${t}` } })
-        .then(res => res.json())
-        .then(data => setProjects(data));
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setProjects(Array.isArray(data) ? data : []));
     }
   }, []);
 

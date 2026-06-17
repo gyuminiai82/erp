@@ -22,16 +22,16 @@ export default function BudgetPage() {
     if (t) {
       setToken(t);
       fetch('/api/projects', { headers: { Authorization: `Bearer ${t}` } })
-        .then(res => res.json())
-        .then(data => setProjects(data));
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setProjects(Array.isArray(data) ? data : []));
     }
   }, []);
 
   useEffect(() => {
     if (!token || !selectedProject) return;
     fetch(`/api/projects/${selectedProject}/budgets`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.json())
-      .then(data => setBudgets(data));
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setBudgets(Array.isArray(data) ? data : []));
   }, [token, selectedProject]);
 
   return (

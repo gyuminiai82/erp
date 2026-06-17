@@ -33,16 +33,16 @@ export default function DocumentsPage() {
     if (t) {
       setToken(t);
       fetch('/api/projects', { headers: { Authorization: `Bearer ${t}` } })
-        .then(res => res.json())
-        .then(data => setProjects(data));
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setProjects(Array.isArray(data) ? data : []));
     }
   }, []);
 
   useEffect(() => {
     if (!token || !selectedProject) return;
     fetch(`/api/projects/${selectedProject}/documents`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.json())
-      .then(data => setDocuments(data));
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setDocuments(Array.isArray(data) ? data : []));
   }, [token, selectedProject]);
 
   return (
