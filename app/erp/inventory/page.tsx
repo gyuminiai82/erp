@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Search, Undo2, Download, AlertCircle, CheckCircle2, Edit3, Save } from 'lucide-react';
@@ -121,21 +124,61 @@ export default function InventoryStatusPage() {
     }
   };
 
-  const exportExcel = () => {
-    // 엑셀 다운로드 (간단한 CSV 변환 로직)
-    let csv = '품목코드,품목명,유형,규격,단위,창고위치,안전재고,현재재고,상태\n';
+  const exportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('재고 현황');
+
+    worksheet.columns = [
+      { header: '품목코드', key: 'item_code', width: 15 },
+      { header: '품목명', key: 'item_name', width: 30 },
+      { header: '유형', key: 'item_type', width: 15 },
+      { header: '규격', key: 'standard', width: 20 },
+      { header: '단위', key: 'unit', width: 10 },
+      { header: '창고위치', key: 'location', width: 20 },
+      { header: '안전재고', key: 'safety_stock', width: 15 },
+      { header: '현재재고', key: 'current_stock', width: 15 },
+      { header: '상태', key: 'status', width: 15 }
+    ];
+
     filteredItems.forEach(item => {
       const status = item.current_stock < item.safety_stock ? '재고 부족' : '적정';
-      csv += `"${item.item_code}","${item.item_name}","${item.item_type}","${item.standard || ''}","${item.unit}","${item.location || ''}",${item.safety_stock},${item.current_stock},"${status}"\n`;
+      worksheet.addRow({
+        item_code: item.item_code,
+        item_name: item.item_name,
+        item_type: item.item_type,
+        standard: item.standard || '',
+        unit: item.unit,
+        location: item.location || '',
+        safety_stock: item.safety_stock,
+        current_stock: item.current_stock,
+        status: status
+      });
     });
-    
-    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `재고현황_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          left: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          right: { style: 'thin', color: { argb: 'FFE2E2E2' } }
+        };
+        if (rowNumber === 1) {
+          cell.font = { name: '맑은 고딕', size: 10, bold: true };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F4F7' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+      row.height = 22;
+    });
+
+    worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `재고현황_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const columns: ColumnDef[] = [

@@ -5,6 +5,8 @@ import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useDialog } from "@/components/providers/DialogProvider";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { Plus, X, Box, Search, Warehouse, Wrench, ShieldAlert, Tag, Layers, DollarSign, Clock, Undo2, Trash2, Save, FileDown } from "lucide-react";
 
 export default function ItemsPage() {
@@ -170,18 +172,54 @@ export default function ItemsPage() {
     setSelectedRowIndices([]);
   };
 
-  const handleExcelDownload = () => {
-    let csv = '품목코드,품목명,유형,규격,단위,표준단가\n';
+  const handleExcelDownload = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('품목 목록');
+
+    worksheet.columns = [
+      { header: '품목코드', key: 'item_code', width: 15 },
+      { header: '품목명', key: 'item_name', width: 30 },
+      { header: '유형', key: 'item_type', width: 15 },
+      { header: '규격', key: 'standard', width: 20 },
+      { header: '단위', key: 'unit', width: 10 },
+      { header: '표준단가', key: 'standard_cost', width: 15 }
+    ];
+
     items.forEach(item => {
-      csv += `"${item.item_code}","${item.item_name}","${item.item_type}","${item.standard || ''}","${item.unit}",${item.standard_cost || 0}\n`;
+      worksheet.addRow({
+        item_code: item.item_code,
+        item_name: item.item_name,
+        item_type: item.item_type,
+        standard: item.standard || '',
+        unit: item.unit,
+        standard_cost: item.standard_cost || 0
+      });
     });
-    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `품목관리_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          left: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E2E2' } },
+          right: { style: 'thin', color: { argb: 'FFE2E2E2' } }
+        };
+        if (rowNumber === 1) {
+          cell.font = { name: '맑은 고딕', size: 10, bold: true };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F4F7' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        } else {
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        }
+      });
+      row.height = 22;
+    });
+
+    worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `품목관리_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const columns: ColumnDef[] = useMemo(() => [
