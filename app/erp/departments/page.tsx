@@ -277,9 +277,9 @@ export default function DepartmentsPage() {
                 setEditingDept(null);
                 setDeptForm({ name: '', manager_id: '' });
                 setIsDeptModalOpen(true);
-              }} className="bg-blue-600 hover:bg-blue-700 text-white h-9">
-                <Plus className="w-4 h-4 mr-1.5" />
-                부서 추가
+              }} variant="outline" size="sm" className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                부서 등록
               </Button>
             </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndDept}>
@@ -321,9 +321,9 @@ export default function DepartmentsPage() {
                 setEditingPos(null);
                 setPosForm({ name: '', level: 10, description: '' });
                 setIsPosModalOpen(true);
-              }} className="bg-blue-600 hover:bg-blue-700 text-white h-9">
-                <Plus className="w-4 h-4 mr-1.5" />
-                직급 추가
+              }} variant="outline" size="sm" className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                직급 등록
               </Button>
             </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndPos}>
