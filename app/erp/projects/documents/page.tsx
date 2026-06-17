@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
-import { Plus, Trash2, Save, Undo2, FileDown } from 'lucide-react';
+import { Plus, Trash2, Save, Undo2, FileDown, Search } from 'lucide-react';
 import { Download } from 'lucide-react';
 
 export default function DocumentsPage() {
@@ -49,22 +49,25 @@ export default function DocumentsPage() {
   }, [token, selectedProject]);
 
   return (
-    <div className="p-6 bg-gray-50/30 min-h-screen">
+    <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">산출물 보관함</h1>
-          <p className="text-gray-500 mt-2">프로젝트 관련 기획서, 보고서, 계약서 등을 중앙 집중식으로 관리합니다.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">산출물 보관함</h1>
+          <p className="text-gray-500">프로젝트 관련 기획서, 보고서, 계약서 등을 중앙 집중식으로 관리합니다.</p>
         </div>
       </div>
 
-      <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-        <div className="p-4 border-b border-gray-200 flex flex-col gap-4 bg-gray-50/50">
-          <div className="flex items-center gap-2">
-            <input type="text" placeholder="검색어 입력..." className="px-3 py-2 border border-gray-300 rounded text-sm w-64 outline-none focus:border-[#107C41]" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input type="text" placeholder="검색어 입력..." className="pl-9 pr-4 border border-gray-200 rounded-lg text-sm bg-white w-full h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent" />
+            </div>
             <select 
               value={selectedProject} 
               onChange={(e) => setSelectedProject(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded text-sm min-w-[200px] outline-none focus:border-blue-500"
+              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[200px]"
             >
               <option value="">프로젝트 선택</option>
               {projects.map((p: any) => (
@@ -78,7 +81,7 @@ export default function DocumentsPage() {
               <Undo2 className="w-4 h-4 text-[#107C41]" />
             </Button>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
             <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
               <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
               파일 업로드
@@ -97,7 +100,7 @@ export default function DocumentsPage() {
             </Button>
           </div>
         </div>
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-t border-gray-200 overflow-hidden bg-white">
           {selectedProject ? (<DataGrid columns={columns} data={documents} showCheckboxes={true} selectedRowIndices={selectedRowIndices} onSelectionChange={setSelectedRowIndices} />) : (<div className="flex items-center justify-center h-full text-gray-500">프로젝트를 선택해주세요.</div>)}
         </div>
       </div>
