@@ -25,12 +25,14 @@ export default function AppointmentsPage() {
   });
 
   const fetchData = async () => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     try {
       const [appRes, empRes, deptRes, posRes] = await Promise.all([
-        fetch("/api/appointments"),
-        fetch("/api/employees"),
-        fetch("/api/departments"),
-        fetch("/api/positions")
+        fetch("/api/appointments", { headers }),
+        fetch("/api/employees", { headers }),
+        fetch("/api/departments", { headers }),
+        fetch("/api/positions", { headers })
       ]);
       
       if (appRes.ok) setAppointments(await appRes.json());
@@ -49,6 +51,8 @@ export default function AppointmentsPage() {
   }, []);
 
   const handleCreate = async () => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     if (!form.employee_id) return showAlert("발령 대상 사원을 선택해주세요.", { type: "warning" });
     if (!form.type) return showAlert("발령 유형을 선택해주세요.", { type: "warning" });
     if (!form.appointment_date) return showAlert("발령 일자를 입력해주세요.", { type: "warning" });
@@ -70,7 +74,7 @@ export default function AppointmentsPage() {
     try {
       const res = await fetch("/api/appointments", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
       
@@ -95,13 +99,15 @@ export default function AppointmentsPage() {
   };
 
   const handleProcess = async (id: number, status: string) => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     const confirmed = await showConfirm(`이 발령을 ${status} 처리하시겠습니까?`, { type: "info" });
     if (!confirmed) return;
 
     try {
       const res = await fetch(`/api/appointments/${id}/status`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status })
       });
       
@@ -117,11 +123,13 @@ export default function AppointmentsPage() {
   };
 
   const handleDelete = async (id: number) => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     const confirmed = await showConfirm("정말 이 발령 기록을 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
 
     try {
-      const res = await fetch(`/api/appointments/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/appointments/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         fetchData();
       } else {

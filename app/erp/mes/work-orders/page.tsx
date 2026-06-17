@@ -16,12 +16,16 @@ export default function WorkOrdersPage() {
   }, []);
 
   const fetchOrders = async () => {
-    const res = await fetch("/api/mes/work-orders");
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await fetch("/api/mes/work-orders", { headers });
     const data = await res.json();
     setOrders(data);
   };
 
   const createOrder = async () => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     const orderNo = await showPrompt("지시번호를 입력하세요:", "");
     if (!orderNo) return;
     const itemId = await showPrompt("품목 ID (숫자)를 입력하세요:", "");
@@ -31,7 +35,7 @@ export default function WorkOrdersPage() {
 
     const res = await fetch("/api/mes/work-orders", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ 
         order_no: orderNo, 
         item_id: parseInt(itemId), 

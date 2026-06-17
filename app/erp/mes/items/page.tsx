@@ -38,7 +38,9 @@ export default function ItemsPage() {
   }, []);
 
   const fetchUnitCodes = async () => {
-    const res = await fetch("/api/common-codes?group=ITEM_UNIT");
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await fetch("/api/common-codes?group=ITEM_UNIT", { headers });
     if (res.ok) {
       const data = await res.json();
       setUnitOptions(data.map((c: any) => ({ label: c.name, value: c.code })));
@@ -46,7 +48,9 @@ export default function ItemsPage() {
   };
 
   const fetchItems = async () => {
-    const res = await fetch("/api/mes/items");
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await fetch("/api/mes/items", { headers });
     const data = await res.json();
     const mapped = data.map((i: any) => ({ ...i, _state: 'R' }));
     setAllItems(mapped);
@@ -67,6 +71,8 @@ export default function ItemsPage() {
   };
 
   const handleModalSubmit = async (e: React.FormEvent) => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     e.preventDefault();
     if (!formData.item_code || !formData.item_name) {
       showAlert('품목코드와 품목명은 필수입니다.', { type: 'warning' });
@@ -75,7 +81,7 @@ export default function ItemsPage() {
 
     const res = await fetch("/api/mes/items", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify(formData)
     });
     
@@ -142,6 +148,8 @@ export default function ItemsPage() {
   };
 
   const handleBatchSave = async () => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     const changed = items.filter(i => i._state === 'U' || i._state === 'D');
     if (changed.length === 0) return;
     
@@ -150,13 +158,11 @@ export default function ItemsPage() {
         if (item._state === 'U') {
           await fetch(`/api/mes/items/${item.id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
             body: JSON.stringify(item)
           });
         } else if (item._state === 'D') {
-          await fetch(`/api/mes/items/${item.id}`, {
-            method: "DELETE"
-          });
+          await fetch(`/api/mes/items/${item.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
         }
       }
       showAlert("저장되었습니다.", { type: "success" });
@@ -173,6 +179,8 @@ export default function ItemsPage() {
   };
 
   const handleExcelDownload = async () => {
+    const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token')) : '';
+    const headers = { Authorization: `Bearer ${token}` };
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('품목 목록');
 
