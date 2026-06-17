@@ -6,7 +6,7 @@ from datetime import date, datetime
 from pydantic import BaseModel
 import models
 import database
-from auth import get_current_user
+from auth import get_current_user_info
 
 router = APIRouter(
     prefix="/api/projects",
@@ -40,7 +40,7 @@ class ProjectResponse(ProjectBase):
         orm_mode = True
 
 @router.get("/", response_model=List[ProjectResponse])
-def get_projects(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
+def get_projects(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
     projects = db.query(models.Project).order_by(models.Project.id.desc()).offset(skip).limit(limit).all()
     res = []
     for p in projects:
@@ -51,7 +51,7 @@ def get_projects(skip: int = 0, limit: int = 100, db: Session = Depends(database
     return res
 
 @router.post("/", response_model=ProjectResponse)
-def create_project(project: ProjectCreate, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
+def create_project(project: ProjectCreate, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
     db_project = models.Project(**project.dict())
     db.add(db_project)
     db.commit()
@@ -63,7 +63,7 @@ def create_project(project: ProjectCreate, db: Session = Depends(database.get_db
     return data
 
 @router.put("/{project_id}", response_model=ProjectResponse)
-def update_project(project_id: int, project: ProjectUpdate, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
+def update_project(project_id: int, project: ProjectUpdate, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
     db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -81,7 +81,7 @@ def update_project(project_id: int, project: ProjectUpdate, db: Session = Depend
     return data
 
 @router.delete("/{project_id}")
-def delete_project(project_id: int, db: Session = Depends(database.get_db), current_user=Depends(get_current_user)):
+def delete_project(project_id: int, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
     db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found")
