@@ -1,7 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, FileDown, Search, Undo2, Save } from 'lucide-react';
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { DataGrid } from '@/components/ui/DataGrid';
+import { useDialog } from "@/components/providers/DialogProvider";
 
 interface Project {
   id: number;
@@ -23,6 +27,9 @@ export default function ProjectsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [clients, setClients] = useState<{id: number, name: string}[]>([]);
   const [employees, setEmployees] = useState<{id: number, name: string}[]>([]);
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const { showAlert, showConfirm } = useDialog();
   
   // Form state
   const [name, setName] = useState('');
@@ -120,26 +127,104 @@ export default function ProjectsPage() {
     { field: 'status', headerName: '상태', width: 100 }
   ];
 
+  const handleDelete = async () => {
+    if (selectedRowIndices.length === 0) return;
+    const confirmed = await showConfirm(`선택한 ${selectedRowIndices.length}개의 프로젝트를 삭제하시겠습니까?`, { type: "warning" });
+    if (!confirmed) return;
+    
+    // API call to delete selected projects would go here. For now just clear selection.
+    // fetch('/api/projects/bulk-delete'...)
+    
+    // Fake deletion logic for UI
+    const updated = projects.filter((_, idx) => !selectedRowIndices.includes(idx));
+    setProjects(updated);
+    setSelectedRowIndices([]);
+    await showAlert("삭제되었습니다.", { type: "success" });
+  };
+
+  const handleSearch = () => {
+    // In a real app, you would filter projects based on searchKeyword.
+    // For now, this is a placeholder matching the layout.
+    fetchProjects();
+  };
+
+  const filteredProjects = projects.filter(p => 
+    searchKeyword === '' || 
+    p.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+    (p.client_name && p.client_name.toLowerCase().includes(searchKeyword.toLowerCase())) ||
+    (p.manager_name && p.manager_name.toLowerCase().includes(searchKeyword.toLowerCase()))
+  );
+
   return (
-    <div className="p-8">
+    <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">프로젝트 관리</h1>
-          <p className="text-gray-500 mt-2">사내 프로젝트 및 계약 건의 일정과 예산을 관리합니다.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">프로젝트 현황</h1>
+          <p className="text-gray-500">사내 프로젝트 및 계약 건의 일정과 예산을 관리합니다.</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          새 프로젝트 등록
-        </button>
+        <div className="flex space-x-2">
+          {/* Action buttons have been moved to the DataGrid toolbar */}
+        </div>
       </div>
 
-      <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-        <DataGrid
-          columns={columns}
-          data={projects}
-        />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-col gap-4 mb-4">
+            {/* Top Row: Search Input and Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                <Input 
+                  value={searchKeyword}
+                  onChange={e => setSearchKeyword(e.target.value)}
+                  onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
+                  className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
+                  placeholder="프로젝트명, 발주처 검색..." 
+                />
+              </div>
+
+              <Button variant="secondary" onClick={handleSearch} className="h-10 px-6 shrink-0">
+                조회
+              </Button>
+              <Button variant="secondary" onClick={() => {setSearchKeyword(''); fetchProjects();}} className="h-10 px-3 shrink-0" title="초기화">
+                <Undo2 className="w-4 h-4 text-[#107C41]" />
+              </Button>
+            </div>
+
+            {/* Bottom Row: Action buttons */}
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                프로젝트 등록
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleDelete} 
+                disabled={selectedRowIndices.length === 0}
+                className={`h-9 flex items-center ${selectedRowIndices.length > 0 ? 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200' : ''}`}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                선택 삭제
+              </Button>
+              <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
+                <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
+                엑셀 다운로드
+              </Button>
+            </div>
+          </div>
+          
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
+              <DataGrid 
+                columns={columns} 
+                data={filteredProjects} 
+                showCheckboxes={true}
+                selectedRowIndices={selectedRowIndices}
+                onSelectionChange={setSelectedRowIndices}
+                storageKey="erp_projects_grid_columns"
+              />
+          </div>
+        </div>
       </div>
 
       {isModalOpen && (
