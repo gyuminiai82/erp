@@ -475,6 +475,15 @@ def bulk_update_employees(payload: EmployeeBulkUpdateRequest, db: Session = Depe
             if emp_data.resident_num is not None: emp.resident_num = crypto.encrypt_data(emp_data.resident_num)
             if emp_data.status is not None: emp.status = emp_data.status
             if emp_data.base_salary is not None: emp.base_salary = emp_data.base_salary
+            if hasattr(emp_data, 'attendance_policy_id') and emp_data.attendance_policy_id is not None: 
+                # 빈 문자열 처리 (기본 설정으로 변경 시)
+                if emp_data.attendance_policy_id == "" or str(emp_data.attendance_policy_id).strip() == "":
+                    emp.attendance_policy_id = None
+                else:
+                    try:
+                        emp.attendance_policy_id = int(emp_data.attendance_policy_id)
+                    except ValueError:
+                        emp.attendance_policy_id = None
             
             if emp_data.role is not None:
                 new_role = db.query(models.Role).filter(models.Role.name == emp_data.role).first()
