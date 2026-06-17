@@ -389,10 +389,13 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
         deductions = int((nps + nhis + ltci + ei) / 10) * 10 + tardy_deduction
         net_pay = total_salary - deductions
         
+        calc_basis_str = "\n".join(basis_list) if basis_list else None
+        
         if existing:
             existing.base_salary = base
             existing.bonus = bonus
             existing.deductions = deductions
+            existing.calculation_basis = calc_basis_str
             existing.net_pay = net_pay
         else:
             new_payroll = Payroll(
@@ -401,6 +404,7 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
                 base_salary=base,
                 bonus=bonus,
                 deductions=deductions,
+                calculation_basis=calc_basis_str,
                 net_pay=net_pay,
                 payment_date=date.today()
             )
