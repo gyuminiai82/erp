@@ -98,10 +98,12 @@ export default function DepartmentsPage() {
 
   const fetchData = async () => {
     try {
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
+      const headers = { Authorization: `Bearer ${token}` };
       const [deptRes, posRes, empRes] = await Promise.all([
-        fetch("/api/departments"),
-        fetch("/api/positions"),
-        fetch("/api/employees")
+        fetch("/api/departments", { headers }),
+        fetch("/api/positions", { headers }),
+        fetch("/api/employees", { headers })
       ]);
       
       if (deptRes.ok) setDepartments(await deptRes.json());
@@ -134,9 +136,10 @@ export default function DepartmentsPage() {
       setDepartments(newItems);
       
       try {
+        const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
         await fetch("/api/departments/reorder", {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ items: newItems.map((item, idx) => ({ id: item.id, sort_order: idx + 1 })) })
         });
       } catch (e) { console.error(e); }
@@ -152,9 +155,10 @@ export default function DepartmentsPage() {
       setPositions(newItems);
       
       try {
+        const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
         await fetch("/api/positions/reorder", {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ items: newItems.map((item, idx) => ({ id: item.id, sort_order: idx + 1 })) })
         });
       } catch (e) { console.error(e); }
@@ -169,9 +173,10 @@ export default function DepartmentsPage() {
     const method = editingDept ? "PUT" : "POST";
     
     try {
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           name: deptForm.name,
           manager_id: deptForm.manager_id ? Number(deptForm.manager_id) : null
@@ -196,7 +201,8 @@ export default function DepartmentsPage() {
     const confirmed = await showConfirm("정말 이 부서를 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`/api/departments/${id}`, { method: "DELETE" });
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
+      const res = await fetch(`/api/departments/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         fetchData();
       } else {
@@ -212,7 +218,8 @@ export default function DepartmentsPage() {
     const confirmed = await showConfirm("정말 이 직급을 삭제하시겠습니까?", { type: "error" });
     if (!confirmed) return;
     try {
-      const res = await fetch(`/api/positions/${id}`, { method: "DELETE" });
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
+      const res = await fetch(`/api/positions/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         fetchData();
       } else {
@@ -232,9 +239,10 @@ export default function DepartmentsPage() {
     const method = editingPos ? "PUT" : "POST";
     
     try {
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           name: posForm.name,
           level: Number(posForm.level),
@@ -378,7 +386,10 @@ export default function DepartmentsPage() {
                   onChange={e => setDeptForm({...deptForm, manager_id: e.target.value})}
                 >
                   <option value="">지정 안함</option>
-                  {employees.map(e => <option key={e.id} value={e.id}>{e.name} ({e.emp_no})</option>)}
+                  {(editingDept 
+                    ? employees.filter(e => e.department_id === editingDept.id) 
+                    : []
+                  ).map(e => <option key={e.id} value={e.id}>{e.name} ({e.emp_no})</option>)}
                 </select>
               </div>
             </div>
