@@ -75,6 +75,7 @@ app.include_router(reports_api.router)
 app.include_router(clients_api.router)
 app.include_router(orders_api.router)
 app.include_router(projects_api.router)
+app.include_router(approvals_api.router, prefix="/api/approvals", tags=["approvals"])
 
 models.Base.metadata.create_all(bind=engine)
 
