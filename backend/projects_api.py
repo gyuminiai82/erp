@@ -41,7 +41,7 @@ class ProjectResponse(ProjectBase):
     class Config:
         orm_mode = True
 
-@router.get("/", response_model=List[ProjectResponse])
+@router.get("", response_model=List[ProjectResponse])
 def get_projects(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
     projects = db.query(models.Project).order_by(models.Project.id.desc()).offset(skip).limit(limit).all()
     res = []
@@ -52,7 +52,7 @@ def get_projects(skip: int = 0, limit: int = 100, db: Session = Depends(database
         res.append(data)
     return res
 
-@router.post("/", response_model=ProjectResponse)
+@router.post("", response_model=ProjectResponse)
 def create_project(project: ProjectCreate, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
     db_project = models.Project(**project.dict())
     db.add(db_project)
