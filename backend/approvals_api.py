@@ -22,7 +22,7 @@ class DraftApprovalRequest(BaseModel):
 @router.post("/draft")
 def draft_approval(payload: DraftApprovalRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
     # 1. 기안자 확인
-    drafter = db.query(Employee).filter(Employee.email == current_user['sub']).first()
+    drafter = db.query(Employee).filter(Employee.email == current_user['email']).first()
     if not drafter:
         raise HTTPException(status_code=404, detail="Drafter not found")
 
@@ -61,7 +61,7 @@ from sqlalchemy.orm import joinedload
 
 @router.get("/inbox")
 def get_inbox(db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
-    me = db.query(Employee).filter(Employee.email == current_user['sub']).first()
+    me = db.query(Employee).filter(Employee.email == current_user['email']).first()
     if not me:
         raise HTTPException(status_code=404, detail="User not found")
         
@@ -99,7 +99,7 @@ def get_inbox(db: Session = Depends(get_db), current_user = Depends(get_current_
 
 @router.get("/outbox")
 def get_outbox(db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
-    me = db.query(Employee).filter(Employee.email == current_user['sub']).first()
+    me = db.query(Employee).filter(Employee.email == current_user['email']).first()
     if not me:
         raise HTTPException(status_code=404, detail="User not found")
         
@@ -150,7 +150,7 @@ class ApprovalActionRequest(BaseModel):
 
 @router.post("/{document_id}/approve")
 def approve_document(document_id: int, payload: ApprovalActionRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
-    me = db.query(Employee).filter(Employee.email == current_user['sub']).first()
+    me = db.query(Employee).filter(Employee.email == current_user['email']).first()
     doc = db.query(ApprovalDocument).filter(ApprovalDocument.id == document_id).first()
     if not doc or doc.status != "IN_PROGRESS":
         raise HTTPException(status_code=400, detail="Invalid document or state")
@@ -179,7 +179,7 @@ def approve_document(document_id: int, payload: ApprovalActionRequest, db: Sessi
 
 @router.post("/{document_id}/reject")
 def reject_document(document_id: int, payload: ApprovalActionRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
-    me = db.query(Employee).filter(Employee.email == current_user['sub']).first()
+    me = db.query(Employee).filter(Employee.email == current_user['email']).first()
     doc = db.query(ApprovalDocument).filter(ApprovalDocument.id == document_id).first()
     if not doc or doc.status != "IN_PROGRESS":
         raise HTTPException(status_code=400, detail="Invalid document or state")
