@@ -36,6 +36,11 @@ class PayrollBase(BaseModel):
     base_salary: int
     bonus: int = 0
     deductions: int = 0
+    national_pension: int = 0
+    health_insurance: int = 0
+    long_term_care: int = 0
+    employment_insurance: int = 0
+    tardiness_deduction: int = 0
     payment_date: date
 
 class PayrollCreate(PayrollBase):
@@ -48,6 +53,11 @@ class PayrollUpdate(BaseModel):
     base_salary: Optional[int] = None
     bonus: Optional[int] = None
     deductions: Optional[int] = None
+    national_pension: Optional[int] = None
+    health_insurance: Optional[int] = None
+    long_term_care: Optional[int] = None
+    employment_insurance: Optional[int] = None
+    tardiness_deduction: Optional[int] = None
     payment_date: Optional[date] = None
 
 class PayrollResponse(PayrollBase):
@@ -91,6 +101,11 @@ def get_my_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), 
             base_salary=p.base_salary,
             bonus=p.bonus,
             deductions=p.deductions,
+            national_pension=p.national_pension,
+            health_insurance=p.health_insurance,
+            long_term_care=p.long_term_care,
+            employment_insurance=p.employment_insurance,
+            tardiness_deduction=p.tardiness_deduction,
             net_pay=p.net_pay,
             payment_date=p.payment_date,
             employee_name=current_user.name,
@@ -121,6 +136,11 @@ def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), cur
             base_salary=p.base_salary,
             bonus=p.bonus,
             deductions=p.deductions,
+            national_pension=p.national_pension,
+            health_insurance=p.health_insurance,
+            long_term_care=p.long_term_care,
+            employment_insurance=p.employment_insurance,
+            tardiness_deduction=p.tardiness_deduction,
             net_pay=p.net_pay,
             payment_date=p.payment_date,
             employee_name=emp.name if emp else None,

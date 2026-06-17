@@ -117,6 +117,14 @@ class Payroll(Base):
     base_salary = Column(Integer)
     bonus = Column(Integer, default=0)
     deductions = Column(Integer, default=0)
+    
+    # 상세 공제 항목
+    national_pension = Column(Integer, default=0)
+    health_insurance = Column(Integer, default=0)
+    long_term_care = Column(Integer, default=0)
+    employment_insurance = Column(Integer, default=0)
+    tardiness_deduction = Column(Integer, default=0)
+    
     net_pay = Column(Integer)
     payment_date = Column(Date)
 
