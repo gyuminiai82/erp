@@ -219,6 +219,10 @@ class SystemSetting(Base):
     holiday_multiplier = Column(Float, default=1.5)             # 휴일근무 배수 (8시간 이내)
     holiday_overtime_multiplier = Column(Float, default=2.0)    # 휴일근무 배수 (8시간 초과)
 
+    # 지각 및 근태 관련 설정
+    tardiness_penalty_type = Column(String, default="NONE")     # NONE, DEDUCT_SALARY, DEDUCT_LEAVE
+    tardiness_grace_period = Column(Integer, default=0)         # 지각 허용 시간 (분)
+
 class CompanyInfo(Base):
     __tablename__ = "company_info"
 

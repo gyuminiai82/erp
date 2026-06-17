@@ -22,6 +22,8 @@ class SystemSettingSchema(BaseModel):
     overtime_multiplier: float = 1.5
     holiday_multiplier: float = 1.5
     holiday_overtime_multiplier: float = 2.0
+    tardiness_penalty_type: str = "NONE"
+    tardiness_grace_period: int = 0
 
     class Config:
         from_attributes = True
@@ -37,6 +39,8 @@ class SystemSettingUpdateSchema(BaseModel):
     overtime_multiplier: Optional[float] = None
     holiday_multiplier: Optional[float] = None
     holiday_overtime_multiplier: Optional[float] = None
+    tardiness_penalty_type: Optional[str] = None
+    tardiness_grace_period: Optional[int] = None
 
 @router.get("", response_model=SystemSettingSchema)
 def get_settings(db: Session = Depends(get_db)):
@@ -52,7 +56,9 @@ def get_settings(db: Session = Depends(get_db)):
             employment_insurance_rate=0.009,
             overtime_multiplier=1.5,
             holiday_multiplier=1.5,
-            holiday_overtime_multiplier=2.0
+            holiday_overtime_multiplier=2.0,
+            tardiness_penalty_type="NONE",
+            tardiness_grace_period=0
         )
         db.add(setting)
         db.commit()
@@ -81,7 +87,9 @@ def update_settings(
         "employment_insurance_rate": setting.employment_insurance_rate,
         "overtime_multiplier": setting.overtime_multiplier,
         "holiday_multiplier": setting.holiday_multiplier,
-        "holiday_overtime_multiplier": setting.holiday_overtime_multiplier
+        "holiday_overtime_multiplier": setting.holiday_overtime_multiplier,
+        "tardiness_penalty_type": setting.tardiness_penalty_type,
+        "tardiness_grace_period": setting.tardiness_grace_period
     }
 
     # 값 갱신 (제공된 필드만 업데이트)
@@ -100,7 +108,9 @@ def update_settings(
         "employment_insurance_rate": setting.employment_insurance_rate,
         "overtime_multiplier": setting.overtime_multiplier,
         "holiday_multiplier": setting.holiday_multiplier,
-        "holiday_overtime_multiplier": setting.holiday_overtime_multiplier
+        "holiday_overtime_multiplier": setting.holiday_overtime_multiplier,
+        "tardiness_penalty_type": setting.tardiness_penalty_type,
+        "tardiness_grace_period": setting.tardiness_grace_period
     }
 
     db.commit()
@@ -112,8 +122,12 @@ def update_settings(
         
         is_rules_changed = any(k.startswith("emp_no_") for k in changed_keys)
         is_payroll_changed = any(k.endswith("_rate") or k.endswith("_multiplier") for k in changed_keys)
+        is_tardiness_changed = any(k.startswith("tardiness_") for k in changed_keys)
 
-        if is_rules_changed and is_payroll_changed:
+        if is_tardiness_changed:
+            event_title = "지각/근태 정책 변경"
+            event_desc = "지각 처리 방식 및 허용 시간이 변경되었습니다."
+        elif is_rules_changed and is_payroll_changed:
             event_title = "시스템 환경설정 변경"
             event_desc = "사번 생성 규칙 및 급여/보험 정책이 변경되었습니다."
         elif is_rules_changed:

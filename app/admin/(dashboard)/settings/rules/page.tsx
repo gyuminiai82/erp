@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Settings2, Save, Hash } from 'lucide-react';
+import { Settings2, Save, Hash, Clock } from 'lucide-react';
 import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
     emp_no_prefix: "EMP",
     emp_no_year_format: "YY",
-    emp_no_length: 3
+    emp_no_length: 3,
+    tardiness_penalty_type: "NONE",
+    tardiness_grace_period: 0
   });
   const [preview, setPreview] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -21,7 +23,9 @@ export default function SettingsPage() {
         setSettings({
           emp_no_prefix: data.emp_no_prefix || "EMP",
           emp_no_year_format: data.emp_no_year_format || "YY",
-          emp_no_length: data.emp_no_length || 3
+          emp_no_length: data.emp_no_length || 3,
+          tardiness_penalty_type: data.tardiness_penalty_type || "NONE",
+          tardiness_grace_period: data.tardiness_grace_period || 0
         });
       })
       .catch(err => console.error(err));
@@ -41,7 +45,9 @@ export default function SettingsPage() {
       const payload = {
         emp_no_prefix: settings.emp_no_prefix,
         emp_no_year_format: settings.emp_no_year_format,
-        emp_no_length: Number(settings.emp_no_length)
+        emp_no_length: Number(settings.emp_no_length),
+        tardiness_penalty_type: settings.tardiness_penalty_type,
+        tardiness_grace_period: Number(settings.tardiness_grace_period)
       };
       
       const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
@@ -146,6 +152,48 @@ export default function SettingsPage() {
             <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">실시간 미리보기</span>
               <span className="text-2xl font-mono font-bold text-[#107C41] tracking-tight">{preview}</span>
+            </div>
+          </div>
+
+          {/* 근태 및 지각 처리 설정 */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center mb-4">
+              <div className="bg-red-50 p-2 rounded-lg mr-3">
+                <Clock className="w-5 h-5 text-red-600" />
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">근태 및 지각 처리 설정</h2>
+            </div>
+            
+            <p className="text-sm text-gray-500 mb-6">
+              전사적으로 적용될 지각 허용 시간과 지각에 대한 처리 방식(급여 차감, 연차 차감 등)을 설정합니다.
+            </p>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">지각 처리 방식</label>
+                <select 
+                  value={settings.tardiness_penalty_type} 
+                  onChange={e => setSettings({...settings, tardiness_penalty_type: e.target.value})}
+                  className="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
+                >
+                  <option value="NONE">처리 안 함 (단순 기록)</option>
+                  <option value="DEDUCT_SALARY">급여 차감 (지각 시간 비례)</option>
+                  <option value="DEDUCT_LEAVE">연차 차감 (시간 단위 차감)</option>
+                </select>
+                <p className="text-xs text-gray-400 mt-1">급여 차감을 선택하면 매월 급여 계산 시 자동으로 반영됩니다.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">지각 허용 시간 (분)</label>
+                <input 
+                  type="number" 
+                  value={settings.tardiness_grace_period} 
+                  onChange={e => setSettings({...settings, tardiness_grace_period: Number(e.target.value)})}
+                  className="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#107C41]/20 focus:border-[#107C41] outline-none transition-all"
+                  placeholder="예: 10"
+                />
+                <p className="text-xs text-gray-400 mt-1">출근 시간으로부터 지정된 시간이 초과된 시점부터 지각으로 산정됩니다.</p>
+              </div>
             </div>
           </div>
         </div>
