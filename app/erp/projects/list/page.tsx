@@ -12,7 +12,7 @@ export default function ProjectListPage() {
 
   const columns: ColumnDef[] = [
     { field: 'id', headerName: 'ID', width: 60 },
-    { field: 'name', headerName: '프로젝트명', flex: 1 },
+    { field: 'name', headerName: '프로젝트명', },
     { field: 'client_name', headerName: '고객사', width: 150 },
     { field: 'manager_name', headerName: 'PM', width: 100 },
     { field: 'start_date', headerName: '시작일', width: 120 },

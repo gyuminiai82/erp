@@ -296,7 +296,7 @@ export default function EmployeesPage() {
     const worksheet = workbook.addWorksheet('사원목록');
 
     const baseCols = columns.map(c => ({
-      header: c.headerName,
+      headerName: c.headerName,
       key: c.field,
       width: c.width ? Math.max(10, c.width / 10) : 15
     }));

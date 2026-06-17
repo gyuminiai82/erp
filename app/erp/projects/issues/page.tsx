@@ -14,7 +14,7 @@ export default function IssuesPage() {
 
   const columns: ColumnDef[] = [
     { field: 'id', headerName: 'ID', width: 60 },
-    { field: 'title', headerName: '이슈명', flex: 1 },
+    { field: 'title', headerName: '이슈명', },
     { field: 'priority', headerName: '우선순위', width: 100 },
     { field: 'status', headerName: '상태', width: 100 },
     { field: 'reporter_name', headerName: '보고자', width: 120 },

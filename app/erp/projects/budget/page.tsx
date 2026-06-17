@@ -17,7 +17,7 @@ export default function BudgetPage() {
     { field: 'category', headerName: '항목(카테고리)', width: 150 },
     { field: 'amount', headerName: '예산 배정액', width: 150 },
     { field: 'spent_amount', headerName: '집행액', width: 150 },
-    { field: 'remarks', headerName: '비고', flex: 1 },
+    { field: 'remarks', headerName: '비고', },
   ];
 
   useEffect(() => {

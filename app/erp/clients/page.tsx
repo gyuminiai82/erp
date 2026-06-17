@@ -191,7 +191,7 @@ export default function ClientsPage() {
     { field: "contact_phone", headerName: "연락처", width: 150, editable: true },
     { field: "contact_email", headerName: "이메일", width: 180, editable: true },
     { field: "address", headerName: "주소", width: 250, editable: true },
-    { field: "is_active", headerName: "상태", width: 100, editable: true, editType: "select", options: [{label: "활성", value: "true"}, {label: "비활성", value: "false"}], renderCell: (val) => (<span>{String(val) === 'true' ? '활성' : '비활성'}</span>) }
+    { field: "is_active", headerName: "상태", width: 100, editable: true, editType: "select", options: [{label: "활성", value: "true"}, {label: "비활성", value: "false"}], renderCell: (val: any) => (<span>{String(val) === 'true' ? '활성' : '비활성'}</span>) }
   ];
 
   const handleCancel = async () => {

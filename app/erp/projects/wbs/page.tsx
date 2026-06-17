@@ -14,7 +14,7 @@ export default function WBSPage() {
 
   const columns: ColumnDef[] = [
     { field: 'id', headerName: 'ID', width: 60 },
-    { field: 'name', headerName: '작업명', flex: 1 },
+    { field: 'name', headerName: '작업명', },
     { field: 'assignee_name', headerName: '담당자', width: 120 },
     { field: 'start_date', headerName: '시작일', width: 120 },
     { field: 'end_date', headerName: '종료일', width: 120 },

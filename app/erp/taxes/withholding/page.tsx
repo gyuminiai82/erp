@@ -7,10 +7,10 @@ import { useDialog } from '@/components/providers/DialogProvider';
 
 interface WithholdingSummary {
   payment_month: string;
-  total_employees: int;
-  total_gross_pay: int;
-  total_income_tax: int;
-  total_local_income_tax: int;
+  total_employees: number;
+  total_gross_pay: number;
+  total_income_tax: number;
+  total_local_income_tax: number;
 }
 
 export default function WithholdingTaxPage() {

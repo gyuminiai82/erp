@@ -16,7 +16,7 @@ export default function ResourcesPage() {
     { field: 'id', headerName: 'ID', width: 60 },
     { field: 'employee_name', headerName: '이름', width: 150 },
     { field: 'department_name', headerName: '부서', width: 150 },
-    { field: 'role', headerName: '역할', flex: 1 },
+    { field: 'role', headerName: '역할', },
     { field: 'start_date', headerName: '투입 시작일', width: 120 },
     { field: 'end_date', headerName: '투입 종료일', width: 120 },
     { field: 'participation_rate', headerName: '참여율(M/M)', width: 120 },

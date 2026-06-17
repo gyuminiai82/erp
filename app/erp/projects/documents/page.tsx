@@ -16,14 +16,14 @@ export default function DocumentsPage() {
   const columns: ColumnDef[] = [
     { field: 'id', headerName: 'ID', width: 60 },
     { field: 'document_type', headerName: '문서유형', width: 120 },
-    { field: 'title', headerName: '문서명', flex: 1 },
+    { field: 'title', headerName: '문서명', },
     { field: 'uploader_name', headerName: '등록자', width: 120 },
     { field: 'created_at', headerName: '등록일시', width: 200 },
     { 
       field: 'file_url', 
       headerName: '다운로드', 
       width: 100,
-      render: (val: any) => val ? (
+      renderCell: (val: any) => val ? (
         <a href={val} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 flex justify-center">
           <Download className="w-5 h-5" />
         </a>

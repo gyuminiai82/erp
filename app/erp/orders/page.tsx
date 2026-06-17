@@ -158,7 +158,7 @@ export default function OrdersPage() {
       item.unit_price = selectedItem ? selectedItem.standard_price : 0;
       item.total_price = item.quantity * item.unit_price;
     } else if (field === 'quantity' || field === 'unit_price') {
-      item[field as keyof OrderItem] = parseInt(value) || 0;
+      (item as any)[field] = parseInt(value) || 0;
       item.total_price = item.quantity * item.unit_price;
     } else {
       (item as any)[field] = value;
@@ -226,21 +226,21 @@ export default function OrdersPage() {
     }
   };
 
-  const columns: ColumnDef<Order>[] = [
-    { field: 'order_no', header: '주문번호', width: '150px' },
-    { field: 'order_type', header: '유형', width: '80px' },
-    { field: 'client_name', header: '거래처명', width: '200px' },
-    { field: 'order_date', header: '주문일자', width: '120px' },
-    { field: 'delivery_date', header: '납기일자', width: '120px' },
+  const columns: ColumnDef[] = [
+    { field: 'order_no', headerName: '주문번호', width: 150 },
+    { field: 'order_type', headerName: '유형', width: 80 },
+    { field: 'client_name', headerName: '거래처명', width: 200 },
+    { field: 'order_date', headerName: '주문일자', width: 120 },
+    { field: 'delivery_date', headerName: '납기일자', width: 120 },
     { 
       field: 'total_amount', 
-      header: '총 공급가액', 
-      width: '150px',
-      render: (val) => val ? val.toLocaleString() + '원' : '0원'
+      headerName: '총 공급가액', 
+      width: 150,
+      renderCell: (val: any) => val ? val.toLocaleString() + '원' : '0원'
     },
-    { field: 'status', header: '상태', width: '100px' },
-    { field: 'manager_name', header: '담당자', width: '120px' },
-    { field: 'remarks', header: '비고', width: 'auto' }
+    { field: 'status', headerName: '상태', width: 100 },
+    { field: 'manager_name', headerName: '담당자', width: 120 },
+    { field: 'remarks', headerName: '비고', }
   ];
 
   return (
