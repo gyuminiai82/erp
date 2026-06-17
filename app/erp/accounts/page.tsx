@@ -197,8 +197,8 @@ export default function AccountsPage() {
       width: 100, 
       editable: true,
       editType: 'select',
-      options: [{ label: '사용', value: true }, { label: '미사용', value: false }],
-      renderCell: (v) => v ? '사용' : '미사용'
+      options: [{ label: '사용', value: 'true' }, { label: '미사용', value: 'false' }],
+      renderCell: (v) => (v === true || v === 'true') ? '사용' : '미사용'
     }
   ];
 
@@ -306,7 +306,7 @@ export default function AccountsPage() {
             </div>
           </div>
           
-          <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
               <DataGrid 
                 columns={columns} 
                 data={accounts} 
