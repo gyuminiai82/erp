@@ -8,13 +8,13 @@ export default function ProjectListPage() {
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
-    { key: 'id', header: 'ID', width: 60 },
-    { key: 'name', header: '프로젝트명', flex: 1 },
-    { key: 'client_name', header: '고객사', width: 150 },
-    { key: 'manager_name', header: 'PM', width: 100 },
-    { key: 'start_date', header: '시작일', width: 120 },
-    { key: 'end_date', header: '종료일', width: 120 },
-    { key: 'status', header: '상태', width: 100 },
+    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'name', headerName: '프로젝트명', flex: 1 },
+    { field: 'client_name', headerName: '고객사', width: 150 },
+    { field: 'manager_name', headerName: 'PM', width: 100 },
+    { field: 'start_date', headerName: '시작일', width: 120 },
+    { field: 'end_date', headerName: '종료일', width: 120 },
+    { field: 'status', headerName: '상태', width: 100 },
   ];
 
   useEffect(() => {

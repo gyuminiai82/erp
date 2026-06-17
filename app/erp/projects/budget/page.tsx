@@ -10,11 +10,11 @@ export default function BudgetPage() {
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
-    { key: 'id', header: 'ID', width: 60 },
-    { key: 'category', header: '항목(카테고리)', width: 150 },
-    { key: 'amount', header: '예산 배정액', width: 150 },
-    { key: 'spent_amount', header: '집행액', width: 150 },
-    { key: 'remarks', header: '비고', flex: 1 },
+    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'category', headerName: '항목(카테고리)', width: 150 },
+    { field: 'amount', headerName: '예산 배정액', width: 150 },
+    { field: 'spent_amount', headerName: '집행액', width: 150 },
+    { field: 'remarks', headerName: '비고', flex: 1 },
   ];
 
   useEffect(() => {

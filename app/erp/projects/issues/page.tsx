@@ -10,13 +10,13 @@ export default function IssuesPage() {
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
-    { key: 'id', header: 'ID', width: 60 },
-    { key: 'title', header: '이슈명', flex: 1 },
-    { key: 'priority', header: '우선순위', width: 100 },
-    { key: 'status', header: '상태', width: 100 },
-    { key: 'reporter_name', header: '보고자', width: 120 },
-    { key: 'assignee_name', header: '담당자', width: 120 },
-    { key: 'due_date', header: '해결 기한', width: 120 },
+    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'title', headerName: '이슈명', flex: 1 },
+    { field: 'priority', headerName: '우선순위', width: 100 },
+    { field: 'status', headerName: '상태', width: 100 },
+    { field: 'reporter_name', headerName: '보고자', width: 120 },
+    { field: 'assignee_name', headerName: '담당자', width: 120 },
+    { field: 'due_date', headerName: '해결 기한', width: 120 },
   ];
 
   useEffect(() => {

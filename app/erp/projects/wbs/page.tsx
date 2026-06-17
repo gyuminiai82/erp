@@ -10,13 +10,13 @@ export default function WBSPage() {
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
-    { key: 'id', header: 'ID', width: 60 },
-    { key: 'name', header: '작업명', flex: 1 },
-    { key: 'assignee_name', header: '담당자', width: 120 },
-    { key: 'start_date', header: '시작일', width: 120 },
-    { key: 'end_date', header: '종료일', width: 120 },
-    { key: 'status', header: '상태', width: 100 },
-    { key: 'progress', header: '진척도(%)', width: 100 },
+    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'name', headerName: '작업명', flex: 1 },
+    { field: 'assignee_name', headerName: '담당자', width: 120 },
+    { field: 'start_date', headerName: '시작일', width: 120 },
+    { field: 'end_date', headerName: '종료일', width: 120 },
+    { field: 'status', headerName: '상태', width: 100 },
+    { field: 'progress', headerName: '진척도(%)', width: 100 },
   ];
 
   useEffect(() => {

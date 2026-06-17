@@ -11,14 +11,14 @@ export default function DocumentsPage() {
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
-    { key: 'id', header: 'ID', width: 60 },
-    { key: 'document_type', header: '문서유형', width: 120 },
-    { key: 'title', header: '문서명', flex: 1 },
-    { key: 'uploader_name', header: '등록자', width: 120 },
-    { key: 'created_at', header: '등록일시', width: 200 },
+    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'document_type', headerName: '문서유형', width: 120 },
+    { field: 'title', headerName: '문서명', flex: 1 },
+    { field: 'uploader_name', headerName: '등록자', width: 120 },
+    { field: 'created_at', headerName: '등록일시', width: 200 },
     { 
-      key: 'file_url', 
-      header: '다운로드', 
+      field: 'file_url', 
+      headerName: '다운로드', 
       width: 100,
       render: (val: any) => val ? (
         <a href={val} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 flex justify-center">

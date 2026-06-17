@@ -10,13 +10,13 @@ export default function ResourcesPage() {
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
-    { key: 'id', header: 'ID', width: 60 },
-    { key: 'employee_name', header: '이름', width: 150 },
-    { key: 'department_name', header: '부서', width: 150 },
-    { key: 'role', header: '역할', flex: 1 },
-    { key: 'start_date', header: '투입 시작일', width: 120 },
-    { key: 'end_date', header: '투입 종료일', width: 120 },
-    { key: 'participation_rate', header: '참여율(M/M)', width: 120 },
+    { field: 'id', headerName: 'ID', width: 60 },
+    { field: 'employee_name', headerName: '이름', width: 150 },
+    { field: 'department_name', headerName: '부서', width: 150 },
+    { field: 'role', headerName: '역할', flex: 1 },
+    { field: 'start_date', headerName: '투입 시작일', width: 120 },
+    { field: 'end_date', headerName: '투입 종료일', width: 120 },
+    { field: 'participation_rate', headerName: '참여율(M/M)', width: 120 },
   ];
 
   useEffect(() => {
