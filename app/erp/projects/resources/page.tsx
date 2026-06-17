@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
+import { Button } from '@/components/ui/Button';
+import { Plus, Trash2, Save, Undo2, FileDown } from 'lucide-react';
 
 export default function ResourcesPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -49,7 +51,7 @@ export default function ResourcesPage() {
       <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
         <div className="p-4 border-b border-gray-200 flex flex-col gap-4 bg-gray-50/50">
           <div className="flex items-center gap-2">
-            <input type="text" placeholder="검색어 입력..." className="px-3 py-2 border border-gray-300 rounded text-sm w-64 outline-none focus:border-blue-500" />
+            <input type="text" placeholder="검색어 입력..." className="px-3 py-2 border border-gray-300 rounded text-sm w-64 outline-none focus:border-[#107C41]" />
             <select 
               value={selectedProject} 
               onChange={(e) => setSelectedProject(e.target.value)}
@@ -60,22 +62,30 @@ export default function ResourcesPage() {
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-            <button className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded text-sm font-medium hover:bg-green-100 transition-colors">조회</button>
-            <button className="px-3 py-2 bg-gray-50 text-gray-600 border border-gray-200 rounded text-sm font-medium hover:bg-gray-100 transition-colors">↺</button>
+            <Button variant="secondary" className="h-10 px-6 shrink-0">
+              조회
+            </Button>
+            <Button variant="secondary" className="h-10 px-3 shrink-0" title="초기화">
+              <Undo2 className="w-4 h-4 text-[#107C41]" />
+            </Button>
           </div>
           <div className="flex justify-end gap-2">
-            <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded text-sm font-medium hover:bg-gray-50 flex items-center shadow-sm transition-colors">
-              + 인력 추가
-            </button>
-            <button className="px-4 py-2 bg-gray-500 text-white rounded text-sm font-medium hover:bg-gray-600 shadow-sm transition-colors">
+            <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
+              <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+              인력 추가
+            </Button>
+            <Button variant="outline" size="sm" className="h-9 flex items-center" disabled={selectedRowIndices.length === 0}>
+              <Trash2 className="w-4 h-4 mr-1" />
               선택 삭제
-            </button>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600 shadow-sm transition-colors">
+            </Button>
+            <Button size="sm" className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white" disabled={true}>
+              <Save className="w-4 h-4 mr-1" />
               저장
-            </button>
-            <button className="px-4 py-2 bg-white text-green-700 border border-green-300 rounded text-sm font-medium hover:bg-green-50 flex items-center shadow-sm transition-colors">
+            </Button>
+            <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
+              <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
               엑셀 다운로드
-            </button>
+            </Button>
           </div>
         </div>
         <div className="flex-1 overflow-hidden relative">
