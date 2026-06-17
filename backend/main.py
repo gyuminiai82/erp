@@ -22,9 +22,11 @@ import leaves_api
 import payrolls_api
 import items_api
 import work_orders_api
-import journals_api
 import accounts_api
+import journals_api
+import approvals_api
 import reports_api
+import projects_api
 import clients_api
 import orders_api
 import models
@@ -72,6 +74,7 @@ app.include_router(accounts_api.router)
 app.include_router(reports_api.router)
 app.include_router(clients_api.router)
 app.include_router(orders_api.router)
+app.include_router(projects_api.router)
 
 models.Base.metadata.create_all(bind=engine)
 

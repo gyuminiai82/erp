@@ -16,16 +16,33 @@ export default function JournalsPage() {
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
   const [entryType, setEntryType] = useState("대체");
   const [description, setDescription] = useState("");
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [lines, setLines] = useState<any[]>([
-    { account_code: "", account_name: "", debit: 0, credit: 0, description: "" },
-    { account_code: "", account_name: "", debit: 0, credit: 0, description: "" }
+    { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" },
+    { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" }
   ]);
 
   const { showAlert } = useDialog();
 
   useEffect(() => {
     fetchJournals();
+    fetchOptions();
   }, []);
+
+  const fetchOptions = async () => {
+    try {
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const [resDept, resClient, resProj] = await Promise.all([
+        fetch("/api/departments", { headers }), fetch("/api/clients", { headers }), fetch("/api/projects", { headers })
+      ]);
+      if (resDept.ok) setDepartments(await resDept.json());
+      if (resClient.ok) setClients(await resClient.json());
+      if (resProj.ok) setProjects(await resProj.json());
+    } catch(err) { console.error(err); }
+  };
 
   const fetchJournals = async () => {
     const res = await fetch("/api/accounting/journals");
@@ -36,7 +53,7 @@ export default function JournalsPage() {
   };
 
   const handleAddLine = () => {
-    setLines([...lines, { account_code: "", account_name: "", debit: 0, credit: 0, description: "" }]);
+    setLines([...lines, { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" }]);
   };
 
   const handleRemoveLine = (index: number) => {
@@ -64,7 +81,12 @@ export default function JournalsPage() {
       entry_date: entryDate,
       entry_type: entryType,
       description,
-      lines: lines.filter(l => l.account_code)
+      lines: lines.filter(l => l.account_code).map(l => ({
+        ...l,
+        department_id: l.department_id || null,
+        client_id: l.client_id || null,
+        project_id: l.project_id || null
+      }))
     };
 
     const res = await fetch("/api/accounting/journals", {
@@ -80,8 +102,8 @@ export default function JournalsPage() {
       setEntryType("대체");
       setDescription("");
       setLines([
-        { account_code: "", account_name: "", debit: 0, credit: 0, description: "" },
-        { account_code: "", account_name: "", debit: 0, credit: 0, description: "" }
+        { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" },
+        { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" }
       ]);
     } else {
       const err = await res.json();
@@ -96,8 +118,8 @@ export default function JournalsPage() {
     setEntryType("대체");
     setDescription("");
     setLines([
-      { account_code: "", account_name: "", debit: 0, credit: 0, description: "" },
-      { account_code: "", account_name: "", debit: 0, credit: 0, description: "" }
+      { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" },
+      { account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" }
     ]);
     setIsModalOpen(true);
   };
@@ -109,9 +131,14 @@ export default function JournalsPage() {
     setEntryType(journal.entry_type);
     setDescription(journal.description || "");
     if (journal.lines && journal.lines.length > 0) {
-      setLines(journal.lines);
+      setLines(journal.lines.map((l: any) => ({
+        ...l,
+        department_id: l.department_id || "",
+        client_id: l.client_id || "",
+        project_id: l.project_id || ""
+      })));
     } else {
-      setLines([{ account_code: "", account_name: "", debit: 0, credit: 0, description: "" }]);
+      setLines([{ account_code: "", account_name: "", debit: 0, credit: 0, description: "", department_id: "", client_id: "", project_id: "" }]);
     }
     setIsModalOpen(true);
   };
@@ -228,28 +255,54 @@ export default function JournalsPage() {
                   <div className="col-span-1 text-center">삭제</div>
                 </div>
                 {lines.map((line, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-2">
-                      <input type="text" value={line.account_code} onChange={e => handleLineChange(idx, "account_code", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="ex: 101" required />
+                  <div key={idx} className="flex flex-col gap-2 p-2 border border-gray-100 rounded bg-white">
+                    <div className="grid grid-cols-12 gap-2 items-center">
+                      <div className="col-span-2">
+                        <input type="text" value={line.account_code} onChange={e => handleLineChange(idx, "account_code", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="ex: 101" required />
+                      </div>
+                      <div className="col-span-3">
+                        <input type="text" value={line.account_name} onChange={e => handleLineChange(idx, "account_name", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="보통예금" required />
+                      </div>
+                      <div className="col-span-2">
+                        <input type="number" value={line.debit} onChange={e => handleLineChange(idx, "debit", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-blue-600 font-medium bg-blue-50/30 disabled:opacity-70 disabled:bg-gray-50" min="0" />
+                      </div>
+                      <div className="col-span-2">
+                        <input type="number" value={line.credit} onChange={e => handleLineChange(idx, "credit", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-red-600 font-medium bg-red-50/30 disabled:opacity-70 disabled:bg-gray-50" min="0" />
+                      </div>
+                      <div className="col-span-2">
+                        <input type="text" value={line.description} onChange={e => handleLineChange(idx, "description", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="상세 내용" />
+                      </div>
+                      <div className="col-span-1 flex justify-center">
+                        {!viewMode && (
+                          <button type="button" onClick={() => handleRemoveLine(idx)} className="p-1 text-gray-400 hover:text-red-500 rounded">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="col-span-3">
-                      <input type="text" value={line.account_name} onChange={e => handleLineChange(idx, "account_name", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="보통예금" required />
-                    </div>
-                    <div className="col-span-2">
-                      <input type="number" value={line.debit} onChange={e => handleLineChange(idx, "debit", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-blue-600 font-medium bg-blue-50/30 disabled:opacity-70 disabled:bg-gray-50" min="0" />
-                    </div>
-                    <div className="col-span-2">
-                      <input type="number" value={line.credit} onChange={e => handleLineChange(idx, "credit", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-right text-red-600 font-medium bg-red-50/30 disabled:opacity-70 disabled:bg-gray-50" min="0" />
-                    </div>
-                    <div className="col-span-2">
-                      <input type="text" value={line.description} onChange={e => handleLineChange(idx, "description", e.target.value)} disabled={viewMode} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm disabled:bg-gray-100 disabled:text-gray-500" placeholder="상세 내용" />
-                    </div>
-                    <div className="col-span-1 flex justify-center">
-                      {!viewMode && (
-                        <button type="button" onClick={() => handleRemoveLine(idx)} className="p-1 text-gray-400 hover:text-red-500 rounded">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
+                    {/* 다차원 입력 항목 (부서, 거래처, 프로젝트) */}
+                    <div className="grid grid-cols-3 gap-4 pt-1 pl-1">
+                      <div className="flex items-center text-xs">
+                        <span className="text-gray-500 w-12">부서:</span>
+                        <select value={line.department_id || ""} onChange={e => handleLineChange(idx, "department_id", e.target.value ? Number(e.target.value) : "")} disabled={viewMode} className="flex-1 px-2 py-1 border border-gray-300 rounded disabled:bg-gray-100">
+                          <option value="">선택 안함</option>
+                          {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex items-center text-xs">
+                        <span className="text-gray-500 w-12">거래처:</span>
+                        <select value={line.client_id || ""} onChange={e => handleLineChange(idx, "client_id", e.target.value ? Number(e.target.value) : "")} disabled={viewMode} className="flex-1 px-2 py-1 border border-gray-300 rounded disabled:bg-gray-100">
+                          <option value="">선택 안함</option>
+                          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex items-center text-xs">
+                        <span className="text-gray-500 w-16">프로젝트:</span>
+                        <select value={line.project_id || ""} onChange={e => handleLineChange(idx, "project_id", e.target.value ? Number(e.target.value) : "")} disabled={viewMode} className="flex-1 px-2 py-1 border border-gray-300 rounded disabled:bg-gray-100">
+                          <option value="">선택 안함</option>
+                          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                      </div>
                     </div>
                   </div>
                 ))}

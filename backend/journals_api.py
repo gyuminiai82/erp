@@ -14,6 +14,9 @@ class JournalEntryLineBase(BaseModel):
     debit: float = 0.0
     credit: float = 0.0
     description: Optional[str] = None
+    department_id: Optional[int] = None
+    client_id: Optional[int] = None
+    project_id: Optional[int] = None
 
 class JournalEntryCreate(BaseModel):
     entry_date: date
@@ -63,7 +66,13 @@ def get_journals(start_date: str = None, end_date: str = None, db: Session = Dep
                     "account_name": line.account_name,
                     "debit": line.debit,
                     "credit": line.credit,
-                    "description": line.description
+                    "description": line.description,
+                    "department_id": line.department_id,
+                    "client_id": line.client_id,
+                    "project_id": line.project_id,
+                    "department_name": line.department.name if line.department else None,
+                    "client_name": line.client.name if line.client else None,
+                    "project_name": line.project.name if line.project else None
                 } for line in entry.lines
             ]
         })
@@ -96,7 +105,10 @@ def create_journal(item: JournalEntryCreate, db: Session = Depends(get_db)):
             account_name=line.account_name,
             debit=line.debit,
             credit=line.credit,
-            description=line.description
+            description=line.description,
+            department_id=line.department_id,
+            client_id=line.client_id,
+            project_id=line.project_id
         )
         db.add(db_line)
     

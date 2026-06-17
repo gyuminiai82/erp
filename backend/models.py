@@ -404,8 +404,16 @@ class JournalEntryLine(Base):
     debit = Column(Float, default=0.0)  # 차변
     credit = Column(Float, default=0.0) # 대변
     description = Column(String, nullable=True)
+    
+    # 관리항목 (Dimensions)
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
 
     journal_entry = relationship("JournalEntry", back_populates="lines")
+    department = relationship("Department")
+    client = relationship("Client")
+    project = relationship("Project")
 
 class Client(Base):
     __tablename__ = "clients"
@@ -450,3 +458,51 @@ class OrderItem(Base):
     total_price = Column(Integer, default=0)
     
     order = relationship("Order", back_populates="items")
+
+class ApprovalDocument(Base):
+    __tablename__ = "approval_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    drafter_id = Column(Integer, ForeignKey("employees.id"))
+    document_type = Column(String(50)) # 기안서, 품의서 등
+    title = Column(String(200), nullable=False)
+    content = Column(Text)
+    status = Column(String(20), default="DRAFT") # DRAFT, IN_PROGRESS, APPROVED, REJECTED
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    drafter = relationship("Employee", foreign_keys=[drafter_id])
+    approval_lines = relationship("ApprovalLine", back_populates="document", cascade="all, delete")
+
+
+class ApprovalLine(Base):
+    __tablename__ = "approval_lines"
+
+    id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(Integer, ForeignKey("approval_documents.id"))
+    approver_id = Column(Integer, ForeignKey("employees.id"))
+    sequence_no = Column(Integer) # 1차, 2차 등
+    status = Column(String(20), default="PENDING") # PENDING, APPROVED, REJECTED
+    comment = Column(Text, nullable=True)
+    acted_at = Column(DateTime(timezone=True), nullable=True)
+
+    document = relationship("ApprovalDocument", back_populates="approval_lines")
+    approver = relationship("Employee", foreign_keys=[approver_id])
+
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)
+    client_id = Column(Integer, ForeignKey("clients.id"), nullable=True)
+    manager_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    start_date = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
+    budget = Column(Float, default=0.0)
+    status = Column(String(50), default="PLANNED") # PLANNED, IN_PROGRESS, COMPLETED, ON_HOLD
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    client = relationship("Client")
+    manager = relationship("Employee")

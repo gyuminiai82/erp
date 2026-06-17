@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from database import get_db
 from models import Payroll, Employee
-from auth import SECRET_KEY, ALGORITHM
+from auth import SECRET_KEY, ALGORITHM, get_current_user_info
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 
@@ -103,11 +103,11 @@ def get_my_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), 
             base_salary=p.base_salary,
             bonus=p.bonus,
             deductions=p.deductions,
-            national_pension=p.national_pension,
-            health_insurance=p.health_insurance,
-            long_term_care=p.long_term_care,
-            employment_insurance=p.employment_insurance,
-            tardiness_deduction=p.tardiness_deduction,
+            national_pension=p.national_pension or 0,
+            health_insurance=p.health_insurance or 0,
+            long_term_care=p.long_term_care or 0,
+            employment_insurance=p.employment_insurance or 0,
+            tardiness_deduction=p.tardiness_deduction or 0,
             calculation_basis=p.calculation_basis,
             net_pay=p.net_pay,
             payment_date=p.payment_date,
@@ -119,7 +119,7 @@ def get_my_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), 
     return results
 
 @router.get("", response_model=List[PayrollResponse])
-def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
     # 관리자만 전체 조회가 가능하도록 하거나, 일반 사원은 자기 것만 보게 하려면 여기 로직을 추가
     query = db.query(Payroll)
     
@@ -139,11 +139,11 @@ def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), cur
             base_salary=p.base_salary,
             bonus=p.bonus,
             deductions=p.deductions,
-            national_pension=p.national_pension,
-            health_insurance=p.health_insurance,
-            long_term_care=p.long_term_care,
-            employment_insurance=p.employment_insurance,
-            tardiness_deduction=p.tardiness_deduction,
+            national_pension=p.national_pension or 0,
+            health_insurance=p.health_insurance or 0,
+            long_term_care=p.long_term_care or 0,
+            employment_insurance=p.employment_insurance or 0,
+            tardiness_deduction=p.tardiness_deduction or 0,
             calculation_basis=p.calculation_basis,
             net_pay=p.net_pay,
             payment_date=p.payment_date,
@@ -214,7 +214,7 @@ def delete_payroll(payroll_id: int, db: Session = Depends(get_db), current_user 
     return {"ok": True}
 
 @router.post("/bulk-create")
-def bulk_create_payrolls(payload: BulkPayrollCreateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+def bulk_create_payrolls(payload: BulkPayrollCreateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
     created_count = 0
     for p in payload.payrolls:
         net_pay = p.base_salary + p.bonus - p.deductions
@@ -225,7 +225,7 @@ def bulk_create_payrolls(payload: BulkPayrollCreateRequest, db: Session = Depend
     return {"message": f"{created_count}건의 급여가 등록되었습니다."}
 
 @router.post("/bulk-update")
-def bulk_update_payrolls(payload: BulkPayrollUpdateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+def bulk_update_payrolls(payload: BulkPayrollUpdateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
     updated_count = 0
     for p in payload.payrolls:
         db_payroll = db.query(Payroll).filter(Payroll.id == p.id).first()
@@ -239,7 +239,7 @@ def bulk_update_payrolls(payload: BulkPayrollUpdateRequest, db: Session = Depend
     return {"message": f"{updated_count}건의 급여가 수정되었습니다."}
 
 @router.post("/bulk-delete")
-def bulk_delete_payrolls(payload: BulkPayrollDeleteRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+def bulk_delete_payrolls(payload: BulkPayrollDeleteRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
     deleted_count = 0
     for pid in payload.payroll_ids:
         db_payroll = db.query(Payroll).filter(Payroll.id == pid).first()
@@ -250,7 +250,7 @@ def bulk_delete_payrolls(payload: BulkPayrollDeleteRequest, db: Session = Depend
     return {"message": f"{deleted_count}건의 급여가 삭제되었습니다."}
 
 @router.post("/generate")
-def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get_db), current_user = Depends(get_current_user_info)):
     from models import SystemSetting, Attendance, AttendancePolicy, LeaveBalance
     from sqlalchemy import extract
     import datetime

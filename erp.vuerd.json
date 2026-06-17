@@ -937,7 +937,10 @@
           "463e201a62fb4451a1e741fb1091ca9c",
           "a23be20565c44d33ab8bbe47c7b50ab5",
           "8311cd03fb764e9f9586d7734e50c786",
-          "c7b0968302ff4964a64b405d6576f2b1"
+          "c7b0968302ff4964a64b405d6576f2b1",
+          "56be39e9af1a44cc94f6fcbfb6299e01",
+          "abc6496df3a949bd8bb7b42c7b8388c2",
+          "f3733bfb1076466a8617746cc04f3a50"
         ],
         "seqColumnIds": [
           "d045a9cac96a4e2dae925a81d41f2585",
@@ -946,7 +949,10 @@
           "463e201a62fb4451a1e741fb1091ca9c",
           "a23be20565c44d33ab8bbe47c7b50ab5",
           "8311cd03fb764e9f9586d7734e50c786",
-          "c7b0968302ff4964a64b405d6576f2b1"
+          "c7b0968302ff4964a64b405d6576f2b1",
+          "56be39e9af1a44cc94f6fcbfb6299e01",
+          "abc6496df3a949bd8bb7b42c7b8388c2",
+          "f3733bfb1076466a8617746cc04f3a50"
         ],
         "ui": {
           "x": 500,
@@ -1115,6 +1121,35 @@
         "meta": {
           "updateAt": 1690000000000,
           "createAt": 1690000000000
+        }
+      },
+      "bd674149f0a041d78272ab3d57471fff": {
+        "id": "bd674149f0a041d78272ab3d57471fff",
+        "name": "projects",
+        "comment": "프로젝트",
+        "columnIds": [
+          "1633dd53535d4b3294a1c524c88c8c10",
+          "b3660550452f4311a538ef9261811368",
+          "6c4ded8473fe4b5da6dfcbf0d007775f",
+          "a91dc841d0a34426b0503b7ddcbb3f93"
+        ],
+        "seqColumnIds": [
+          "1633dd53535d4b3294a1c524c88c8c10",
+          "b3660550452f4311a538ef9261811368",
+          "6c4ded8473fe4b5da6dfcbf0d007775f",
+          "a91dc841d0a34426b0503b7ddcbb3f93"
+        ],
+        "ui": {
+          "x": 100,
+          "y": 100,
+          "zIndex": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
         }
       }
     },
@@ -5443,6 +5478,181 @@
           "widthDataType": 60,
           "widthDefault": 60
         }
+      },
+      "1633dd53535d4b3294a1c524c88c8c10": {
+        "id": "1633dd53535d4b3294a1c524c88c8c10",
+        "tableId": "bd674149f0a041d78272ab3d57471fff",
+        "name": "id",
+        "comment": "PK",
+        "dataType": "Integer",
+        "default": "",
+        "options": {
+          "autoIncrement": true,
+          "primaryKey": true,
+          "unique": false,
+          "notNull": true
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "b3660550452f4311a538ef9261811368": {
+        "id": "b3660550452f4311a538ef9261811368",
+        "tableId": "bd674149f0a041d78272ab3d57471fff",
+        "name": "name",
+        "comment": "이름",
+        "dataType": "String",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": true
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "6c4ded8473fe4b5da6dfcbf0d007775f": {
+        "id": "6c4ded8473fe4b5da6dfcbf0d007775f",
+        "tableId": "bd674149f0a041d78272ab3d57471fff",
+        "name": "client_id",
+        "comment": "고객사 FK",
+        "dataType": "Integer",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "a91dc841d0a34426b0503b7ddcbb3f93": {
+        "id": "a91dc841d0a34426b0503b7ddcbb3f93",
+        "tableId": "bd674149f0a041d78272ab3d57471fff",
+        "name": "manager_id",
+        "comment": "담당자 FK",
+        "dataType": "Integer",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "56be39e9af1a44cc94f6fcbfb6299e01": {
+        "id": "56be39e9af1a44cc94f6fcbfb6299e01",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "department_id",
+        "comment": "부서 FK",
+        "dataType": "Integer",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "abc6496df3a949bd8bb7b42c7b8388c2": {
+        "id": "abc6496df3a949bd8bb7b42c7b8388c2",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "client_id",
+        "comment": "거래처 FK",
+        "dataType": "Integer",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "f3733bfb1076466a8617746cc04f3a50": {
+        "id": "f3733bfb1076466a8617746cc04f3a50",
+        "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+        "name": "project_id",
+        "comment": "프로젝트 FK",
+        "dataType": "Integer",
+        "default": "",
+        "options": {
+          "autoIncrement": false,
+          "primaryKey": false,
+          "unique": false,
+          "notNull": false
+        },
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
       }
     },
     "relationshipEntities": {
@@ -5892,6 +6102,118 @@
         "meta": {
           "updateAt": 1781225924433,
           "createAt": 1781225924433
+        }
+      },
+      "bfc4ca62b3cb4526a4c4cdeed794aba8": {
+        "id": "bfc4ca62b3cb4526a4c4cdeed794aba8",
+        "identification": false,
+        "relationshipType": "ZeroOneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "bce92db4d0f24dcfb798b7e278aced08",
+          "columnIds": [
+            "2e13c73b81f04e99bbebf973c960f743"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+          "columnIds": [
+            "56be39e9af1a44cc94f6fcbfb6299e01"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "top"
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "e668ab3fb40946d7a93015aaff6626e4": {
+        "id": "e668ab3fb40946d7a93015aaff6626e4",
+        "identification": false,
+        "relationshipType": "ZeroOneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "901a6dd965c0483a8041fed18063e99c",
+          "columnIds": [
+            "4993d945a5d64787852b615d0b68c376"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+          "columnIds": [
+            "abc6496df3a949bd8bb7b42c7b8388c2"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "top"
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "f20061ecfc784d8589624f312403b64d": {
+        "id": "f20061ecfc784d8589624f312403b64d",
+        "identification": false,
+        "relationshipType": "ZeroOneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "901a6dd965c0483a8041fed18063e99c",
+          "columnIds": [
+            "4993d945a5d64787852b615d0b68c376"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "bd674149f0a041d78272ab3d57471fff",
+          "columnIds": [
+            "6c4ded8473fe4b5da6dfcbf0d007775f"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "top"
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
+        }
+      },
+      "f896ae1a517142e099301a7c4e310f6d": {
+        "id": "f896ae1a517142e099301a7c4e310f6d",
+        "identification": false,
+        "relationshipType": "ZeroOneN",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "bd674149f0a041d78272ab3d57471fff",
+          "columnIds": [
+            "1633dd53535d4b3294a1c524c88c8c10"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "7f3cb13508424b86ba5cf0206f05d663",
+          "columnIds": [
+            "f3733bfb1076466a8617746cc04f3a50"
+          ],
+          "x": 0,
+          "y": 0,
+          "direction": "top"
+        },
+        "meta": {
+          "updateAt": 1781680170560,
+          "createAt": 1781680170560
         }
       }
     },
