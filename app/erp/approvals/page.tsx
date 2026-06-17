@@ -303,7 +303,7 @@ export default function ApprovalPage() {
                         />
                         <div className="flex space-x-2">
                           <Button 
-                            variant="destructive" 
+                            variant="danger" 
                             className="flex-1"
                             onClick={() => handleAction('reject')}
                           >
