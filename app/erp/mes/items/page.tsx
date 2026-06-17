@@ -5,10 +5,14 @@ import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useDialog } from "@/components/providers/DialogProvider";
-import { Plus, X, Box, Search, Warehouse, Wrench, ShieldAlert, Tag, Layers, DollarSign, Clock } from "lucide-react";
+import { Plus, X, Box, Search, Warehouse, Wrench, ShieldAlert, Tag, Layers, DollarSign, Clock, Undo2, Trash2, Save, FileDown } from "lucide-react";
 
 export default function ItemsPage() {
+  const [allItems, setAllItems] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchType, setSearchType] = useState('');
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     item_code: '',
@@ -42,7 +46,9 @@ export default function ItemsPage() {
   const fetchItems = async () => {
     const res = await fetch("/api/mes/items");
     const data = await res.json();
-    setItems(data);
+    const mapped = data.map((i: any) => ({ ...i, _state: 'R' }));
+    setAllItems(mapped);
+    setItems(mapped);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -85,27 +91,97 @@ export default function ItemsPage() {
     }
   };
 
-  const handleDataChange = async (rowIndex: number, field: string, newValue: any) => {
-    const updatedItem = { ...items[rowIndex], [field]: newValue };
-    
-    // Optimistic UI update
-    const newItems = [...items];
-    newItems[rowIndex] = updatedItem;
-    setItems(newItems);
-
-    try {
-      const res = await fetch(`/api/mes/items/${updatedItem.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedItem)
-      });
-      if (!res.ok) {
-        throw new Error("수정 실패");
-      }
-    } catch (err) {
-      showAlert("데이터 수정 중 오류가 발생했습니다.", { type: "error" });
-      fetchItems(); // Revert on failure
+  const handleSearch = () => {
+    let filtered = [...allItems];
+    if (searchType) {
+      filtered = filtered.filter(i => i.item_type === searchType);
     }
+    if (searchKeyword) {
+      const lower = searchKeyword.toLowerCase();
+      filtered = filtered.filter(i => 
+        (i.item_code && i.item_code.toLowerCase().includes(lower)) ||
+        (i.item_name && i.item_name.toLowerCase().includes(lower))
+      );
+    }
+    setItems(filtered);
+    setSelectedRowIndices([]);
+  };
+
+  const handleReset = () => {
+    setSearchKeyword('');
+    setSearchType('');
+    setItems(allItems);
+    setSelectedRowIndices([]);
+  };
+
+  const handleDataChange = (rowIndex: number, field: string, newValue: any) => {
+    const updatedData = [...items];
+    const oldRow = updatedData[rowIndex];
+    const newRow = { ...oldRow, [field]: newValue };
+    if (oldRow && oldRow._state !== 'C') {
+      newRow._state = 'U';
+    }
+    updatedData[rowIndex] = newRow;
+    setItems(updatedData);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedRowIndices.length === 0) return;
+    const newData = [...items];
+    selectedRowIndices.sort((a, b) => b - a).forEach(idx => {
+      if (newData[idx]._state === 'C') {
+        newData.splice(idx, 1);
+      } else {
+        newData[idx] = { ...newData[idx], _state: 'D' };
+      }
+    });
+    setItems(newData);
+    setSelectedRowIndices([]);
+  };
+
+  const handleBatchSave = async () => {
+    const changed = items.filter(i => i._state === 'U' || i._state === 'D');
+    if (changed.length === 0) return;
+    
+    try {
+      for (const item of changed) {
+        if (item._state === 'U') {
+          await fetch(`/api/mes/items/${item.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(item)
+          });
+        } else if (item._state === 'D') {
+          await fetch(`/api/mes/items/${item.id}`, {
+            method: "DELETE"
+          });
+        }
+      }
+      showAlert("저장되었습니다.", { type: "success" });
+      fetchItems();
+      setSelectedRowIndices([]);
+    } catch (e) {
+      showAlert("저장 중 오류가 발생했습니다.", { type: "error" });
+    }
+  };
+
+  const handleBatchCancel = () => {
+    fetchItems();
+    setSelectedRowIndices([]);
+  };
+
+  const handleExcelDownload = () => {
+    let csv = '품목코드,품목명,유형,규격,단위,표준단가\n';
+    items.forEach(item => {
+      csv += `"${item.item_code}","${item.item_name}","${item.item_type}","${item.standard || ''}","${item.unit}",${item.standard_cost || 0}\n`;
+    });
+    const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `품목관리_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const columns: ColumnDef[] = useMemo(() => [
@@ -132,16 +208,32 @@ export default function ItemsPage() {
         <div className="p-4 bg-gray-50/50">
           <div className="flex flex-col gap-4 mb-4">
             <div className="flex flex-wrap items-center gap-2">
+              <select 
+                value={searchType}
+                onChange={e => setSearchType(e.target.value)}
+                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-slate-800 min-w-[120px]"
+              >
+                <option value="">모든 품목 유형</option>
+                <option value="원자재">원자재</option>
+                <option value="반제품">반제품</option>
+                <option value="완제품">완제품</option>
+              </select>
               <div className="flex items-center space-x-2 w-full max-w-[400px]">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <Input 
-                    placeholder="검색어 입력..." 
+                    placeholder="코드, 품목명 검색..." 
                     className="pl-9 w-full h-9 text-sm" 
+                    value={searchKeyword}
+                    onChange={e => setSearchKeyword(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
                   />
                 </div>
-                <Button variant="secondary" size="sm" className="h-9">
+                <Button variant="secondary" size="sm" onClick={handleSearch} className="h-9">
                   조회
+                </Button>
+                <Button variant="secondary" size="sm" onClick={handleReset} className="h-9" title="초기화">
+                  <Undo2 className="w-4 h-4 text-[#107C41]" />
                 </Button>
               </div>
             </div>
@@ -150,11 +242,56 @@ export default function ItemsPage() {
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
                 품목 등록
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleDeleteSelected} 
+                disabled={selectedRowIndices.length === 0}
+                className={`h-9 flex items-center ${selectedRowIndices.length > 0 ? 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200' : ''}`}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                선택 삭제
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleBatchSave} 
+                disabled={!items.some(e => e._state === 'U' || e._state === 'D' || e._state === 'C')}
+                className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                저장
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleBatchCancel} 
+                disabled={!items.some(e => e._state === 'U' || e._state === 'D' || e._state === 'C')}
+                className="h-9 flex items-center"
+              >
+                <Undo2 className="w-4 h-4 mr-1" />
+                변경 취소
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExcelDownload} 
+                className="h-9 flex items-center bg-white text-gray-700 border-gray-300"
+              >
+                <FileDown className="w-4 h-4 mr-1" />
+                엑셀 다운로드
+              </Button>
             </div>
           </div>
           
           <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-            <DataGrid data={items} columns={columns} showCheckboxes={true} onDataChange={handleDataChange} />
+            <DataGrid 
+              data={items} 
+              columns={columns} 
+              showCheckboxes={true} 
+              onDataChange={handleDataChange} 
+              selectedRowIndices={selectedRowIndices}
+              onSelectionChange={setSelectedRowIndices}
+            />
           </div>
         </div>
       </div>
