@@ -41,6 +41,7 @@ class PayrollBase(BaseModel):
     long_term_care: int = 0
     employment_insurance: int = 0
     tardiness_deduction: int = 0
+    calculation_basis: Optional[str] = None
     payment_date: date
 
 class PayrollCreate(PayrollBase):
@@ -58,6 +59,7 @@ class PayrollUpdate(BaseModel):
     long_term_care: Optional[int] = None
     employment_insurance: Optional[int] = None
     tardiness_deduction: Optional[int] = None
+    calculation_basis: Optional[str] = None
     payment_date: Optional[date] = None
 
 class PayrollResponse(PayrollBase):
@@ -106,6 +108,7 @@ def get_my_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), 
             long_term_care=p.long_term_care,
             employment_insurance=p.employment_insurance,
             tardiness_deduction=p.tardiness_deduction,
+            calculation_basis=p.calculation_basis,
             net_pay=p.net_pay,
             payment_date=p.payment_date,
             employee_name=current_user.name,
@@ -141,6 +144,7 @@ def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), cur
             long_term_care=p.long_term_care,
             employment_insurance=p.employment_insurance,
             tardiness_deduction=p.tardiness_deduction,
+            calculation_basis=p.calculation_basis,
             net_pay=p.net_pay,
             payment_date=p.payment_date,
             employee_name=emp.name if emp else None,
@@ -287,6 +291,7 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
         bonus_calc = 0.0
         tardy_minutes = 0.0
         tardy_deduction = 0
+        basis_list = []
         
         # 사원 맞춤 근태 기준 조회
         emp_policy = None
@@ -317,11 +322,17 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
                 work_seconds = (att.check_out - att.check_in).total_seconds()
                 work_hours = work_seconds / 3600.0
                 if work_hours > 0:
+                    dt_str = att.work_date.strftime('%m-%d')
                     if work_hours <= 8:
-                        bonus_calc += work_hours * hourly_wage * holi_mult
+                        amt = work_hours * hourly_wage * holi_mult
+                        bonus_calc += amt
+                        basis_list.append(f"[{dt_str}] 휴일근로 {work_hours:.1f}시간 (수당 {int(amt):,}원)")
                     else:
-                        bonus_calc += 8 * hourly_wage * holi_mult
-                        bonus_calc += (work_hours - 8) * hourly_wage * holi_over_mult
+                        amt1 = 8 * hourly_wage * holi_mult
+                        amt2 = (work_hours - 8) * hourly_wage * holi_over_mult
+                        bonus_calc += (amt1 + amt2)
+                        basis_list.append(f"[{dt_str}] 휴일근로 8시간 (수당 {int(amt1):,}원)")
+                        basis_list.append(f"[{dt_str}] 휴일연장 {work_hours - 8:.1f}시간 (수당 {int(amt2):,}원)")
             else:
                 in_time = att.check_in.time()
                 std_start_dt = datetime.datetime.combine(att.check_in.date(), work_start_time)
@@ -338,8 +349,11 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
                     std_end_dt = datetime.datetime.combine(att.check_out.date(), work_end_time)
                     over_seconds = (att.check_out - std_end_dt).total_seconds()
                     if over_seconds > 0:
+                        dt_str = att.work_date.strftime('%m-%d')
                         over_hours = over_seconds / 3600.0
-                        bonus_calc += over_hours * hourly_wage * over_mult
+                        amt = over_hours * hourly_wage * over_mult
+                        bonus_calc += amt
+                        basis_list.append(f"[{dt_str}] 연장근로 {over_hours:.1f}시간 (수당 {int(amt):,}원)")
                         
         bonus = int(bonus_calc)
         total_salary = base + bonus
@@ -350,6 +364,7 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
         if tardy_minutes > 0:
             if tardiness_penalty_type == 'DEDUCT_SALARY':
                 tardy_deduction = int((tardy_minutes / 60.0) * hourly_wage)
+                basis_list.append(f"지각 누적 {int(tardy_minutes)}분 (차감액 {tardy_deduction:,}원)")
             elif tardiness_penalty_type == 'DEDUCT_LEAVE':
                 tardy_hours = tardy_minutes / 60.0
                 leave_balance = db.query(LeaveBalance).filter(LeaveBalance.employee_id == emp.id, LeaveBalance.year == payment_year).first()
@@ -358,9 +373,11 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
                     if not existing:
                         leave_balance.remaining_hours -= tardy_hours
                         leave_balance.used_hours += tardy_hours
+                    basis_list.append(f"지각 누적 {int(tardy_minutes)}분 (연차 {tardy_hours:.1f}시간 자동차감)")
                 else:
                     # 연차 부족 시 급여 차감으로 전환
                     tardy_deduction = int((tardy_minutes / 60.0) * hourly_wage)
+                    basis_list.append(f"지각 누적 {int(tardy_minutes)}분 (연차부족 급여차감 {tardy_deduction:,}원)")
 
         # 4대보험 공제 계산 (세전 총액 기준)
         nps = int(total_salary * nps_rate)

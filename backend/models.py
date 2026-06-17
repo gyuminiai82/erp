@@ -125,6 +125,8 @@ class Payroll(Base):
     employment_insurance = Column(Integer, default=0)
     tardiness_deduction = Column(Integer, default=0)
     
+    calculation_basis = Column(Text, nullable=True) # 산출 근거 텍스트/JSON
+    
     net_pay = Column(Integer)
     payment_date = Column(Date)
 
