@@ -511,3 +511,90 @@ class Project(Base):
 
     client = relationship("Client")
     manager = relationship("Employee")
+    tasks = relationship("ProjectTask", back_populates="project", cascade="all, delete")
+    resources = relationship("ProjectResource", back_populates="project", cascade="all, delete")
+    budgets = relationship("ProjectBudget", back_populates="project", cascade="all, delete")
+    issues = relationship("ProjectIssue", back_populates="project", cascade="all, delete")
+    documents = relationship("ProjectDocument", back_populates="project", cascade="all, delete")
+
+class ProjectTask(Base):
+    __tablename__ = "project_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    assignee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    start_date = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
+    status = Column(String(50), default="TODO") # TODO, IN_PROGRESS, DONE
+    progress = Column(Integer, default=0) # 0-100
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    project = relationship("Project", back_populates="tasks")
+    assignee = relationship("Employee")
+
+class ProjectResource(Base):
+    __tablename__ = "project_resources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"), index=True)
+    role = Column(String(100), nullable=True) # 기획, 개발, 디자인 등
+    start_date = Column(Date, nullable=True)
+    end_date = Column(Date, nullable=True)
+    participation_rate = Column(Float, default=1.0) # 1.0 = 100% (Full time)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    project = relationship("Project", back_populates="resources")
+    employee = relationship("Employee")
+
+class ProjectBudget(Base):
+    __tablename__ = "project_budgets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    category = Column(String(100)) # 인건비, 외주비, 장비비 등
+    amount = Column(Float, default=0.0)
+    spent_amount = Column(Float, default=0.0)
+    remarks = Column(String(200), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    project = relationship("Project", back_populates="budgets")
+
+class ProjectIssue(Base):
+    __tablename__ = "project_issues"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    priority = Column(String(20), default="MEDIUM") # LOW, MEDIUM, HIGH, CRITICAL
+    status = Column(String(20), default="OPEN") # OPEN, IN_PROGRESS, RESOLVED, CLOSED
+    reporter_id = Column(Integer, ForeignKey("employees.id"))
+    assignee_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    due_date = Column(Date, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    project = relationship("Project", back_populates="issues")
+    reporter = relationship("Employee", foreign_keys=[reporter_id])
+    assignee = relationship("Employee", foreign_keys=[assignee_id])
+
+class ProjectDocument(Base):
+    __tablename__ = "project_documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
+    title = Column(String(200), nullable=False)
+    document_type = Column(String(50)) # 기획서, 회의록, 산출물 등
+    file_url = Column(String(500), nullable=True)
+    uploaded_by = Column(Integer, ForeignKey("employees.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    project = relationship("Project", back_populates="documents")
+    uploader = relationship("Employee")
