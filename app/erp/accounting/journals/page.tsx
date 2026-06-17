@@ -336,7 +336,7 @@ export default function JournalsPage() {
                         <span className="text-gray-500 w-12">거래처:</span>
                         <select value={line.client_id || ""} onChange={e => handleLineChange(idx, "client_id", e.target.value ? Number(e.target.value) : "")} disabled={viewMode} className="flex-1 px-2 py-1 border border-gray-300 rounded disabled:bg-gray-100">
                           <option value="">선택 안함</option>
-                          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                          {clients.map(c => <option key={c.id} value={c.id}>{c.client_name}</option>)}
                         </select>
                       </div>
                       <div className="flex items-center text-xs">
