@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 
 export default function ProjectListPage() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [token, setToken] = useState<string | null>(null);
 
   const columns: ColumnDef[] = [
@@ -28,17 +29,39 @@ export default function ProjectListPage() {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50/30 min-h-screen">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">프로젝트 조회/등록</h1>
           <p className="text-gray-500 mt-2">전체 프로젝트의 기본 정보와 현황을 관리합니다.</p>
         </div>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">프로젝트 등록</button>
       </div>
 
       <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-        <DataGrid columns={columns} data={projects} showCheckboxes={true} />
+        <div className="p-4 border-b border-gray-200 flex flex-col gap-4 bg-gray-50/50">
+          <div className="flex items-center gap-2">
+            <input type="text" placeholder="검색어 입력..." className="px-3 py-2 border border-gray-300 rounded text-sm w-64 outline-none focus:border-blue-500" />
+            <button className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded text-sm font-medium hover:bg-green-100 transition-colors">조회</button>
+            <button className="px-3 py-2 bg-gray-50 text-gray-600 border border-gray-200 rounded text-sm font-medium hover:bg-gray-100 transition-colors">↺</button>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded text-sm font-medium hover:bg-gray-50 flex items-center shadow-sm transition-colors">
+              + 프로젝트 등록
+            </button>
+            <button className="px-4 py-2 bg-gray-500 text-white rounded text-sm font-medium hover:bg-gray-600 shadow-sm transition-colors">
+              선택 삭제
+            </button>
+            <button className="px-4 py-2 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600 shadow-sm transition-colors">
+              저장
+            </button>
+            <button className="px-4 py-2 bg-white text-green-700 border border-green-300 rounded text-sm font-medium hover:bg-green-50 flex items-center shadow-sm transition-colors">
+              엑셀 다운로드
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden relative">
+          <DataGrid columns={columns} data={projects} showCheckboxes={true} selectedRowIndices={selectedRowIndices} onSelectionChange={setSelectedRowIndices} />
+        </div>
       </div>
     </div>
   );
