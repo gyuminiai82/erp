@@ -424,8 +424,8 @@ export function DataGrid({
       >
         {/* Header */}
         <div 
-          className="flex border-b border-[#d4d4d4] text-xs text-[#444] select-none z-30 sticky top-0"
-          style={{ height: headerHeight, minWidth: 'min-content' }}
+          className="flex border-b border-[#d4d4d4] bg-[#f3f3f3] text-xs text-[#444] select-none z-30 sticky top-0 min-w-full w-max"
+          style={{ height: headerHeight }}
         >
           {/* State Column Header */}
           <div className="w-[20px] border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] sticky left-0 z-[50]" />
@@ -574,7 +574,8 @@ export function DataGrid({
                     const selected = isCellSelected(actualRowIndex, displayIndex);
                     const inRange = isCellInRange(actualRowIndex, displayIndex);
                     const isEditing = editingCell?.row === actualRowIndex && editingCell?.col === originalIndex;
-                    const stateBgColor = row._state === 'D' ? '#fee2e2' : row._state === 'U' ? '#eff6ff' : row._state === 'C' ? '#f0fdf4' : '#fff';
+                    const baseBg = col.editable ? '#fff' : '#fafafa';
+                    const stateBgColor = row._state === 'D' ? '#fee2e2' : row._state === 'U' ? '#eff6ff' : (row._state === 'C' || row._state === 'I') ? '#f0fdf4' : baseBg;
                     const bgColor = selected ? stateBgColor : (inRange ? '#e6ebf5' : stateBgColor);
                     
                     return (

@@ -74,6 +74,32 @@ class BulkPayrollDeleteRequest(BaseModel):
 
 # CRUD Endpoints
 
+@router.get("/my", response_model=List[PayrollResponse])
+def get_my_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
+    query = db.query(Payroll).filter(Payroll.employee_id == current_user.id)
+    if month:
+        query = query.filter(Payroll.payment_month == month)
+        
+    payrolls = query.order_by(Payroll.payment_month.desc()).all()
+    
+    results = []
+    for p in payrolls:
+        res = PayrollResponse(
+            id=p.id,
+            employee_id=p.employee_id,
+            payment_month=p.payment_month,
+            base_salary=p.base_salary,
+            bonus=p.bonus,
+            deductions=p.deductions,
+            net_pay=p.net_pay,
+            payment_date=p.payment_date,
+            employee_name=current_user.name,
+            employee_no=current_user.emp_no,
+            department_name=current_user.department.name if current_user.department else None
+        )
+        results.append(res)
+    return results
+
 @router.get("", response_model=List[PayrollResponse])
 def get_payrolls(month: Optional[str] = None, db: Session = Depends(get_db), current_user = Depends(get_current_employee)):
     # 관리자만 전체 조회가 가능하도록 하거나, 일반 사원은 자기 것만 보게 하려면 여기 로직을 추가

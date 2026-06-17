@@ -14,6 +14,12 @@ class ItemBase(BaseModel):
     item_type: str
     unit: str
     standard: Optional[str] = None
+    standard_cost: Optional[float] = 0.0
+    safety_stock: Optional[float] = 0.0
+    current_stock: Optional[float] = 0.0
+    lead_time: Optional[int] = 0
+    is_lot_tracked: Optional[bool] = False
+    location: Optional[str] = None
 
 class ItemCreate(ItemBase):
     pass

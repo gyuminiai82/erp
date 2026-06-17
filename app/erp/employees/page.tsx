@@ -603,7 +603,7 @@ export default function EmployeesPage() {
             </div>
           </div>
           
-          <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
               <DataGrid 
                 columns={columns} 
                 data={employees} 

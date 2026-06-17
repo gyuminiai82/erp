@@ -349,6 +349,18 @@ class WorkOrder(Base):
     item = relationship("Item")
     manager = relationship("Employee")
 
+class Account(Base):
+    __tablename__ = "accounts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, unique=True, index=True)
+    name = Column(String, index=True)
+    type = Column(String) # 자산, 부채, 자본, 수익, 비용, 제조원가, 판매비와관리비 등
+    description = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class JournalEntry(Base):
     __tablename__ = "journal_entries"
 
