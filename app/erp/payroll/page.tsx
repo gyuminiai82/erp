@@ -478,8 +478,8 @@ export default function PayrollsPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 bg-gray-50/50">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
               <input 
                 type="month" 
                 value={currentMonth}
@@ -496,33 +496,44 @@ export default function PayrollsPage() {
               </Button>
             </div>
             
-            <div className="flex flex-wrap justify-end gap-2 w-full mt-2 sm:mt-0">
-              {payrolls.some(p => p._state === 'C' || p._state === 'I' || p._state === 'D' || p._state === 'U') && (
-                <>
-                  <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
-                    <Undo2 className="w-4 h-4 mr-2" />
-                    변경 취소
-                  </Button>
-                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200 shrink-0">
-                    <Save className="w-4 h-4 mr-2" />
-                    변경사항 저장
-                  </Button>
-                </>
-              )}
-              {selectedRowIndices.length > 0 && (
-                <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent shrink-0">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  선택 삭제 ({selectedRowIndices.length})
-                </Button>
-              )}
-              <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
-                <Plus className="w-4 h-4 mr-2" />
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              <Button variant="outline" size="sm" onClick={handleAddRow} className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
                 급여 추가
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleBulkDelete} 
+                disabled={selectedRowIndices.length === 0}
+                className={`h-9 flex items-center ${selectedRowIndices.length > 0 ? 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200' : ''}`}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                선택 삭제
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSave} 
+                disabled={!payrolls.some(p => p._state === 'C' || p._state === 'I' || p._state === 'D' || p._state === 'U')}
+                className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                저장
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleCancel} 
+                disabled={!payrolls.some(p => p._state === 'C' || p._state === 'I' || p._state === 'D' || p._state === 'U')}
+                className="h-9 flex items-center"
+              >
+                <Undo2 className="w-4 h-4 mr-1" />
+                변경 취소
               </Button>
             </div>
           </div>
 
-          <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
             {loading ? (
               <div className="flex-1 flex items-center justify-center text-gray-500">
                 <div className="animate-pulse flex flex-col items-center">

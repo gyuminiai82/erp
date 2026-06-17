@@ -68,9 +68,11 @@ class Employee(Base):
     
     department_id = Column(Integer, ForeignKey("departments.id"))
     position_id = Column(Integer, ForeignKey("positions.id"), nullable=True)
+    attendance_policy_id = Column(Integer, ForeignKey("attendance_policies.id"), nullable=True)
 
     department = relationship("Department", foreign_keys=[department_id], back_populates="employees")
     position = relationship("Position", back_populates="employees")
+    attendance_policy = relationship("AttendancePolicy")
     
     attendances = relationship("Attendance", back_populates="employee")
     leave_requests = relationship("LeaveRequest", foreign_keys="LeaveRequest.employee_id", back_populates="employee")
@@ -407,3 +409,30 @@ class Client(Base):
     is_active = Column(Boolean, default=True) # 사용여부
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(Integer, primary_key=True, index=True)
+    order_no = Column(String, unique=True, index=True)
+    order_type = Column(String, index=True)
+    client_id = Column(Integer, ForeignKey("clients.id"))
+    order_date = Column(Date)
+    delivery_date = Column(Date, nullable=True)
+    status = Column(String, default="대기")
+    manager_id = Column(Integer, ForeignKey("employees.id"))
+    total_amount = Column(Integer, default=0)
+    remarks = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), index=True)
+    item_id = Column(Integer, ForeignKey("items.id"))
+    quantity = Column(Integer, default=1)
+    unit_price = Column(Integer, default=0)
+    total_price = Column(Integer, default=0)
+    
+    order = relationship("Order", back_populates="items")

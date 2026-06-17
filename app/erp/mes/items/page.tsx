@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useDialog } from "@/components/providers/DialogProvider";
-import { Plus, X, Box, Warehouse, Wrench, ShieldAlert, Tag, Layers, DollarSign, Clock } from "lucide-react";
+import { Plus, X, Box, Search, Warehouse, Wrench, ShieldAlert, Tag, Layers, DollarSign, Clock } from "lucide-react";
 
 export default function ItemsPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -126,7 +127,7 @@ export default function ItemsPage() {
   ], [unitOptions]);
 
   return (
-    <div className="p-6">
+    <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">품목 관리</h1>
@@ -136,14 +137,30 @@ export default function ItemsPage() {
       
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 bg-gray-50/50">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setIsModalOpen(true)} className="bg-[#107C41] hover:bg-[#0b5c30] text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              품목 등록
-            </Button>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center space-x-2 w-full max-w-[400px]">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input 
+                    placeholder="검색어 입력..." 
+                    className="pl-9 w-full h-9 text-sm" 
+                  />
+                </div>
+                <Button variant="secondary" size="sm" className="h-9">
+                  조회
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                품목 등록
+              </Button>
+            </div>
           </div>
           
-          <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
             <DataGrid data={items} columns={columns} showCheckboxes={true} onDataChange={handleDataChange} />
           </div>
         </div>

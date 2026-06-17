@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { DataGrid } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useDialog } from "@/components/providers/DialogProvider";
+import { Plus, Search } from "lucide-react";
 
 export default function WorkOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -56,12 +58,43 @@ export default function WorkOrdersPage() {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">작업 지시서 관리</h1>
-        <Button onClick={createOrder}>+ 작업 지시서 발행</Button>
+    <div className="w-full">
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">작업 지시서 관리</h1>
+          <p className="text-gray-500">생산 공정에 필요한 작업 지시를 발행하고 관리합니다.</p>
+        </div>
       </div>
-      <DataGrid data={orders} columns={columns} />
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center space-x-2 w-full max-w-[400px]">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input 
+                    placeholder="검색어 입력..." 
+                    className="pl-9 w-full h-9 text-sm" 
+                  />
+                </div>
+                <Button variant="secondary" size="sm" className="h-9">
+                  조회
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              <Button variant="outline" size="sm" onClick={createOrder} className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                작업 지시서 발행
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+            <DataGrid data={orders} columns={columns} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

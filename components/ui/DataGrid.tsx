@@ -624,7 +624,9 @@ export function DataGrid({
                             >
                               <div className="absolute inset-0 ring-2 ring-inset ring-black bg-white pointer-events-none" />
                               <div className="relative w-full h-full flex items-center px-1.5">
-                                <div className="w-full truncate">{editValue}</div>
+                                <div className="w-full truncate">
+                                  {col.options?.find(o => String(o.value) === String(editValue))?.label ?? editValue}
+                                </div>
                               </div>
                               {(() => {
                                 const isNearBottom = (actualRowIndex * rowHeight - scrollTop + 200) > containerHeight;

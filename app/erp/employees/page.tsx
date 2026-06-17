@@ -57,6 +57,7 @@ export default function EmployeesPage() {
   const [positions, setPositions] = useState<any[]>([]);
   const [empTypes, setEmpTypes] = useState<any[]>([]);
   const [empStatuses, setEmpStatuses] = useState<any[]>([]);
+  const [attendancePolicies, setAttendancePolicies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { showAlert, showConfirm } = useDialog();
   
@@ -74,17 +75,18 @@ export default function EmployeesPage() {
     name: '', email: '', department: '', position: '', role: 'employee',
     phone: '', birth_date: '', gender: '남성', address: '', 
     employment_type: '정규직', resident_num: '', base_salary: 0, 
-    status: '재직', hire_date: ''
+    status: '재직', hire_date: '', attendance_policy_id: ''
   });
 
   const fetchData = async () => {
     try {
-      const [empRes, deptRes, posRes, typeRes, statusRes] = await Promise.all([
+      const [empRes, deptRes, posRes, typeRes, statusRes, policyRes] = await Promise.all([
         fetch("/api/employees"),
         fetch("/api/departments"),
         fetch("/api/positions"),
         fetch("/api/common-codes?group=EMP_TYPE"),
-        fetch("/api/common-codes?group=EMP_STATUS")
+        fetch("/api/common-codes?group=EMP_STATUS"),
+        fetch("/api/attendance-policies")
       ]);
       
       if (empRes.ok) {
@@ -103,6 +105,7 @@ export default function EmployeesPage() {
       if (posRes.ok) setPositions(await posRes.json());
       if (typeRes.ok) setEmpTypes(await typeRes.json());
       if (statusRes.ok) setEmpStatuses(await statusRes.json());
+      if (policyRes && policyRes.ok) setAttendancePolicies(await policyRes.json());
       
     } catch (e) {
       console.error(e);
@@ -129,7 +132,7 @@ export default function EmployeesPage() {
       name: '', email: '', department: '', position: '', role: 'employee',
       phone: '', birth_date: '', gender: '남성', address: '', 
       employment_type: '정규직', resident_num: '', base_salary: 0, 
-      status: '재직', hire_date: new Date().toISOString().split('T')[0]
+      status: '재직', hire_date: '', attendance_policy_id: new Date().toISOString().split('T')[0]
     });
     setIsEmpModalOpen(true);
   };
@@ -172,6 +175,8 @@ export default function EmployeesPage() {
   };
 
   const handleSave = async () => {
+    const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+    
     // Collect rows to delete and update
     const rowsToCreate = employees.filter(e => e._state === 'C');
     const rowsToDelete = employees.filter(e => e._state === 'D');
@@ -199,7 +204,10 @@ export default function EmployeesPage() {
         if (idsToDelete.length > 0) {
           const delRes = await fetch(`/api/employees/bulk-delete`, { 
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify({ employee_ids: idsToDelete })
           });
           if (!delRes.ok) {
@@ -229,7 +237,10 @@ export default function EmployeesPage() {
 
         const creRes = await fetch(`/api/employees/bulk-create`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify({ employees: createPayload })
         });
         if (!creRes.ok) {
@@ -260,7 +271,10 @@ export default function EmployeesPage() {
 
         const upRes = await fetch(`/api/employees/bulk-update`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify({ employees: updatePayload })
         });
         if (!upRes.ok) {
@@ -387,6 +401,15 @@ export default function EmployeesPage() {
       options: positions.map(p => ({ label: p.name, value: p.name }))
     },
     { field: 'phone', headerName: '연락처', width: 150, editable: true, formatEditValue: formatPhoneNumber },
+    { 
+      field: 'attendance_policy_id', 
+      headerName: '근태 기준', 
+      width: 150, 
+      editable: true,
+      editType: 'select',
+      options: attendancePolicies.map(p => ({ label: p.name, value: p.id })),
+      renderCell: (v) => attendancePolicies.find(p => p.id === v)?.name || '기본 설정'
+    },
     { 
       field: 'employment_type', 
       headerName: '고용형태', 
@@ -567,43 +590,57 @@ export default function EmployeesPage() {
                 {empStatuses.map(s => <option key={s.id} value={s.code}>{s.name}</option>)}
               </select>
 
-              <Button onClick={handleSearch} className="bg-slate-800 hover:bg-slate-700 text-white px-6 shadow-sm border border-slate-800 h-10 shrink-0">
-                검색
+              <Button variant="secondary" onClick={handleSearch} className="h-10 px-6 shrink-0">
+                조회
+              </Button>
+              <Button variant="secondary" onClick={fetchData} className="h-10 px-3 shrink-0" title="초기화">
+                <Undo2 className="w-4 h-4 text-[#107C41]" />
               </Button>
             </div>
 
             {/* Bottom Row: Action buttons */}
             <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
-              {employees.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U') && (
-                <>
-                  <Button onClick={handleCancel} variant="outline" className="text-gray-700 bg-white border-gray-300 hover:bg-gray-50 transition-all shrink-0">
-                    <Undo2 className="w-4 h-4 mr-2" />
-                    변경 취소
-                  </Button>
-                  <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/30 transition-all transform hover:scale-105 duration-200 shrink-0">
-                    <Save className="w-4 h-4 mr-2" />
-                    변경사항 저장
-                  </Button>
-                </>
-              )}
-              {selectedRowIndices.length > 0 && (
-                <Button variant="danger" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 text-white border-transparent shrink-0">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  선택 삭제 ({selectedRowIndices.length})
-                </Button>
-              )}
-              <Button variant="outline" className="text-gray-700 bg-white shrink-0" onClick={handleExcelDownload}>
-                <FileDown className="w-4 h-4 mr-2" />
-                엑셀 다운로드
+              <Button variant="outline" size="sm" onClick={handleAddRow} className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                사원 등록
               </Button>
-              <Button className="bg-[#107C41] hover:bg-[#0b5c30] text-white" onClick={handleAddRow}>
-                <Plus className="w-4 h-4 mr-2" />
-                사원 추가
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleBulkDelete} 
+                disabled={selectedRowIndices.length === 0}
+                className={`h-9 flex items-center ${selectedRowIndices.length > 0 ? 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200' : ''}`}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                선택 삭제
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSave} 
+                disabled={!employees.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U')}
+                className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                저장
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleCancel} 
+                disabled={!employees.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U')}
+                className="h-9 flex items-center"
+              >
+                <Undo2 className="w-4 h-4 mr-1" />
+                변경 취소
+              </Button>
+              <Button variant="outline" size="sm" className="h-9 flex items-center bg-white" onClick={handleExcelDownload}>
+                <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
+                엑셀 다운로드
               </Button>
             </div>
           </div>
           
-          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
               <DataGrid 
                 columns={columns} 
                 data={employees} 

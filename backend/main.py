@@ -26,6 +26,7 @@ import journals_api
 import accounts_api
 import reports_api
 import clients_api
+import orders_api
 import models
 from database import engine, SessionLocal
 import psutil
@@ -70,6 +71,7 @@ app.include_router(journals_api.router)
 app.include_router(accounts_api.router)
 app.include_router(reports_api.router)
 app.include_router(clients_api.router)
+app.include_router(orders_api.router)
 
 models.Base.metadata.create_all(bind=engine)
 

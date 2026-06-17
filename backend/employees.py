@@ -39,7 +39,9 @@ class EmployeeUpdateRequest(BaseModel):
     status: Optional[str] = None
     hire_date: Optional[str] = None
     base_salary: Optional[int] = None
+    attendance_policy_id: Optional[int] = None
     role: Optional[str] = None
+    attendance_policy_id: Optional[int] = None
 
 class EmployeeBulkUpdateRequest(BaseModel):
     employees: List[EmployeeUpdateRequest]
@@ -65,6 +67,7 @@ class EmployeeInlineCreateRequest(BaseModel):
     department: Optional[str] = None
     position: Optional[str] = None
     role: Optional[str] = None
+    attendance_policy_id: Optional[int] = None
     phone: Optional[str] = None
     birth_date: Optional[str] = None
     gender: Optional[str] = None
@@ -93,6 +96,7 @@ class EmployeeBulkCreateItem(BaseModel):
     base_salary: Optional[int] = 0
     hire_date: Optional[str] = None
     status: Optional[str] = "재직"
+    attendance_policy_id: Optional[int] = None
 
 class EmployeeBulkCreateRequest(BaseModel):
     employees: List[EmployeeBulkCreateItem]
@@ -163,7 +167,8 @@ def get_employees(db: Session = Depends(get_db)):
             "employment_type": emp.employment_type,
             "resident_num": crypto.decrypt_data(emp.resident_num),
             "profile_image_url": emp.profile_image_url,
-            "base_salary": emp.base_salary
+            "base_salary": emp.base_salary,
+            "attendance_policy_id": emp.attendance_policy_id
         })
     return result
 
@@ -318,7 +323,8 @@ def create_employee(payload: EmployeeCreateRequest, db: Session = Depends(get_db
         employment_type=payload.employment_type,
         resident_num=crypto.encrypt_data(payload.resident_num),
         profile_image_url=payload.profile_image_url,
-        base_salary=payload.base_salary
+        base_salary=payload.base_salary,
+        attendance_policy_id=payload.attendance_policy_id
     )
     db.add(new_emp)
     db.commit()

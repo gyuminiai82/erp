@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { useDialog } from "@/components/providers/DialogProvider";
 
-const CLIENT_TYPES = ["고객사", "협력사", "기타"];
+const CLIENT_TYPES = [
+  { label: "고객사", value: "고객사" },
+  { label: "협력사", value: "협력사" },
+  { label: "기타", value: "기타" }
+];
 
 export default function ClientsPage() {
   const [allClients, setAllClients] = useState<any[]>([]);
@@ -74,27 +78,22 @@ export default function ClientsPage() {
     setIsModalOpen(false);
   };
 
-  const handleDeleteRows = () => {
+  const handleDeleteRows = async () => {
     if (selectedRowIndices.length === 0) {
       showAlert("삭제할 거래처를 선택해주세요.", { type: "warning" });
       return;
     }
-    showConfirm(
-      "선택 삭제",
-      `선택한 ${selectedRowIndices.length}개의 거래처를 목록에서 제거하시겠습니까?`,
-      () => {
-        const newData = [...clients];
-        selectedRowIndices.sort((a, b) => b - a).forEach(idx => {
-          if (newData[idx]._state === 'C') {
-            newData.splice(idx, 1);
-          } else {
-            newData[idx] = { ...newData[idx], _state: 'D' };
-          }
-        });
-        setClients(newData);
-        setSelectedRowIndices([]);
+    
+    const newData = [...clients];
+    selectedRowIndices.sort((a, b) => b - a).forEach(idx => {
+      if (newData[idx]._state === 'C') {
+        newData.splice(idx, 1);
+      } else {
+        newData[idx] = { ...newData[idx], _state: 'D' };
       }
-    );
+    });
+    setClients(newData);
+    setSelectedRowIndices([]);
   };
 
   const handleSave = async () => {
@@ -183,48 +182,24 @@ export default function ClientsPage() {
   };
 
   const columns: ColumnDef[] = [
-    {
-      field: "client_code",
-      header: "거래처 코드",
-      width: "120px",
-      align: "center",
-      editable: true,
-      renderCell: (val) => <span className="font-medium text-[#107C41]">{val}</span>
-    },
-    { field: "client_name", header: "거래처명", width: "180px", editable: true },
-    {
-      field: "client_type",
-      header: "구분",
-      width: "120px",
-      align: "center",
-      editable: true,
-      editor: { type: "select", options: CLIENT_TYPES }
-    },
-    { field: "registration_number", header: "사업자등록번호", width: "150px", align: "center", editable: true },
-    { field: "representative", header: "대표자", width: "100px", align: "center", editable: true },
-    { field: "contact_person", header: "담당자", width: "100px", align: "center", editable: true },
-    { field: "contact_phone", header: "연락처", width: "150px", align: "center", editable: true },
-    { field: "contact_email", header: "이메일", width: "180px", editable: true },
-    { field: "address", header: "주소", width: "250px", editable: true },
-    {
-      field: "is_active",
-      header: "상태",
-      width: "100px",
-      align: "center",
-      editable: true,
-      editor: {
-        type: "select",
-        options: ["true", "false"]
-      },
-      renderCell: (val) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          String(val) === 'true' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
-        }`}>
-          {String(val) === 'true' ? '활성' : '비활성'}
-        </span>
-      )
-    }
+    { field: "client_code", headerName: "거래처 코드", width: 120, editable: true },
+    { field: "client_name", headerName: "거래처명", width: 180, editable: true },
+    { field: "client_type", headerName: "구분", width: 120, editable: true, editType: "select", options: CLIENT_TYPES },
+    { field: "registration_number", headerName: "사업자등록번호", width: 150, editable: true },
+    { field: "representative", headerName: "대표자", width: 100, editable: true },
+    { field: "contact_person", headerName: "담당자", width: 100, editable: true },
+    { field: "contact_phone", headerName: "연락처", width: 150, editable: true },
+    { field: "contact_email", headerName: "이메일", width: 180, editable: true },
+    { field: "address", headerName: "주소", width: 250, editable: true },
+    { field: "is_active", headerName: "상태", width: 100, editable: true, editType: "select", options: [{label: "활성", value: "true"}, {label: "비활성", value: "false"}], renderCell: (val) => (<span>{String(val) === 'true' ? '활성' : '비활성'}</span>) }
   ];
+
+  const handleCancel = async () => {
+    const confirmed = await showConfirm("변경사항을 취소하고 처음 상태로 되돌리시겠습니까?", { type: "warning" });
+    if (!confirmed) return;
+    setSelectedRowIndices([]);
+    fetchClients();
+  };
 
   if (loading) {
     return (
@@ -243,64 +218,86 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-        {/* Toolbar */}
-        <div className="p-3 border-b border-gray-200 bg-gray-50/80 flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <Input 
-                placeholder="코드/거래처명 검색" 
-                className="pl-9 w-[220px] h-9 text-sm" 
-                value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSearch()}
-              />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center space-x-2 w-full max-w-[400px]">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input 
+                    placeholder="코드/거래처명 검색" 
+                    className="pl-9 w-full h-9 text-sm" 
+                    value={searchKeyword}
+                    onChange={e => setSearchKeyword(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                  />
+                </div>
+                <Button variant="secondary" size="sm" onClick={handleSearch} className="h-9">
+                  조회
+                </Button>
+                <Button variant="secondary" size="sm" onClick={fetchClients} className="h-9" title="초기화">
+                  <Undo2 className="w-4 h-4 text-[#107C41]" />
+                </Button>
+              </div>
             </div>
-            <Button variant="secondary" size="sm" onClick={handleSearch} className="h-9">
-              조회
-            </Button>
-            <Button variant="outline" size="sm" onClick={fetchClients} className="h-9" title="초기화">
-              <Undo2 className="w-4 h-4 text-gray-500" />
-            </Button>
+            
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+              <Button variant="outline" size="sm" onClick={handleAddRow} className="h-9 flex items-center bg-white">
+                <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+                신규 거래처
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleDeleteRows} 
+                disabled={selectedRowIndices.length === 0}
+                className={`h-9 flex items-center ${selectedRowIndices.length > 0 ? 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200' : ''}`}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                선택 삭제
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSave} 
+                disabled={!clients.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U')}
+                className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                저장
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleCancel} 
+                disabled={!clients.some(e => e._state === 'C' || e._state === 'D' || e._state === 'U')}
+                className="h-9 flex items-center"
+              >
+                <Undo2 className="w-4 h-4 mr-1" />
+                변경 취소
+              </Button>
+            </div>
           </div>
           
-          <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={handleAddRow} className="h-9 flex items-center bg-white">
-              <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-              신규 거래처
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleDeleteRows} className="h-9 flex items-center bg-white text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
-              <Trash2 className="w-4 h-4 mr-1" />
-              선택 삭제
-            </Button>
-            <Button size="sm" onClick={handleSave} className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white">
-              <Save className="w-4 h-4 mr-1" />
-              저장
-            </Button>
-          </div>
-        </div>
-
-        {/* DataGrid */}
-        <div className="flex-1 overflow-hidden">
-          <DataGrid 
-            columns={columns} 
-            data={clients}
-            onChange={(newData) => {
-              const updatedData = newData.map((row: any, i: number) => {
-                const oldRow = clients[i];
-                if (oldRow && oldRow._state === 'C') return row;
-                if (oldRow && JSON.stringify(oldRow) !== JSON.stringify(row)) {
-                  return { ...row, _state: oldRow._state || 'U' };
+          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
+            <DataGrid 
+              columns={columns} 
+              data={clients}
+              onDataChange={(rowIndex, field, newValue) => {
+                const updatedData = [...clients];
+                const oldRow = updatedData[rowIndex];
+                const newRow = { ...oldRow, [field]: newValue };
+                if (oldRow && oldRow._state !== 'C') {
+                  newRow._state = 'U';
                 }
-                return row;
-              });
-              setClients(updatedData);
-            }}
-            showCheckboxes={true}
-            selectedRowIndices={selectedRowIndices}
-            onSelectionChange={setSelectedRowIndices}
-          />
+                updatedData[rowIndex] = newRow;
+                setClients(updatedData);
+              }}
+              showCheckboxes={true}
+              selectedRowIndices={selectedRowIndices}
+              onSelectionChange={setSelectedRowIndices}
+            />
+          </div>
         </div>
       </div>
 
@@ -351,7 +348,7 @@ export default function ClientsPage() {
                       value={newClientData.client_type}
                       onChange={e => setNewClientData({...newClientData, client_type: e.target.value})}
                     >
-                      {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      {CLIENT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
                   <div className="space-y-2">
