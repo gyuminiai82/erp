@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DataGrid } from "@/components/ui/DataGrid";
 import { Button } from "@/components/ui/Button";
 import { useDialog } from "@/components/providers/DialogProvider";
 import { Plus, X, FileText, PlusCircle, Trash2, Search } from "lucide-react";
@@ -143,21 +142,7 @@ export default function JournalsPage() {
     setIsModalOpen(true);
   };
 
-  const columns = [
-    { field: "id", headerName: "전표번호", width: 90, renderCell: (val: any) => <div className="text-center w-full">#{val}</div> },
-    { field: "entry_date", headerName: "전표일자", width: 120, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
-    { field: "entry_type", headerName: "유형", width: 90, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
-    { field: "description", headerName: "적요", width: 250 },
-    { field: "total_debit", headerName: "차변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
-    { field: "total_credit", headerName: "대변 합계", width: 130, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
-    { field: "status", headerName: "상태", width: 100, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
-    { field: "creator_name", headerName: "작성자", width: 100, renderCell: (val: any) => <div className="text-center w-full">{val}</div> },
-    { field: "actions", headerName: "상세보기", width: 100, renderCell: (_: any, row: any) => (
-      <div className="flex justify-center w-full">
-        <Button variant="outline" size="sm" onClick={() => openViewModal(row)} className="h-7 text-xs px-2 py-0">상세</Button>
-      </div>
-    )},
-  ];
+
 
   return (
     <div className="w-full">
@@ -193,12 +178,70 @@ export default function JournalsPage() {
             </div>
           </div>
 
-          <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-            <DataGrid
-              data={journals}
-              columns={columns}
-              showCheckboxes={true}
-            />
+          <div className="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto pb-10 pr-2">
+            {journals.map(journal => (
+              <div key={journal.id} className="bg-white border-2 border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 overflow-hidden group">
+                {/* Header */}
+                <div className="flex justify-between items-center p-4 bg-gray-50/80 border-b border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-sm font-semibold text-gray-500">#{journal.id}</span>
+                    <span className="font-bold text-gray-900">{journal.entry_date}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">{journal.entry_type}</span>
+                    {journal.description && <span className="text-sm text-gray-600 truncate max-w-md">| {journal.description}</span>}
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center text-gray-500">
+                      <span className="mr-2">작성: {journal.creator_name}</span>
+                      <span className={`px-2 py-0.5 rounded text-xs font-bold ${journal.status === 'APPROVED' ? 'bg-green-100 text-green-700' : journal.status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-700'}`}>
+                        {journal.status === 'APPROVED' ? '승인됨' : journal.status === 'REJECTED' ? '반려됨' : '대기중'}
+                      </span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => openViewModal(journal)} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 text-xs px-3 py-0 border-gray-300 hover:bg-gray-100 text-gray-700">상세 및 수정</Button>
+                  </div>
+                </div>
+                
+                {/* Body Table */}
+                <div className="p-0">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-50/40 text-gray-500 text-xs border-b border-gray-100">
+                      <tr>
+                        <th className="px-4 py-2 font-medium w-1/4">계정과목</th>
+                        <th className="px-4 py-2 font-medium w-1/3">적요</th>
+                        <th className="px-4 py-2 font-medium text-right w-1/6">차변 (Debit)</th>
+                        <th className="px-4 py-2 font-medium text-right w-1/6">대변 (Credit)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {journal.lines?.map((line: any) => (
+                        <tr key={line.id} className="hover:bg-gray-50/50">
+                          <td className="px-4 py-2 text-gray-900 font-medium">
+                            <span className="text-gray-400 font-normal mr-2">[{line.account_code}]</span>
+                            {line.account_name}
+                          </td>
+                          <td className="px-4 py-2 text-gray-600 truncate max-w-[200px]">{line.description || "-"}</td>
+                          <td className="px-4 py-2 text-right text-blue-600 font-semibold">{line.debit ? line.debit.toLocaleString() : ""}</td>
+                          <td className="px-4 py-2 text-right text-red-600 font-semibold">{line.credit ? line.credit.toLocaleString() : ""}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-gray-100/50 font-bold border-t border-gray-200">
+                      <tr>
+                        <td colSpan={2} className="px-4 py-2.5 text-right text-gray-600 uppercase tracking-wider text-xs">합계 (Total)</td>
+                        <td className="px-4 py-2.5 text-right text-blue-700 text-base">{journal.total_debit.toLocaleString()}</td>
+                        <td className="px-4 py-2.5 text-right text-red-700 text-base">{journal.total_credit.toLocaleString()}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            ))}
+            
+            {journals.length === 0 && (
+              <div className="text-center py-20 text-gray-500 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                <FileText className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                <p>조회된 전표가 없습니다.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
