@@ -142,6 +142,19 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
     } catch(e) { console.error(e); }
   };
 
+  let activeTitle = "";
+  let globalActiveUrl = "";
+  if (Array.isArray(menus)) {
+    menus.forEach(m => {
+      if (m.url && (pathname === m.url || pathname?.startsWith(`${m.url}/`))) {
+        if (m.url.length > globalActiveUrl.length) {
+          globalActiveUrl = m.url;
+          activeTitle = m.name;
+        }
+      }
+    });
+  }
+
   return (
     <div className="flex h-screen bg-[#f8f9fc] text-gray-800 font-sans">
       {/* Sidebar */}
@@ -236,7 +249,11 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
             <button className="md:hidden mr-4 text-gray-500 hover:text-gray-700">
               <Menu className="w-6 h-6" />
             </button>
-            {/* Search bar removed as per user request */}
+            {activeTitle && (
+              <h2 className="text-xl font-bold text-gray-800 hidden sm:block">
+                {activeTitle}
+              </h2>
+            )}
           </div>
           
           <div className="flex items-center space-x-4">
