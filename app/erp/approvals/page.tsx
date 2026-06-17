@@ -212,8 +212,7 @@ export default function ApprovalPage() {
       <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
         <DataGrid
           columns={columns}
-          rows={items}
-          loading={loading}
+          data={items}
           showCheckboxes={false}
         />
       </div>

@@ -538,12 +538,12 @@ export default function EmployeesPage() {
             {/* Top Row: Search Input, Filters, and Search Button */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <Input 
                   value={searchKeyword}
                   onChange={e => setSearchKeyword(e.target.value)}
                   onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
-                  className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
+                  className="pl-9 pr-4 bg-white w-full h-10 focus:z-10 relative" 
                   placeholder="이름, 사번, 이메일 검색..." 
                 />
               </div>
