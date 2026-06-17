@@ -76,48 +76,48 @@ export default function FundsPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center text-gray-500 mb-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3">
+          <div className="flex items-center text-gray-500 mb-4 whitespace-nowrap">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3">
               <Wallet className="w-5 h-5" />
             </div>
-            <span className="font-medium">보유 자금 (현금성)</span>
+            <span className="font-medium truncate">보유 자금 (현금성)</span>
           </div>
-          <div className="text-3xl font-bold text-gray-800">
-            {cash_equivalents.total.toLocaleString()} <span className="text-lg font-normal text-gray-500">원</span>
+          <div className="text-2xl 2xl:text-3xl font-bold text-gray-800 break-keep">
+            {cash_equivalents.total.toLocaleString()} <span className="text-base 2xl:text-lg font-normal text-gray-500 ml-1">원</span>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center text-gray-500 mb-4">
-            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+          <div className="flex items-center text-gray-500 mb-4 whitespace-nowrap">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
               <ArrowUpRight className="w-5 h-5" />
             </div>
-            <span className="font-medium">받을 돈 (채권)</span>
+            <span className="font-medium truncate">받을 돈 (채권)</span>
           </div>
-          <div className="text-3xl font-bold text-gray-800">
-            {receivables.total.toLocaleString()} <span className="text-lg font-normal text-gray-500">원</span>
+          <div className="text-2xl 2xl:text-3xl font-bold text-gray-800 break-keep">
+            {receivables.total.toLocaleString()} <span className="text-base 2xl:text-lg font-normal text-gray-500 ml-1">원</span>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center text-gray-500 mb-4">
-            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3">
+          <div className="flex items-center text-gray-500 mb-4 whitespace-nowrap">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-red-100 text-red-600 flex items-center justify-center mr-3">
               <ArrowDownRight className="w-5 h-5" />
             </div>
-            <span className="font-medium">갚을 돈 (채무)</span>
+            <span className="font-medium truncate">갚을 돈 (채무)</span>
           </div>
-          <div className="text-3xl font-bold text-gray-800">
-            {payables.total.toLocaleString()} <span className="text-lg font-normal text-gray-500">원</span>
+          <div className="text-2xl 2xl:text-3xl font-bold text-gray-800 break-keep">
+            {payables.total.toLocaleString()} <span className="text-base 2xl:text-lg font-normal text-gray-500 ml-1">원</span>
           </div>
         </div>
 
         <div className="bg-slate-800 p-6 rounded-2xl shadow-md text-white flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
-          <div className="flex items-center text-slate-300 mb-4 z-10">
-            <span className="font-medium">순유동자금 예상액</span>
+          <div className="flex items-center text-slate-300 mb-4 z-10 whitespace-nowrap">
+            <span className="font-medium truncate">순유동자금 예상액</span>
           </div>
-          <div className="text-3xl font-bold z-10">
-            {net_liquidity.toLocaleString()} <span className="text-lg font-normal text-slate-400">원</span>
+          <div className="text-2xl 2xl:text-3xl font-bold z-10 break-keep">
+            {net_liquidity.toLocaleString()} <span className="text-base 2xl:text-lg font-normal text-slate-400 ml-1">원</span>
           </div>
         </div>
       </div>
@@ -138,11 +138,11 @@ export default function FundsPage() {
                 <tbody>
                   {cash_equivalents.details.map((item, idx) => (
                     <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap text-ellipsis overflow-hidden max-w-[150px]">
                         <span className="text-xs text-gray-400 mr-2">[{item.code}]</span>
                         <span className="font-medium text-gray-700">{item.name}</span>
                       </td>
-                      <td className="px-6 py-4 text-right font-semibold text-gray-800">
+                      <td className="px-6 py-4 text-right font-semibold text-gray-800 break-keep">
                         {item.balance.toLocaleString()} 원
                       </td>
                     </tr>
@@ -166,11 +166,11 @@ export default function FundsPage() {
                 <tbody>
                   {receivables.details.map((item, idx) => (
                     <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap text-ellipsis overflow-hidden max-w-[150px]">
                         <span className="text-xs text-gray-400 mr-2">[{item.code}]</span>
                         <span className="font-medium text-gray-700">{item.name}</span>
                       </td>
-                      <td className="px-6 py-4 text-right font-semibold text-gray-800">
+                      <td className="px-6 py-4 text-right font-semibold text-gray-800 break-keep">
                         {item.balance.toLocaleString()} 원
                       </td>
                     </tr>
@@ -194,11 +194,11 @@ export default function FundsPage() {
                 <tbody>
                   {payables.details.map((item, idx) => (
                     <tr key={idx} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap text-ellipsis overflow-hidden max-w-[150px]">
                         <span className="text-xs text-gray-400 mr-2">[{item.code}]</span>
                         <span className="font-medium text-gray-700">{item.name}</span>
                       </td>
-                      <td className="px-6 py-4 text-right font-semibold text-gray-800">
+                      <td className="px-6 py-4 text-right font-semibold text-gray-800 break-keep">
                         {item.balance.toLocaleString()} 원
                       </td>
                     </tr>

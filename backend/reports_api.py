@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 @router.get("/funds")
-def get_funds_status(db: Session = Depends(get_db), user: dict = Depends(auth.get_current_user)):
+def get_funds_status(db: Session = Depends(get_db), user: dict = Depends(auth.get_current_user_info)):
     """자금 현황 조회: 현금성 자산, 채권, 채무 잔액"""
     
     # 승인완료된 전표 라인 가져오기
@@ -70,7 +70,7 @@ def get_statements(
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     db: Session = Depends(get_db), 
-    user: dict = Depends(auth.get_current_user)
+    user: dict = Depends(auth.get_current_user_info)
 ):
     """재무제표 조회 (재무상태표, 손익계산서)"""
     

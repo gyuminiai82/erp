@@ -390,3 +390,20 @@ class JournalEntryLine(Base):
     description = Column(String, nullable=True)
 
     journal_entry = relationship("JournalEntry", back_populates="lines")
+
+class Client(Base):
+    __tablename__ = "clients"
+
+    id = Column(Integer, primary_key=True, index=True)
+    client_code = Column(String, unique=True, index=True) # 거래처 코드
+    client_name = Column(String, index=True) # 거래처명
+    client_type = Column(String, default="고객사") # 고객사, 협력사, 기타
+    registration_number = Column(String, nullable=True) # 사업자등록번호
+    representative = Column(String, nullable=True) # 대표자명
+    contact_person = Column(String, nullable=True) # 담당자명
+    contact_phone = Column(String, nullable=True) # 연락처
+    contact_email = Column(String, nullable=True) # 이메일
+    address = Column(String, nullable=True) # 주소
+    is_active = Column(Boolean, default=True) # 사용여부
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
