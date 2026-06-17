@@ -8,8 +8,8 @@ interface Employee {
   name: string;
   department_id: number | null;
   position_id: number | null;
-  department?: { name: string };
-  position?: { name: string };
+  department?: string;
+  position?: string;
 }
 
 interface ApproverInput {
@@ -177,7 +177,7 @@ export default function DraftApprovalPage() {
                       </span>
                       <span className="font-medium text-gray-800">{emp.name}</span>
                       <span className="text-sm text-gray-500">
-                        {emp.department?.name || '부서없음'} / {emp.position?.name || '직급없음'}
+                        {emp.department || '부서없음'} / {emp.position || '직급없음'}
                       </span>
                     </div>
                     <button
@@ -235,7 +235,7 @@ export default function DraftApprovalPage() {
 
       {/* Approver Selection Modal */}
       {isApproverModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
               <h2 className="text-lg font-semibold text-gray-800">결재자 선택</h2>
@@ -260,7 +260,7 @@ export default function DraftApprovalPage() {
                         <div>
                           <p className="font-medium text-gray-800">{emp.name}</p>
                           <p className="text-xs text-gray-500">
-                            {emp.department?.name || '부서없음'} / {emp.position?.name || '직급없음'}
+                            {emp.department || '부서없음'} / {emp.position || '직급없음'}
                           </p>
                         </div>
                         {isSelected && <span className="text-xs text-blue-600 font-semibold">선택됨</span>}
