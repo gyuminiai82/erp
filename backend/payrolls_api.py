@@ -269,8 +269,8 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
     holi_mult = setting.holiday_multiplier if setting and getattr(setting, 'holiday_multiplier', None) is not None else 1.5
     holi_over_mult = setting.holiday_overtime_multiplier if setting and getattr(setting, 'holiday_overtime_multiplier', None) is not None else 2.0
     
-    tardiness_penalty_type = getattr(setting, 'tardiness_penalty_type', 'NONE') if setting else 'NONE'
-    tardiness_grace_period = getattr(setting, 'tardiness_grace_period', 0) if setting else 0
+    tardiness_penalty_type = setting.tardiness_penalty_type if setting and setting.tardiness_penalty_type is not None else 'NONE'
+    tardiness_grace_period = setting.tardiness_grace_period if setting and setting.tardiness_grace_period is not None else 0
     
     default_policy = db.query(AttendancePolicy).filter(AttendancePolicy.is_default == True).first()
 
