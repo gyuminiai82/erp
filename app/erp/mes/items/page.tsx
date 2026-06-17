@@ -17,8 +17,6 @@ export default function ItemsPage() {
     unit: 'EA',
     standard: '',
     standard_cost: 0,
-    safety_stock: 0,
-    current_stock: 0,
     lead_time: 0,
     is_lot_tracked: false,
     location: ''
@@ -77,7 +75,7 @@ export default function ItemsPage() {
       setIsModalOpen(false);
       setFormData({
         item_code: '', item_name: '', item_type: '원자재', unit: 'EA', standard: '',
-        standard_cost: 0, safety_stock: 0, current_stock: 0, lead_time: 0, is_lot_tracked: false, location: ''
+        standard_cost: 0, lead_time: 0, is_lot_tracked: false, location: ''
       });
       fetchItems();
       showAlert('품목이 추가되었습니다.', { type: 'success' });
@@ -115,11 +113,6 @@ export default function ItemsPage() {
     { field: "item_name", headerName: "품목명", width: 220, editable: true, renderCell: (val: any) => <span>{val}</span> },
     { field: "item_type", headerName: "유형", width: 100, editable: true },
     { field: "standard", headerName: "규격", width: 160, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
-    { field: "current_stock", headerName: "현재고", width: 100, editable: true, renderCell: (val: any, row: any) => {
-        return <div className="text-right w-full">{Number(val).toLocaleString()}</div>;
-      }
-    },
-    { field: "safety_stock", headerName: "안전재고", width: 90, editable: true, renderCell: (val: any) => <div className="text-right w-full text-gray-600">{Number(val).toLocaleString()}</div> },
     { field: "unit", headerName: "단위", width: 100, editable: true, editType: 'select', options: unitOptions },
     { field: "standard_cost", headerName: "표준단가", width: 120, editable: true, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
     { field: "lead_time", headerName: "L/T", width: 70, editable: true, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
@@ -244,18 +237,9 @@ export default function ItemsPage() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1"><Layers className="w-3 h-3"/> 현재고</label>
-                          <input type="number" name="current_stock" value={formData.current_stock} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-right text-indigo-700 font-bold" min="0" />
+                          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1"><Warehouse className="w-3 h-3"/> 창고 위치</label>
+                          <input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="ex: 1층 자재창고 A열 3번선반" />
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1"><ShieldAlert className="w-3 h-3"/> 안전재고</label>
-                          <input type="number" name="safety_stock" value={formData.safety_stock} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-right" min="0" />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1"><Warehouse className="w-3 h-3"/> 창고 위치</label>
-                        <input type="text" name="location" value={formData.location} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="ex: 1층 자재창고 A열 3번선반" />
                       </div>
                     </div>
                   </div>
