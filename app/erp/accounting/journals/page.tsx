@@ -290,11 +290,11 @@ export default function JournalsPage() {
 
               <div className="space-y-2 mb-8">
                 <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 bg-gray-50 p-2 rounded">
-                  <div className="col-span-2">계정코드</div>
-                  <div className="col-span-3">계정명</div>
-                  <div className="col-span-2 text-right">차변(Debit)</div>
-                  <div className="col-span-2 text-right">대변(Credit)</div>
-                  <div className="col-span-2">적요</div>
+                  <div className="col-span-2 px-2">계정코드</div>
+                  <div className="col-span-3 px-2">계정명</div>
+                  <div className="col-span-2 px-2 text-right">차변(Debit)</div>
+                  <div className="col-span-2 px-2 text-right">대변(Credit)</div>
+                  <div className="col-span-2 px-2">적요</div>
                   <div className="col-span-1 text-center">삭제</div>
                 </div>
                 {lines.map((line, idx) => (
