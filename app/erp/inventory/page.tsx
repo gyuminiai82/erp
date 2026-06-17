@@ -108,7 +108,7 @@ export default function InventoryStatusPage() {
     fetchItems();
   };
 
-  const handleDataChange = (rowIndex: number, field: keyof Item, value: any) => {
+  const handleDataChange = (rowIndex: number, field: string, value: any) => {
     const newItems = [...items];
     const originalIndex = items.findIndex(i => i.id === filteredItems[rowIndex].id);
     
@@ -138,32 +138,32 @@ export default function InventoryStatusPage() {
     URL.revokeObjectURL(url);
   };
 
-  const columns: ColumnDef<Item>[] = [
-    { field: 'item_code', header: '품목코드', width: '120px' },
-    { field: 'item_name', header: '품목명', width: '200px' },
-    { field: 'item_type', header: '품목유형', width: '100px' },
-    { field: 'standard', header: '규격', width: '120px' },
-    { field: 'unit', header: '단위', width: '80px' },
-    { field: 'location', header: '창고위치', width: '120px', editable: true },
+  const columns: ColumnDef[] = [
+    { field: 'item_code', headerName: '품목코드', width: 120 },
+    { field: 'item_name', headerName: '품목명', width: 200 },
+    { field: 'item_type', headerName: '품목유형', width: 100 },
+    { field: 'standard', headerName: '규격', width: 120 },
+    { field: 'unit', headerName: '단위', width: 80 },
+    { field: 'location', headerName: '창고위치', width: 120, editable: true },
     { 
       field: 'safety_stock', 
-      header: '안전재고', 
-      width: '100px', 
+      headerName: '안전재고', 
+      width: 100, 
       editable: true,
-      render: (val) => <div className="text-right w-full font-medium">{val?.toLocaleString()}</div>
+      renderCell: (val: any) => <div className="text-right w-full font-medium">{val?.toLocaleString()}</div>
     },
     { 
       field: 'current_stock', 
-      header: '현재재고', 
-      width: '100px', 
+      headerName: '현재재고', 
+      width: 100, 
       editable: true,
-      render: (val) => <div className="text-right w-full font-bold text-[#107C41]">{val?.toLocaleString()}</div>
+      renderCell: (val: any) => <div className="text-right w-full font-bold text-[#107C41]">{val?.toLocaleString()}</div>
     },
     {
       field: 'id', // 더미 필드
-      header: '상태',
-      width: '120px',
-      render: (_, row) => {
+      headerName: '상태',
+      width: 120,
+      renderCell: (_: any, row: any) => {
         const isShortage = row.current_stock < row.safety_stock;
         return (
           <div className={`flex items-center ${isShortage ? 'text-red-600' : 'text-green-600'}`}>
