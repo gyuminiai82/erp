@@ -41,6 +41,8 @@ class PayrollBase(BaseModel):
     long_term_care: int = 0
     employment_insurance: int = 0
     tardiness_deduction: int = 0
+    income_tax: int = 0
+    local_income_tax: int = 0
     calculation_basis: Optional[str] = None
     payment_date: date
 
@@ -59,6 +61,8 @@ class PayrollUpdate(BaseModel):
     long_term_care: Optional[int] = None
     employment_insurance: Optional[int] = None
     tardiness_deduction: Optional[int] = None
+    income_tax: Optional[int] = None
+    local_income_tax: Optional[int] = None
     calculation_basis: Optional[str] = None
     payment_date: Optional[date] = None
 
@@ -385,8 +389,20 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
         ltci = int(nhis * ltci_rate)
         ei = int(total_salary * ei_rate)
         
-        # 총 공제액 = 4대보험 + 지각 차감
-        deductions = int((nps + nhis + ltci + ei) / 10) * 10 + tardy_deduction
+        # 간이 소득세 계산 (단순화된 공식)
+        dependents = emp.dependents_count if hasattr(emp, 'dependents_count') and emp.dependents_count else 1
+        if total_salary > 3000000:
+            base_tax = total_salary * 0.05
+        elif total_salary > 2000000:
+            base_tax = total_salary * 0.03
+        else:
+            base_tax = total_salary * 0.01
+            
+        income_tax = max(0, int(base_tax - (dependents * 10000)))
+        local_income_tax = int(income_tax * 0.1)
+        
+        # 총 공제액 = 4대보험 + 지각 차감 + 소득세 + 지방소득세
+        deductions = int((nps + nhis + ltci + ei) / 10) * 10 + tardy_deduction + income_tax + local_income_tax
         net_pay = total_salary - deductions
         
         calc_basis_str = "\n".join(basis_list) if basis_list else None
@@ -395,6 +411,8 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
             existing.base_salary = base
             existing.bonus = bonus
             existing.deductions = deductions
+            existing.income_tax = income_tax
+            existing.local_income_tax = local_income_tax
             existing.calculation_basis = calc_basis_str
             existing.net_pay = net_pay
         else:
@@ -404,6 +422,8 @@ def generate_payrolls(payload: PayrollGenerateRequest, db: Session = Depends(get
                 base_salary=base,
                 bonus=bonus,
                 deductions=deductions,
+                income_tax=income_tax,
+                local_income_tax=local_income_tax,
                 calculation_basis=calc_basis_str,
                 net_pay=net_pay,
                 payment_date=date.today()

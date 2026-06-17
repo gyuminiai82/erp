@@ -69,6 +69,7 @@ class Employee(Base):
     department_id = Column(Integer, ForeignKey("departments.id"))
     position_id = Column(Integer, ForeignKey("positions.id"), nullable=True)
     attendance_policy_id = Column(Integer, ForeignKey("attendance_policies.id"), nullable=True)
+    dependents_count = Column(Integer, default=1)
 
     department = relationship("Department", foreign_keys=[department_id], back_populates="employees")
     position = relationship("Position", back_populates="employees")
@@ -124,6 +125,8 @@ class Payroll(Base):
     long_term_care = Column(Integer, default=0)
     employment_insurance = Column(Integer, default=0)
     tardiness_deduction = Column(Integer, default=0)
+    income_tax = Column(Integer, default=0)
+    local_income_tax = Column(Integer, default=0)
     
     calculation_basis = Column(Text, nullable=True) # 산출 근거 텍스트/JSON
     
