@@ -2,7 +2,7 @@ import sys
 import os
 
 # Ensure backend modules can be imported
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../backend'))
 
 from sqlalchemy.orm import Session
 from database import SessionLocal

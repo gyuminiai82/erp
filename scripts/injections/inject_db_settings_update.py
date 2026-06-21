@@ -1,5 +1,6 @@
 import sys
 import os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../backend'))
 from sqlalchemy import text
 from database import engine, SessionLocal
 from models import SystemSetting

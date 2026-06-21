@@ -2,6 +2,9 @@ import os
 import sys
 import random
 from datetime import date, timedelta
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../backend'))
+
 from database import SessionLocal
 import models
 

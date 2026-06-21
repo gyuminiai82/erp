@@ -161,8 +161,8 @@ export default function StatementsPage() {
     };
 
     return (
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 text-center border-b border-gray-100 bg-slate-50">
+      <div className="max-w-4xl bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-6 text-left border-b border-gray-100 bg-slate-50">
           <h2 className="text-2xl font-extrabold text-gray-800">손익계산서 (Income Statement)</h2>
           <p className="text-gray-500 mt-1">기업의 경영성과를 나타내는 보고서입니다.</p>
         </div>

@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath('d:/001_portfolio/port_erp/backend'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../backend'))
 
 from database import SessionLocal
 from models import Menu, Role, RoleMenu

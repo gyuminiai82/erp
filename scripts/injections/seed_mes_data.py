@@ -2,7 +2,7 @@ import os
 import sys
 
 # 현재 디렉토리 기준 백엔드 경로 추가
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../backend'))
 
 from database import SessionLocal
 import models

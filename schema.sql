@@ -1,28 +1,42 @@
 CREATE TABLE departments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL COMMENT '부서명',
-    manager_id INT COMMENT '부서장 ID'
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    manager_id INT,
+    COMMENT ON TABLE departments IS '부서';
+    COMMENT ON COLUMN departments.name IS '부서명';
+    COMMENT ON COLUMN departments.manager_id IS '부서장 ID'
 );
 
 CREATE TABLE positions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(255) NOT NULL COMMENT '직급명',
-    level INT NOT NULL COMMENT '직급 레벨'
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    level INT NOT NULL,
+    COMMENT ON TABLE positions IS '직급';
+    COMMENT ON COLUMN positions.title IS '직급명';
+    COMMENT ON COLUMN positions.level IS '직급 레벨'
 );
 
 CREATE TABLE employees (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    emp_no VARCHAR(50) UNIQUE NOT NULL COMMENT '사번',
-    name VARCHAR(100) NOT NULL COMMENT '이름',
-    email VARCHAR(255) UNIQUE NOT NULL COMMENT '이메일',
-    password_hash VARCHAR(255) NOT NULL COMMENT '비밀번호',
-    hire_date DATE NOT NULL COMMENT '입사일',
-    status VARCHAR(50) DEFAULT '재직' COMMENT '상태',
-    department_id INT COMMENT '부서 ID',
-    position_id INT COMMENT '직급 ID',
-    deleted_at DATETIME NULL COMMENT '삭제 일시 (Soft Delete)',
-    FOREIGN KEY (department_id) REFERENCES departments(id),
-    FOREIGN KEY (position_id) REFERENCES positions(id)
+    id SERIAL PRIMARY KEY,
+    emp_no VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    hire_date DATE NOT NULL,
+    status VARCHAR(50) DEFAULT '재직',
+    department_id INT REFERENCES departments(id),
+    position_id INT REFERENCES positions(id),
+    deleted_at TIMESTAMP NULL,
+    COMMENT ON TABLE employees IS '사원';
+    COMMENT ON COLUMN employees.emp_no IS '사번';
+    COMMENT ON COLUMN employees.name IS '이름';
+    COMMENT ON COLUMN employees.email IS '이메일';
+    COMMENT ON COLUMN employees.password_hash IS '비밀번호';
+    COMMENT ON COLUMN employees.hire_date IS '입사일';
+    COMMENT ON COLUMN employees.status IS '상태';
+    COMMENT ON COLUMN employees.department_id IS '부서 ID';
+    COMMENT ON COLUMN employees.position_id IS '직급 ID';
+    COMMENT ON COLUMN employees.deleted_at IS '삭제 일시 (Soft Delete)'
 );
 
 ALTER TABLE departments ADD FOREIGN KEY (manager_id) REFERENCES employees(id);
