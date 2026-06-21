@@ -142,8 +142,8 @@ export default function DraftApprovalPage() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto min-h-screen bg-gray-50/30">
-      <div className="mb-8 border-b-2 border-gray-900 pb-4 flex justify-between items-end">
+    <div className="p-4 max-w-5xl mx-auto bg-gray-50/30">
+      <div className="mb-4 border-b-2 border-gray-900 pb-2 flex justify-between items-end">
         <h1 className="text-3xl font-black text-gray-900 flex items-center gap-3">
           <FileText className="w-8 h-8 text-blue-600" />
           기안서 작성
@@ -162,7 +162,7 @@ export default function DraftApprovalPage() {
         <table className="w-full text-sm border-collapse">
           <tbody>
             <tr className="border-b border-gray-200">
-              <th className="bg-gray-100 py-4 px-6 text-left w-40 text-gray-700 font-semibold border-r border-gray-200">문서유형</th>
+              <th className="bg-gray-100 py-2 px-4 text-left w-36 text-gray-700 font-semibold border-r border-gray-200">문서유형</th>
               <td className="py-2 px-4">
                 <select 
                   value={documentType}
@@ -177,15 +177,15 @@ export default function DraftApprovalPage() {
               </td>
             </tr>
             <tr className="border-b border-gray-200">
-              <th className="bg-gray-100 py-3 px-6 text-left w-40 text-gray-700 font-semibold border-r border-gray-200">기안자</th>
-              <td className="py-3 px-6 text-gray-900">{user?.name || '-'}</td>
+              <th className="bg-gray-100 py-2 px-4 text-left w-36 text-gray-700 font-semibold border-r border-gray-200">기안자</th>
+              <td className="py-2 px-4 text-gray-900">{user?.name || '-'}</td>
             </tr>
             <tr className="border-b border-gray-200">
-              <th className="bg-gray-100 py-3 px-6 text-left w-40 text-gray-700 font-semibold border-r border-gray-200">기안부서</th>
-              <td className="py-3 px-6 text-gray-900">{user?.department || '부서없음'}</td>
+              <th className="bg-gray-100 py-2 px-4 text-left w-36 text-gray-700 font-semibold border-r border-gray-200">기안부서</th>
+              <td className="py-2 px-4 text-gray-900">{user?.department || '부서없음'}</td>
             </tr>
             <tr className="border-b border-gray-200">
-              <th className="bg-gray-100 py-3 px-6 text-left w-40 text-gray-700 font-semibold border-r border-gray-200">프로젝트</th>
+              <th className="bg-gray-100 py-2 px-4 text-left w-36 text-gray-700 font-semibold border-r border-gray-200">프로젝트</th>
               <td className="py-2 px-4">
                 <select 
                   value={projectId}
@@ -205,21 +205,21 @@ export default function DraftApprovalPage() {
         <div className="w-full h-2 bg-gray-100 border-y border-gray-200"></div>
 
         {/* 결재선 지정 영역 */}
-        <div className="p-6 border-b border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between bg-white">
-          <div className="flex items-center space-x-6 flex-1 overflow-x-auto pb-4 md:pb-0">
+        <div className="p-3 border-b border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between bg-white">
+          <div className="flex items-center space-x-4 flex-1 overflow-x-auto pb-2 md:pb-0">
             <span className="font-semibold text-gray-700 whitespace-nowrap min-w-[60px]">결재선</span>
             
             <div className="flex items-center text-sm font-medium text-gray-800">
               {/* 기안자 (자신) */}
-              <div className="flex items-center px-4 py-2 bg-gray-100 rounded-full border border-gray-200">
+              <div className="flex items-center px-3 py-1.5 bg-gray-100 rounded-full border border-gray-200">
                 <span className="text-blue-600 mr-2 font-bold">기안</span>
                 {user?.name || '기안자'}
               </div>
               
               {selectedApprovers.map((emp, idx) => (
                 <div key={emp.id} className="flex items-center">
-                  <ArrowRight className="w-5 h-5 mx-3 text-gray-400" />
-                  <div className="flex items-center px-4 py-2 bg-white rounded-full border border-gray-300 shadow-sm relative group cursor-pointer hover:border-red-300 hover:bg-red-50 transition-colors"
+                  <ArrowRight className="w-4 h-4 mx-2 text-gray-400" />
+                  <div className="flex items-center px-3 py-1.5 bg-white rounded-full border border-gray-300 shadow-sm relative group cursor-pointer hover:border-red-300 hover:bg-red-50 transition-colors"
                        onClick={() => handleRemoveApprover(emp.id)}
                        title="클릭하여 결재자 삭제">
                     <span className="text-gray-500 mr-2 text-xs">{emp.department || '부서'}</span>
@@ -233,7 +233,7 @@ export default function DraftApprovalPage() {
           <button
             type="button"
             onClick={() => setIsApproverModalOpen(true)}
-            className="mt-4 md:mt-0 ml-4 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 flex items-center text-sm whitespace-nowrap shadow-sm font-medium transition-colors"
+            className="mt-2 md:mt-0 ml-4 px-3 py-1.5 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 flex items-center text-sm whitespace-nowrap shadow-sm font-medium transition-colors"
           >
             <Users className="w-4 h-4 mr-2 text-blue-600" />
             결재선 지정
@@ -241,26 +241,26 @@ export default function DraftApprovalPage() {
         </div>
 
         {/* 기안 작성 폼 */}
-        <div className="p-8 space-y-6 bg-white">
+        <div className="p-4 space-y-4 bg-white">
           <div className="flex items-start">
-            <span className="w-20 font-semibold text-gray-700 pt-2 shrink-0">제목</span>
+            <span className="w-20 font-semibold text-gray-700 pt-1.5 shrink-0">제목</span>
             <input 
               type="text" 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="기안 제목을 입력하세요" 
-              className="flex-1 px-2 py-2 border-b-2 border-gray-300 focus:border-blue-600 outline-none transition-colors text-lg font-medium text-gray-900 bg-transparent"
+              className="flex-1 px-2 py-1.5 border-b-2 border-gray-300 focus:border-blue-600 outline-none transition-colors text-base font-medium text-gray-900 bg-transparent"
             />
           </div>
 
-          <div className="flex items-start mt-6">
-            <span className="w-20 font-semibold text-gray-700 pt-2 shrink-0">내용</span>
+          <div className="flex items-start mt-4">
+            <span className="w-20 font-semibold text-gray-700 pt-1.5 shrink-0">내용</span>
             <div className="flex-1 border border-gray-300 rounded p-1">
               <textarea 
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="상세 내용을 입력하세요." 
-                className="w-full h-80 p-4 outline-none resize-none text-gray-700 leading-relaxed"
+                className="w-full h-40 p-3 outline-none resize-none text-sm text-gray-700 leading-relaxed"
               ></textarea>
             </div>
           </div>
@@ -269,9 +269,9 @@ export default function DraftApprovalPage() {
         <div className="w-full h-2 bg-gray-100 border-y border-gray-200"></div>
 
         {/* 첨부파일 */}
-        <div className="p-6 border-b border-gray-200 flex items-center bg-white">
+        <div className="p-3 border-b border-gray-200 flex items-center bg-white">
           <span className="w-24 font-semibold text-gray-700 shrink-0">첨부파일</span>
-          <button className="px-4 py-2 border border-dashed border-gray-400 text-gray-600 rounded hover:bg-gray-50 flex items-center text-sm font-medium transition-colors">
+          <button className="px-3 py-1.5 border border-dashed border-gray-400 text-gray-600 rounded hover:bg-gray-50 flex items-center text-sm font-medium transition-colors">
             <Paperclip className="w-4 h-4 mr-2" />
             파일 추가 (선택)
           </button>
@@ -279,7 +279,7 @@ export default function DraftApprovalPage() {
       </div>
 
       {/* 하단 액션 버튼 */}
-      <div className="mt-8 flex justify-end space-x-3">
+      <div className="mt-4 flex justify-end space-x-3">
         <button
           onClick={() => handleSubmit(true)}
           disabled={loading}
