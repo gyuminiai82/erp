@@ -41,8 +41,15 @@ export default function DraftApprovalPage() {
   
   // UI State
   const [isApproverModalOpen, setIsApproverModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isApproverModalOpen) {
+      setSearchTerm('');
+    }
+  }, [isApproverModalOpen]);
 
   useEffect(() => {
     const t = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
@@ -303,32 +310,55 @@ export default function DraftApprovalPage() {
               <h2 className="text-lg font-bold">결재자 추가</h2>
               <button onClick={() => setIsApproverModalOpen(false)}><X className="w-5 h-5 text-gray-500 hover:text-gray-700" /></button>
             </div>
-            <div className="p-4 max-h-[60vh] overflow-y-auto">
+            
+            {/* 검색 입력란 */}
+            <div className="p-3 border-b bg-gray-50/50">
+              <input
+                type="text"
+                placeholder="이름, 부서 또는 직급으로 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+              />
+            </div>
+
+            <div className="p-4 max-h-[50vh] overflow-y-auto">
               <div className="space-y-2">
-                {employees.map(emp => {
-                  const isSelected = selectedApprovers.some(a => a.id === emp.id);
-                  return (
-                    <div key={emp.id} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
-                      <div>
-                        <div className="font-semibold text-gray-800">{emp.name} <span className="text-xs text-gray-500 font-normal ml-1">{emp.position}</span></div>
-                        <div className="text-xs text-gray-500">{emp.department || '부서없음'}</div>
-                      </div>
-                      <button
-                        onClick={() => isSelected ? handleRemoveApprover(emp.id) : handleAddApprover(emp)}
-                        className={`px-3 py-1 rounded text-xs font-bold ${
-                          isSelected ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                        }`}
-                      >
-                        {isSelected ? '제거' : '추가'}
-                      </button>
-                    </div>
+                {(() => {
+                  const filtered = employees.filter(emp => 
+                    emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (emp.department && emp.department.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (emp.position && emp.position.toLowerCase().includes(searchTerm.toLowerCase()))
                   );
-                })}
-                {employees.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 text-sm">
-                    선택 가능한 임직원이 없습니다.
-                  </div>
-                )}
+                  
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-gray-500 text-sm">
+                        {searchTerm ? '검색 결과가 없습니다.' : '선택 가능한 임직원이 없습니다.'}
+                      </div>
+                    );
+                  }
+                  
+                  return filtered.map(emp => {
+                    const isSelected = selectedApprovers.some(a => a.id === emp.id);
+                    return (
+                      <div key={emp.id} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                        <div>
+                          <div className="font-semibold text-gray-800">{emp.name} <span className="text-xs text-gray-500 font-normal ml-1">{emp.position}</span></div>
+                          <div className="text-xs text-gray-500">{emp.department || '부서없음'}</div>
+                        </div>
+                        <button
+                          onClick={() => isSelected ? handleRemoveApprover(emp.id) : handleAddApprover(emp)}
+                          className={`px-3 py-1 rounded text-xs font-bold ${
+                            isSelected ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                          }`}
+                        >
+                          {isSelected ? '제거' : '추가'}
+                        </button>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
             </div>
             <div className="p-4 border-t bg-gray-50 text-right">
