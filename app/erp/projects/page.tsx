@@ -161,6 +161,21 @@ export default function ProjectsPage() {
     setProjects(updated);
   };
 
+  const handleCancel = () => {
+    // Reset any pending U states
+    const reverted = projects.map(p => {
+      if ((p as any)._state === 'U') {
+        const { _state, ...rest } = p as any;
+        return rest;
+      }
+      return p;
+    });
+    // In a real app we might want to refetch to get the original data back.
+    // Let's just refetch.
+    fetchProjects();
+    setSelectedRowIndices([]);
+  };
+
   const handleSave = async () => {
     const rowsToUpdate = (projects as any[]).filter(p => p._state === 'U');
     if (rowsToUpdate.length === 0) {
@@ -312,6 +327,16 @@ export default function ProjectsPage() {
                 <Save className="w-4 h-4 mr-1" />
                 저장
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleCancel} 
+                disabled={!(projects as any[]).some(p => p._state === 'U')}
+                className="h-9 flex items-center"
+              >
+                <Undo2 className="w-4 h-4 mr-1" />
+                변경 취소
+              </Button>
               <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
                 <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
                 엑셀 다운로드
@@ -383,8 +408,8 @@ export default function ProjectsPage() {
                 </select>
               </div>
               <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">취소</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">저장</button>
+                <Button variant="outline" onClick={() => setIsModalOpen(false)}>취소</Button>
+                <Button type="submit" className="bg-[#107C41] hover:bg-[#0b5c30] text-white">저장</Button>
               </div>
             </form>
           </div>
