@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
-import { FileSignature, FileBadge, X, Printer } from 'lucide-react';
+import { FileSignature, FileBadge, X, Printer, Search } from 'lucide-react';
 import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function DocumentsPage() {
   const [employees, setEmployees] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -16,6 +17,7 @@ export default function DocumentsPage() {
   // Modal states
   const [activeDocument, setActiveDocument] = useState<'contract' | 'certificate' | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [companyInfo, setCompanyInfo] = useState<any>(null);
 
   const { showAlert } = useDialog();
 
@@ -24,10 +26,11 @@ export default function DocumentsPage() {
       const token = typeof window !== 'undefined' ? (localStorage.getItem('erp_user_token') || localStorage.getItem('token')) : '';
       const headers = { Authorization: `Bearer ${token}` };
       
-      const [empRes, deptRes, posRes] = await Promise.all([
+      const [empRes, deptRes, posRes, companyRes] = await Promise.all([
         fetch("/api/employees", { headers }),
         fetch("/api/departments", { headers }),
-        fetch("/api/positions", { headers })
+        fetch("/api/positions", { headers }),
+        fetch("/api/company", { headers })
       ]);
       
       if (empRes.ok) {
@@ -37,6 +40,9 @@ export default function DocumentsPage() {
         
         setDepartments(deptData);
         setPositions(posData);
+        
+        const companyData = companyRes.ok ? await companyRes.json() : null;
+        setCompanyInfo(companyData);
         
         // Map department and position names
         const enriched = empData.map((e: any) => ({
@@ -67,11 +73,18 @@ export default function DocumentsPage() {
     { field: 'status', headerName: '상태', width: 100 },
   ];
 
+  const filteredEmployees = employees.filter(emp => {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = emp.name && emp.name.toLowerCase().includes(q);
+    const empNoMatch = emp.emp_no && emp.emp_no.toLowerCase().includes(q);
+    return nameMatch || empNoMatch;
+  });
+
   const handleIssueContract = () => {
     if (selectedRowIndices.length !== 1) {
       return showAlert("근로계약서를 발급할 직원을 한 명만 선택해주세요.", { type: "warning" });
     }
-    setSelectedEmployee(employees[selectedRowIndices[0]]);
+    setSelectedEmployee(filteredEmployees[selectedRowIndices[0]]);
     setActiveDocument('contract');
   };
 
@@ -79,7 +92,7 @@ export default function DocumentsPage() {
     if (selectedRowIndices.length !== 1) {
       return showAlert("증명서를 발급할 직원을 한 명만 선택해주세요.", { type: "warning" });
     }
-    setSelectedEmployee(employees[selectedRowIndices[0]]);
+    setSelectedEmployee(filteredEmployees[selectedRowIndices[0]]);
     setActiveDocument('certificate');
   };
 
@@ -113,9 +126,21 @@ export default function DocumentsPage() {
         </div>
 
         <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          <div className="p-4 border-b border-gray-200 flex justify-end items-center bg-gray-50">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="사번 또는 이름 검색"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none w-64"
+              />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+          </div>
           <DataGrid
             columns={columns}
-            data={employees}
+            data={filteredEmployees}
             showCheckboxes={true}
             selectedRowIndices={selectedRowIndices}
             onSelectionChange={setSelectedRowIndices}
@@ -147,9 +172,9 @@ export default function DocumentsPage() {
                 {/* Print Content Wrapper */}
                 <div className="bg-white shadow-md w-[210mm] min-h-[297mm] p-[20mm] relative">
                   {activeDocument === 'contract' ? (
-                    <ContractDocument employee={selectedEmployee} dateString={dateString} />
+                    <ContractDocument employee={selectedEmployee} dateString={dateString} companyInfo={companyInfo} />
                   ) : (
-                    <CertificateDocument employee={selectedEmployee} dateString={dateString} />
+                    <CertificateDocument employee={selectedEmployee} dateString={dateString} companyInfo={companyInfo} />
                   )}
                 </div>
               </div>
@@ -157,13 +182,45 @@ export default function DocumentsPage() {
           </div>
           
           {/* PRINT ONLY CONTENT */}
-          <div className="hidden print:block w-[210mm] min-h-[297mm] bg-white text-black p-[20mm]">
+          <div id="print-section" className="hidden print:block w-[210mm] bg-white text-black p-[20mm]">
             {activeDocument === 'contract' ? (
-              <ContractDocument employee={selectedEmployee} dateString={dateString} />
+              <ContractDocument employee={selectedEmployee} dateString={dateString} companyInfo={companyInfo} />
             ) : (
-              <CertificateDocument employee={selectedEmployee} dateString={dateString} />
+              <CertificateDocument employee={selectedEmployee} dateString={dateString} companyInfo={companyInfo} />
             )}
           </div>
+          
+          <style dangerouslySetInnerHTML={{__html: `
+            @media print {
+              body * {
+                visibility: hidden;
+              }
+              /* 강제로 모달 및 불필요한 UI 숨김 처리 (스크롤바 제거) */
+              .print\\:hidden {
+                display: none !important;
+              }
+              /* 스크롤바 자체를 숨김 */
+              ::-webkit-scrollbar {
+                display: none !important;
+              }
+              #print-section, #print-section * {
+                visibility: visible;
+              }
+              #print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 210mm;
+                margin: 0;
+                padding: 20mm;
+                box-shadow: none;
+              }
+              @page {
+                size: A4;
+                margin: 0;
+              }
+            }
+          `}} />
         </>
       )}
     </div>
@@ -174,14 +231,26 @@ export default function DocumentsPage() {
 // Document Components
 // -----------------------------------------------------
 
-function ContractDocument({ employee, dateString }: { employee: any, dateString: string }) {
+function ContractDocument({ employee, dateString, companyInfo }: { employee: any, dateString: string, companyInfo?: any }) {
+  const getBirthDate = () => {
+    if (employee.birth_date) return employee.birth_date;
+    if (employee.resident_num && employee.resident_num.length >= 6) {
+      const yy = employee.resident_num.substring(0, 2);
+      const mm = employee.resident_num.substring(2, 4);
+      const dd = employee.resident_num.substring(4, 6);
+      const yearPrefix = parseInt(yy) > 50 ? '19' : '20';
+      return `${yearPrefix}${yy}년 ${mm}월 ${dd}일`;
+    }
+    return '__________________';
+  };
+
   return (
     <div className="text-gray-900 leading-relaxed font-sans">
-      <h1 className="text-3xl font-bold text-center mb-12 tracking-widest">표준 근로계약서</h1>
+      <h1 className="text-2xl font-bold text-center mb-8 tracking-widest">표준 근로계약서</h1>
       
-      <p className="mb-6">(주)차세대ERP솔루션(이하 "사업주"라 함)과(와) <strong>{employee.name}</strong>(이하 "근로자"라 함)은(는) 다음과 같이 근로계약을 체결한다.</p>
+      <p className="mb-4">(주)차세대ERP솔루션(이하 "사업주"라 함)과(와) <strong>{employee.name}</strong>(이하 "근로자"라 함)은(는) 다음과 같이 근로계약을 체결한다.</p>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         <section>
           <h2 className="font-bold text-lg mb-2">1. 근로계약기간</h2>
           <p className="pl-4">{employee.hire_date} 부터 기간의 정함이 없는 근로계약(정규직)으로 한다.</p>
@@ -226,22 +295,26 @@ function ContractDocument({ employee, dateString }: { employee: any, dateString:
         </section>
       </div>
 
-      <div className="mt-16 text-center">
-        <p className="mb-12">{dateString}</p>
+      <div className="mt-8 text-center">
+        <p className="mb-8">{dateString}</p>
         
-        <div className="flex justify-between px-10">
-          <div className="text-left">
-            <h3 className="font-bold mb-4">[사업주]</h3>
-            <p>사업체명 : (주)차세대ERP솔루션</p>
-            <p>대 표 자 : 김 대 표 (인)</p>
-            <p>주 소 : 서울특별시 강남구 테헤란로 123</p>
+        <div className="flex justify-between px-10 relative">
+          <div className="text-left relative inline-block">
+            <h3 className="font-bold mb-3">[사업주]</h3>
+            <p className="mb-1">사업체명 : {companyInfo?.name || '(주)차세대ERP솔루션'}</p>
+            <p className="mb-1">대 표 자 : {companyInfo?.representative || '김 대 표'} (인)</p>
+            <p className="mb-1">주 소 : {companyInfo?.address || '서울특별시 강남구 테헤란로 123'}</p>
+            
+            {companyInfo?.seal_url && (
+              <img src={companyInfo.seal_url} alt="직인" className="absolute object-contain mix-blend-multiply opacity-90" style={{ width: '60px', height: '60px', left: '140px', top: '24px' }} />
+            )}
           </div>
           
           <div className="text-left">
-            <h3 className="font-bold mb-4">[근로자]</h3>
-            <p>성 명 : {employee.name} (인)</p>
-            <p>생년월일 : {employee.birth_date || '__________________'}</p>
-            <p>주 소 : {employee.address || '__________________________________'}</p>
+            <h3 className="font-bold mb-3">[근로자]</h3>
+            <p className="mb-1">성 명 : {employee.name} (인)</p>
+            <p className="mb-1">생년월일 : {getBirthDate()}</p>
+            <p className="mb-1 break-all">주 소 : {employee.address || '___________________________'}</p>
           </div>
         </div>
       </div>
@@ -249,10 +322,22 @@ function ContractDocument({ employee, dateString }: { employee: any, dateString:
   );
 }
 
-function CertificateDocument({ employee, dateString }: { employee: any, dateString: string }) {
+function CertificateDocument({ employee, dateString, companyInfo }: { employee: any, dateString: string, companyInfo?: any }) {
   // Determine if currently employed to change title
   const isEmployed = employee.status === '재직';
   const title = isEmployed ? '재직증명서' : '경력증명서';
+
+  const getBirthDate = () => {
+    if (employee.birth_date) return employee.birth_date;
+    if (employee.resident_num && employee.resident_num.length >= 6) {
+      const yy = employee.resident_num.substring(0, 2);
+      const mm = employee.resident_num.substring(2, 4);
+      const dd = employee.resident_num.substring(4, 6);
+      const yearPrefix = parseInt(yy) > 50 ? '19' : '20';
+      return `${yearPrefix}${yy}년 ${mm}월 ${dd}일`;
+    }
+    return '-';
+  };
 
   return (
     <div className="text-gray-900 leading-relaxed font-sans h-full flex flex-col">
@@ -264,7 +349,7 @@ function CertificateDocument({ employee, dateString }: { employee: any, dateStri
             <th className="border border-black p-4 bg-gray-50 w-1/4 text-center font-bold">성 명</th>
             <td className="border border-black p-4 w-1/4 text-center">{employee.name}</td>
             <th className="border border-black p-4 bg-gray-50 w-1/4 text-center font-bold">생년월일</th>
-            <td className="border border-black p-4 w-1/4 text-center">{employee.birth_date || '-'}</td>
+            <td className="border border-black p-4 w-1/4 text-center">{getBirthDate()}</td>
           </tr>
           <tr>
             <th className="border border-black p-4 bg-gray-50 text-center font-bold">주 소</th>
@@ -295,11 +380,14 @@ function CertificateDocument({ employee, dateString }: { employee: any, dateStri
 
       <div className="mt-auto text-center pb-20 relative">
         <p className="text-lg mb-12">{dateString}</p>
-        <h2 className="text-2xl font-bold tracking-wider">(주)차세대ERP솔루션 대표이사</h2>
-        {/* Placeholder for official seal */}
-        <div className="absolute right-20 bottom-16 w-16 h-16 border-4 border-red-500 rounded-full flex items-center justify-center text-red-500 font-bold transform rotate-12 opacity-80">
-          직인
-        </div>
+        <h2 className="text-2xl font-bold tracking-wider">{companyInfo?.name || '(주)차세대ERP솔루션'} 대표이사</h2>
+        {companyInfo?.seal_url ? (
+          <img src={companyInfo.seal_url} alt="직인" className="absolute object-contain mix-blend-multiply opacity-90" style={{ width: '80px', height: '80px', right: '80px', bottom: '56px' }} />
+        ) : (
+          <div className="absolute right-20 bottom-16 w-16 h-16 border-4 border-red-500 rounded-full flex items-center justify-center text-red-500 font-bold transform rotate-12 opacity-80">
+            직인
+          </div>
+        )}
       </div>
     </div>
   );
