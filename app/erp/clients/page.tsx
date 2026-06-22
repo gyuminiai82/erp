@@ -28,7 +28,7 @@ export default function ClientsPage() {
   const [newClientData, setNewClientData] = useState({
     client_code: '', client_name: '', client_type: '고객사',
     registration_number: '', representative: '', contact_person: '', 
-    contact_phone: '', contact_email: '', address: '', is_active: true
+    contact_phone: '', contact_email: '', postal_code: '', address: '', is_active: true
   });
 
   const fetchClients = async () => {
@@ -59,7 +59,7 @@ export default function ClientsPage() {
     setNewClientData({
       client_code: '', client_name: '', client_type: '고객사',
       registration_number: '', representative: '', contact_person: '', 
-      contact_phone: '', contact_email: '', address: '', is_active: true
+      contact_phone: '', contact_email: '', postal_code: '', address: '', is_active: true
     });
     setIsModalOpen(true);
   };
@@ -80,7 +80,7 @@ export default function ClientsPage() {
           }
           fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
         }
-        setNewClientData({ ...newClientData, address: fullAddress });
+        setNewClientData({ ...newClientData, postal_code: data.zonecode, address: fullAddress });
       }
     });
   };
@@ -145,6 +145,7 @@ export default function ClientsPage() {
               contact_person: item.contact_person,
               contact_phone: item.contact_phone,
               contact_email: item.contact_email,
+              postal_code: item.postal_code,
               address: item.address,
               is_active: item.is_active
             })
@@ -169,6 +170,7 @@ export default function ClientsPage() {
               contact_person: item.contact_person,
               contact_phone: item.contact_phone,
               contact_email: item.contact_email,
+              postal_code: item.postal_code,
               address: item.address,
               is_active: item.is_active
             })
@@ -419,18 +421,30 @@ export default function ClientsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">주소</label>
-                  <div className="flex space-x-2">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">우편번호</label>
+                    <div className="flex space-x-2">
+                      <Input 
+                        value={newClientData.postal_code || ''} 
+                        onChange={e => setNewClientData({...newClientData, postal_code: e.target.value})}
+                        className="w-full"
+                        placeholder="우편번호 검색"
+                        readOnly
+                      />
+                      <Button type="button" variant="outline" onClick={handleAddressSearch} className="shrink-0 bg-white border-gray-300">
+                        우편번호 검색
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 col-span-2">
+                    <label className="text-sm font-medium text-gray-700">주소</label>
                     <Input 
                       value={newClientData.address} 
                       onChange={e => setNewClientData({...newClientData, address: e.target.value})}
-                      className="flex-1"
-                      placeholder="주소를 검색하거나 입력하세요"
+                      className="w-full"
+                      placeholder="상세 주소를 입력하세요"
                     />
-                    <Button type="button" variant="outline" onClick={handleAddressSearch} className="shrink-0 bg-white border-gray-300">
-                      우편번호 검색
-                    </Button>
                   </div>
                 </div>
               </div>

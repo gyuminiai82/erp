@@ -23,6 +23,7 @@ class ClientBase(BaseModel):
     contact_person: Optional[str] = None
     contact_phone: Optional[str] = None
     contact_email: Optional[str] = None
+    postal_code: Optional[str] = None
     address: Optional[str] = None
     is_active: Optional[bool] = True
 

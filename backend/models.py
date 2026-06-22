@@ -431,6 +431,7 @@ class Client(Base):
     contact_person = Column(String, nullable=True) # 담당자명
     contact_phone = Column(String, nullable=True) # 연락처
     contact_email = Column(String, nullable=True) # 이메일
+    postal_code = Column(String, nullable=True) # 우편번호
     address = Column(String, nullable=True) # 주소
     is_active = Column(Boolean, default=True) # 사용여부
     created_at = Column(DateTime, default=datetime.utcnow)
