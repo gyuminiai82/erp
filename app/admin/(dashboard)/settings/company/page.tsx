@@ -12,7 +12,8 @@ export default function CompanySettingsPage() {
     address: "",
     contact_email: "",
     contact_phone: "",
-    logo_url: ""
+    logo_url: "",
+    seal_url: ""
   });
   const [isSaving, setIsSaving] = useState(false);
   const { showAlert } = useDialog();
@@ -146,6 +147,40 @@ export default function CompanySettingsPage() {
               onChange={e => setInfo({...info, contact_phone: e.target.value})}
               className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all"
             />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">회사 로고 이미지 URL</label>
+            <input 
+              type="text" 
+              value={info.logo_url || ''} 
+              onChange={e => setInfo({...info, logo_url: e.target.value})}
+              placeholder="https://example.com/logo.png"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all"
+            />
+            {info.logo_url && (
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg inline-block">
+                <p className="text-xs text-gray-500 mb-2">미리보기:</p>
+                <img src={info.logo_url} alt="로고 미리보기" className="max-h-20 object-contain" />
+              </div>
+            )}
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">대표 직인 이미지 URL (근로계약서, 증명서 출력용)</label>
+            <input 
+              type="text" 
+              value={info.seal_url || ''} 
+              onChange={e => setInfo({...info, seal_url: e.target.value})}
+              placeholder="https://example.com/seal.png"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all"
+            />
+            {info.seal_url && (
+              <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg inline-block">
+                <p className="text-xs text-gray-500 mb-2">미리보기:</p>
+                <img src={info.seal_url} alt="직인 미리보기" className="max-h-20 object-contain" />
+              </div>
+            )}
           </div>
         </div>
       </div>
