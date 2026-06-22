@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, FileDown, Search, Undo2, Save } from 'lucide-react';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { DataGrid } from '@/components/ui/DataGrid';
+import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 import { useDialog } from "@/components/providers/DialogProvider";
 
 interface Project {
@@ -116,7 +116,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const columns = [
+  const columns: ColumnDef[] = [
     { field: 'id', headerName: 'ID', width: 60 },
     { field: 'name', headerName: '프로젝트명', width: 200, editable: true },
     { 

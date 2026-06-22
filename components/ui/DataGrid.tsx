@@ -5,7 +5,7 @@ export interface ColumnDef {
   headerName: string;
   width?: number;
   editable?: boolean;
-  editType?: 'text' | 'select';
+  editType?: 'text' | 'select' | 'date';
   options?: { label: string; value: string | number }[];
   renderCell?: (value: any, row: any) => React.ReactNode;
   formatEditValue?: (val: string) => string;
@@ -664,9 +664,9 @@ export function DataGrid({
                           ) : (
                             <div className="absolute inset-0 w-full h-full z-40 bg-white">
                               <div className="absolute inset-0 ring-2 ring-inset ring-black pointer-events-none" />
-                              <input
-                                ref={inputRef as React.RefObject<HTMLInputElement>}
-                                type="text"
+                                <input
+                                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                                  type={col.editType === 'date' ? 'date' : 'text'}
                                 className={`relative w-full h-full border-none outline-none px-1.5 py-0 m-0 bg-transparent text-sm leading-none ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                                 value={editValue}
                                 onChange={(e) => {
