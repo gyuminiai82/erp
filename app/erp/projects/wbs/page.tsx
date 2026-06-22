@@ -12,6 +12,15 @@ export default function WBSPage() {
   const [originalTasks, setOriginalTasks] = useState<any[]>([]);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [token, setToken] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newTaskData, setNewTaskData] = useState({
+    name: '',
+    assignee_name: '',
+    start_date: '',
+    end_date: '',
+    status: 'TODO',
+    progress: 0
+  });
   
   // Use a dialog provider if needed, or window.alert
   const showAlert = (msg: string) => window.alert(msg);
@@ -57,17 +66,30 @@ export default function WBSPage() {
       showAlert('프로젝트를 먼저 선택해주세요.');
       return;
     }
-    const newTemp = {
-      id: `temp_${Date.now()}`,
+    setNewTaskData({
       name: '',
       assignee_name: '',
       start_date: '',
       end_date: '',
       status: 'TODO',
-      progress: 0,
+      progress: 0
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleModalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskData.name) {
+      showAlert('작업명을 입력해주세요.');
+      return;
+    }
+    const newTemp = {
+      id: `temp_${Date.now()}`,
+      ...newTaskData,
       _state: 'C'
     };
     setTasks([newTemp, ...tasks]);
+    setIsModalOpen(false);
   };
 
   const handleDataChange = (rowIndex: number, field: string, value: any) => {
@@ -155,6 +177,63 @@ export default function WBSPage() {
           {selectedProject ? (<DataGrid columns={columns} data={tasks} showCheckboxes={true} selectedRowIndices={selectedRowIndices} onSelectionChange={setSelectedRowIndices} onDataChange={handleDataChange} />) : (<div className="flex items-center justify-center h-full text-gray-500">프로젝트를 선택해주세요.</div>)}
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-800">새 작업 추가</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <span className="text-xl leading-none">&times;</span>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[70vh]">
+              <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2 text-sm text-blue-800 shadow-sm">
+                <span className="text-blue-500 font-bold">ℹ️</span>
+                <p className="text-blue-700/90 whitespace-normal break-keep">
+                  하단의 <strong className="text-blue-900">[표에 임시 추가]</strong> 후, 반드시 표 상단의 <strong className="text-blue-900 bg-white px-1 py-0.5 rounded border border-blue-200">[저장]</strong>을 눌러야 최종 반영됩니다.
+                </p>
+              </div>
+              <form id="newTaskForm" onSubmit={handleModalSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">작업명 *</label>
+                    <input type="text" required value={newTaskData.name} onChange={e => setNewTaskData({...newTaskData, name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#107C41] focus:border-[#107C41]" placeholder="작업명을 입력하세요" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">담당자</label>
+                    <input type="text" value={newTaskData.assignee_name} onChange={e => setNewTaskData({...newTaskData, assignee_name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#107C41] focus:border-[#107C41]" placeholder="담당자 이름" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">시작일</label>
+                    <input type="date" value={newTaskData.start_date} onChange={e => setNewTaskData({...newTaskData, start_date: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#107C41] focus:border-[#107C41]" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">종료일</label>
+                    <input type="date" value={newTaskData.end_date} onChange={e => setNewTaskData({...newTaskData, end_date: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#107C41] focus:border-[#107C41]" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">상태</label>
+                    <select value={newTaskData.status} onChange={e => setNewTaskData({...newTaskData, status: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#107C41] focus:border-[#107C41]">
+                      <option value="TODO">TODO (대기)</option>
+                      <option value="IN_PROGRESS">IN_PROGRESS (진행중)</option>
+                      <option value="DONE">DONE (완료)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">진척도 (%)</label>
+                    <input type="number" min="0" max="100" value={newTaskData.progress} onChange={e => setNewTaskData({...newTaskData, progress: parseInt(e.target.value) || 0})} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#107C41] focus:border-[#107C41]" />
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div className="p-4 border-t border-gray-100 bg-slate-50 flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>취소</Button>
+              <Button type="submit" form="newTaskForm" className="bg-[#107C41] hover:bg-[#0b5c30] text-white">표에 임시 추가</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
