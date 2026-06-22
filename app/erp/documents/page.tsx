@@ -159,6 +159,7 @@ export default function DocumentsPage() {
                 columns={columns}
                 data={filteredEmployees}
                 showCheckboxes={true}
+                singleSelection={true}
                 selectedRowIndices={selectedRowIndices}
                 onSelectionChange={setSelectedRowIndices}
               />

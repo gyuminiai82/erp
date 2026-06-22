@@ -9,6 +9,7 @@ export interface ColumnDef {
   options?: { label: string; value: string | number }[];
   renderCell?: (value: any, row: any) => React.ReactNode;
   formatEditValue?: (val: string) => string;
+  align?: 'left' | 'center' | 'right';
 }
 
 export interface DataGridProps {
@@ -22,6 +23,7 @@ export interface DataGridProps {
   showCheckboxes?: boolean;
   selectedRowIndices?: number[];
   onSelectionChange?: (indices: number[]) => void;
+  singleSelection?: boolean;
   storageKey?: string;
 }
 
@@ -36,6 +38,7 @@ export function DataGrid({
   showCheckboxes = false,
   selectedRowIndices = [],
   onSelectionChange,
+  singleSelection = false,
   storageKey
 }: DataGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -435,19 +438,21 @@ export function DataGrid({
               className="flex items-center justify-center border-r border-[#d4d4d4] flex-shrink-0 bg-[#f3f3f3] w-[40px] sticky z-[50]"
               style={{ left: checkboxLeft }}
             >
-              <input 
-                type="checkbox"
-                checked={data.length > 0 && selectedRowIndices.length === data.length}
-                onChange={(e) => {
-                  if (!onSelectionChange) return;
-                  if (e.target.checked) {
-                    onSelectionChange(data.map((_, idx) => idx));
-                  } else {
-                    onSelectionChange([]);
-                  }
-                }}
-                className="cursor-pointer"
-              />
+              {!singleSelection && (
+                <input 
+                  type="checkbox"
+                  checked={data.length > 0 && selectedRowIndices.length === data.length}
+                  onChange={(e) => {
+                    if (!onSelectionChange) return;
+                    if (e.target.checked) {
+                      onSelectionChange(data.map((_, idx) => idx));
+                    } else {
+                      onSelectionChange([]);
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+              )}
             </div>
           )}
           {/* Corner Cell (Empty) */}
@@ -541,10 +546,14 @@ export function DataGrid({
                         checked={selectedRowIndices.includes(actualRowIndex)}
                         onChange={(e) => {
                           if (!onSelectionChange) return;
-                          const next = e.target.checked
-                            ? [...selectedRowIndices, actualRowIndex]
-                            : selectedRowIndices.filter(idx => idx !== actualRowIndex);
-                          onSelectionChange(next);
+                          if (singleSelection) {
+                            onSelectionChange(e.target.checked ? [actualRowIndex] : []);
+                          } else {
+                            const next = e.target.checked
+                              ? [...selectedRowIndices, actualRowIndex]
+                              : selectedRowIndices.filter(idx => idx !== actualRowIndex);
+                            onSelectionChange(next);
+                          }
                         }}
                         onMouseDown={(e) => e.stopPropagation()}
                         className="cursor-pointer"
@@ -658,7 +667,7 @@ export function DataGrid({
                               <input
                                 ref={inputRef as React.RefObject<HTMLInputElement>}
                                 type="text"
-                                className="relative w-full h-full border-none outline-none px-1.5 py-0 m-0 bg-transparent text-sm leading-none"
+                                className={`relative w-full h-full border-none outline-none px-1.5 py-0 m-0 bg-transparent text-sm leading-none ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                                 value={editValue}
                                 onChange={(e) => {
                                   let val = e.target.value;
