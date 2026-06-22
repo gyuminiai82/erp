@@ -17,8 +17,8 @@ export default function DocumentsPage() {
     { field: 'id', headerName: 'ID', width: 60 },
     { field: 'document_type', headerName: '문서유형', width: 120 },
     { field: 'title', headerName: '문서명', },
-    { field: 'uploader_name', headerName: '등록자', width: 120 },
-    { field: 'created_at', headerName: '등록일시', width: 200 },
+    { field: 'uploader_name', headerName: '추가자', width: 120 },
+    { field: 'created_at', headerName: '추가일시', width: 200 },
     { 
       field: 'file_url', 
       headerName: '다운로드', 

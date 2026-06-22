@@ -296,7 +296,7 @@ export default function RolesPage() {
                                 </label>
                                 <label className="flex items-center space-x-2 cursor-pointer group">
                                   <input type="checkbox" checked={menuPerm.can_write} onChange={() => handleTogglePermission(menu.id, 'can_write')} className="w-4 h-4 text-[#107C41] border-gray-300 rounded focus:ring-[#107C41] cursor-pointer" />
-                                  <span className="text-xs font-medium text-gray-600 group-hover:text-gray-900 transition-colors">등록/수정</span>
+                                  <span className="text-xs font-medium text-gray-600 group-hover:text-gray-900 transition-colors">추가/수정</span>
                                 </label>
                                 <label className="flex items-center space-x-2 cursor-pointer group">
                                   <input type="checkbox" checked={menuPerm.can_delete} onChange={() => handleTogglePermission(menu.id, 'can_delete')} className="w-4 h-4 text-[#107C41] border-gray-300 rounded focus:ring-[#107C41] cursor-pointer" />

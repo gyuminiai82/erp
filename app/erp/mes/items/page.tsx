@@ -286,7 +286,7 @@ export default function ItemsPage() {
             <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                품목 등록
+                품목 추가
               </Button>
               <Button 
                 variant="outline" 
@@ -348,7 +348,7 @@ export default function ItemsPage() {
             <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
               <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <Box className="w-6 h-6 text-indigo-600" />
-                신규 품목 등록
+                신규 품목 추가
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700 hover:bg-gray-200 p-2 rounded-full transition-colors">
                 <X className="w-5 h-5" />
@@ -434,7 +434,7 @@ export default function ItemsPage() {
                   취소
                 </Button>
                 <Button type="submit" className="bg-[#107C41] hover:bg-[#0b5c30] text-white">
-                  품목 등록 완료
+                  품목 추가 완료
                 </Button>
               </div>
             </form>

@@ -120,7 +120,7 @@ export default function AttendanceSettingsPage() {
           className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center"
         >
           <Plus className="w-4 h-4 mr-2" />
-          신규 기준 등록
+          신규 기준 추가
         </button>
       </div>
 
@@ -179,7 +179,7 @@ export default function AttendanceSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="font-bold text-lg text-gray-900">{formData.id ? '근태 정책 수정' : '새 근태 정책 등록'}</h3>
+              <h3 className="font-bold text-lg text-gray-900">{formData.id ? '근태 정책 수정' : '새 근태 정책 추가'}</h3>
             </div>
             <div className="p-6 space-y-4">
               <div>

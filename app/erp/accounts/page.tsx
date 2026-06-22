@@ -17,7 +17,7 @@ export default function AccountsPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchType, setSearchType] = useState('');
 
-  // 팝업 등록용 상태
+  // 팝업 추가용 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newData, setNewData] = useState({
     code: '', name: '', type: '자산', description: '', is_active: true
@@ -132,7 +132,7 @@ export default function AccountsPage() {
           });
           if (!res.ok) {
             const data = await res.json();
-            throw new Error(`계정과목 ${row.code} 등록 실패: ${data.detail || ''}`);
+            throw new Error(`계정과목 ${row.code} 추가 실패: ${data.detail || ''}`);
           }
         }
       }
@@ -344,7 +344,7 @@ export default function AccountsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50">
-              <h3 className="font-bold text-lg text-slate-800">신규 계정과목 등록</h3>
+              <h3 className="font-bold text-lg text-slate-800">신규 계정과목 추가</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <span className="text-xl leading-none">&times;</span>
               </button>

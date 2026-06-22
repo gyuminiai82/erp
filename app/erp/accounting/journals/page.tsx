@@ -106,7 +106,7 @@ export default function JournalsPage() {
       ]);
     } else {
       const err = await res.json();
-      showAlert(err.detail || "전표 등록 중 오류가 발생했습니다.", { type: "error" });
+      showAlert(err.detail || "전표 추가 중 오류가 발생했습니다.", { type: "error" });
     }
   };
 
@@ -173,7 +173,7 @@ export default function JournalsPage() {
             <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               <Button variant="outline" size="sm" onClick={openCreateModal} className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                신규 전표 등록
+                신규 전표 추가
               </Button>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default function JournalsPage() {
                 </Button>
                 {!viewMode && (
                   <Button type="submit" disabled={!isBalanced} className={isBalanced ? "bg-[#107C41] hover:bg-[#0b5c30] text-white" : "bg-gray-300 text-gray-500 cursor-not-allowed"}>
-                    전표 등록 완료
+                    전표 추가 완료
                   </Button>
                 )}
               </div>

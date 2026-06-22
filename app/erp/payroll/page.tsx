@@ -308,7 +308,7 @@ export default function PayrollsPage() {
           },
           body: JSON.stringify({ payrolls: createPayload })
         });
-        if (!res.ok) throw new Error("일괄 등록 실패");
+        if (!res.ok) throw new Error("일괄 추가 실패");
       }
 
       // 3. Update
@@ -688,7 +688,7 @@ export default function PayrollsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h2 className="text-lg font-bold text-gray-800">신규 급여 등록</h2>
+              <h2 className="text-lg font-bold text-gray-800">신규 급여 추가</h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 text-gray-400 hover:bg-gray-200 rounded-full transition-colors">
                 <span className="text-xl leading-none">&times;</span>
               </button>

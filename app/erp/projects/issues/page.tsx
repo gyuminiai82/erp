@@ -44,7 +44,7 @@ export default function IssuesPage() {
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">이슈 및 리스크 관리</h1>
-          <p className="text-gray-500">프로젝트 진행 중 발생한 문제점이나 리스크를 등록하고 해결 과정을 추적합니다.</p>
+          <p className="text-gray-500">프로젝트 진행 중 발생한 문제점이나 리스크를 추가하고 해결 과정을 추적합니다.</p>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export default function IssuesPage() {
           <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
             <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
               <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-              이슈 등록
+              이슈 추가
             </Button>
             <Button variant="outline" size="sm" className="h-9 flex items-center" disabled={selectedRowIndices.length === 0}>
               <Trash2 className="w-4 h-4 mr-1" />

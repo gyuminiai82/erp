@@ -248,9 +248,9 @@ export default function OrdersPage() {
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center">
-            수주/발주 등록
+            수주/발주 추가
           </h1>
-          <p className="text-gray-500 mt-2">고객사의 수주 내역 및 협력사의 발주 내역을 등록하고 관리합니다.</p>
+          <p className="text-gray-500 mt-2">고객사의 수주 내역 및 협력사의 발주 내역을 추가하고 관리합니다.</p>
         </div>
       </div>
 
@@ -286,7 +286,7 @@ export default function OrdersPage() {
             <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               <Button variant="outline" size="sm" onClick={openNewModal} className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                신규 {orderType} 등록
+                신규 {orderType} 추가
               </Button>
               <Button 
                 variant="outline" 
@@ -308,7 +308,7 @@ export default function OrdersPage() {
               </div>
             ) : orders.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-gray-500">
-                등록된 {orderType} 데이터가 없습니다.
+                추가된 {orderType} 데이터가 없습니다.
               </div>
             ) : (
               <DataGrid 
@@ -323,14 +323,14 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* 신규 등록 모달 */}
+      {/* 신규 추가 모달 */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/80">
               <h2 className="text-xl font-bold text-gray-800 flex items-center">
                 <ArrowUpRight className="w-5 h-5 mr-2 text-[#107C41]" />
-                신규 {orderType} 등록
+                신규 {orderType} 추가
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />

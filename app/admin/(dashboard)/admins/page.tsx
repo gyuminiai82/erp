@@ -182,7 +182,7 @@ export default function SystemAdminsPage() {
             {admins.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
-                  등록된 관리자 계정이 없습니다.
+                  추가된 관리자 계정이 없습니다.
                 </td>
               </tr>
             )}

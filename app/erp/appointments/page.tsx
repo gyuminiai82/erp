@@ -91,7 +91,7 @@ export default function AppointmentsPage() {
         fetchData();
       } else {
         const data = await res.json();
-        await showAlert(data.detail || "등록 실패", { type: "error" });
+        await showAlert(data.detail || "추가 실패", { type: "error" });
       }
     } catch (e) {
       console.error(e);
@@ -242,7 +242,7 @@ export default function AppointmentsPage() {
               </tr>
             ))}
             {appointments.length === 0 && (
-              <tr><td colSpan={7} className="py-12 text-center text-gray-500">등록된 발령 내역이 없습니다.</td></tr>
+              <tr><td colSpan={7} className="py-12 text-center text-gray-500">추가된 발령 내역이 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -331,7 +331,7 @@ export default function AppointmentsPage() {
             </div>
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>취소</Button>
-              <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white">등록 (대기 상태로 저장)</Button>
+              <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white">추가 (대기 상태로 저장)</Button>
             </div>
           </div>
         </div>

@@ -99,7 +99,7 @@ export default function SettingsPage() {
             </div>
             
             <p className="text-sm text-gray-500 mb-6">
-              신규 사원 등록 시 시스템이 자동으로 부여할 사번의 형태를 정의합니다.
+              신규 사원 추가 시 시스템이 자동으로 부여할 사번의 형태를 정의합니다.
               규칙을 변경하더라도 기존 사원들의 사번은 변경되지 않습니다.
             </p>
 

@@ -287,7 +287,7 @@ export default function DepartmentsPage() {
                 setIsDeptModalOpen(true);
               }} variant="outline" size="sm" className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                부서 등록
+                부서 추가
               </Button>
             </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndDept}>
@@ -314,7 +314,7 @@ export default function DepartmentsPage() {
                       />
                     ))}
                     {departments.length === 0 && (
-                      <tr><td colSpan={4} className="py-8 text-center text-gray-500">등록된 부서가 없습니다.</td></tr>
+                      <tr><td colSpan={4} className="py-8 text-center text-gray-500">추가된 부서가 없습니다.</td></tr>
                     )}
                   </tbody>
                 </SortableContext>
@@ -331,7 +331,7 @@ export default function DepartmentsPage() {
                 setIsPosModalOpen(true);
               }} variant="outline" size="sm" className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                직급 등록
+                직급 추가
               </Button>
             </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEndPos}>
@@ -357,7 +357,7 @@ export default function DepartmentsPage() {
                       />
                     ))}
                     {positions.length === 0 && (
-                      <tr><td colSpan={5} className="py-8 text-center text-gray-500">등록된 직급이 없습니다.</td></tr>
+                      <tr><td colSpan={5} className="py-8 text-center text-gray-500">추가된 직급이 없습니다.</td></tr>
                     )}
                   </tbody>
                 </SortableContext>

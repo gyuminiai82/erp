@@ -83,7 +83,7 @@ export default function RoleManagementPage() {
         })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "등록 실패");
+      if (!res.ok) throw new Error(data.detail || "추가 실패");
       
       await showAlert(data.message + "\n초기 비밀번호는 1234로 설정되었습니다.", { type: "success" });
       setIsModalOpen(false);
@@ -119,7 +119,7 @@ export default function RoleManagementPage() {
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">사용자 및 권한 할당</h1>
-          <p className="text-sm text-gray-500 mt-1">사원을 신규 등록하거나, 시스템 접근 권한(Role)을 설정합니다.</p>
+          <p className="text-sm text-gray-500 mt-1">사원을 신규 추가하거나, 시스템 접근 권한(Role)을 설정합니다.</p>
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export default function RoleManagementPage() {
         <div>
           <h4 className="text-sm font-semibold text-blue-900">보안 및 접근 제어 안내</h4>
           <p className="text-xs text-blue-700 mt-1 leading-relaxed">
-            사원을 등록하면 자동으로 초기 비밀번호(1234)가 설정되며, 해당 사원은 최초 로그인 시 반드시 비밀번호를 변경해야 합니다.<br/>
+            사원을 추가하면 자동으로 초기 비밀번호(1234)가 설정되며, 해당 사원은 최초 로그인 시 반드시 비밀번호를 변경해야 합니다.<br/>
             시스템 관리자는 보안 정책상 사원의 상세 개인정보(연봉, 등)를 열람할 수 없습니다. 상세 업무는 '인사 담당자' 권한으로 진행해 주십시오.
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function RoleManagementPage() {
               className="px-4 py-2 bg-[#107C41] text-white text-sm font-medium rounded-lg hover:bg-[#0c5e31] transition-colors shadow-sm flex items-center"
             >
               <Plus className="w-4 h-4 mr-2" />
-              총괄 관리자 등록
+              총괄 관리자 추가
             </button>
           </div>
         </div>
@@ -237,13 +237,13 @@ export default function RoleManagementPage() {
         </div>
       </div>
 
-      {/* 사원 등록 모달 */}
+      {/* 사원 추가 모달 */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900">총괄 관리자 등록</h3>
+              <h3 className="text-lg font-bold text-gray-900">총괄 관리자 추가</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -288,7 +288,7 @@ export default function RoleManagementPage() {
                   type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-[#107C41] rounded-lg hover:bg-[#0c5e31] shadow-sm shadow-green-600/20 transition-all"
                 >
-                  등록 완료
+                  추가 완료
                 </button>
               </div>
             </form>

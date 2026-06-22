@@ -69,7 +69,7 @@ export default function EmployeesPage() {
   const [searchEmpType, setSearchEmpType] = useState('');
   const [searchStatus, setSearchStatus] = useState('');
 
-  // 팝업 등록용 상태
+  // 팝업 추가용 상태
   const [isEmpModalOpen, setIsEmpModalOpen] = useState(false);
   const [newEmpData, setNewEmpData] = useState({
     name: '', email: '', department: '', position: '', role: 'employee',
@@ -189,7 +189,7 @@ export default function EmployeesPage() {
 
     const invalidCreate = rowsToCreate.find(e => !e.name || !e.email);
     if (invalidCreate) {
-      await showAlert("신규 등록 시 이름과 이메일은 필수입니다.", { type: "warning" });
+      await showAlert("신규 추가 시 이름과 이메일은 필수입니다.", { type: "warning" });
       return;
     }
 
@@ -245,7 +245,7 @@ export default function EmployeesPage() {
         });
         if (!creRes.ok) {
           const data = await creRes.json();
-          throw new Error(formatApiError(data.detail, "등록 실패"));
+          throw new Error(formatApiError(data.detail, "추가 실패"));
         }
       }
 
@@ -525,7 +525,7 @@ export default function EmployeesPage() {
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">사원 관리</h1>
-          <p className="text-gray-500">전체 임직원 목록 조회 및 신규 사원 등록을 관리합니다.</p>
+          <p className="text-gray-500">전체 임직원 목록 조회 및 신규 사원 추가을 관리합니다.</p>
         </div>
         <div className="flex space-x-2">
           {/* Action buttons have been moved to the DataGrid toolbar */}
@@ -602,7 +602,7 @@ export default function EmployeesPage() {
             <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               <Button variant="outline" size="sm" onClick={handleAddRow} className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                사원 등록
+                사원 추가
               </Button>
               <Button 
                 variant="outline" 
@@ -658,7 +658,7 @@ export default function EmployeesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-slate-50">
-              <h3 className="font-bold text-lg text-slate-800">신규 사원 등록</h3>
+              <h3 className="font-bold text-lg text-slate-800">신규 사원 추가</h3>
               <button onClick={() => setIsEmpModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <Trash2 className="w-5 h-5 hidden" /> {/* Just for spacing or use an X icon */}
                 <span className="text-xl leading-none">&times;</span>

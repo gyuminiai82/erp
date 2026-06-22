@@ -306,7 +306,7 @@ export default function ProjectsPage() {
             <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="h-9 flex items-center bg-white">
                 <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
-                프로젝트 등록
+                프로젝트 추가
               </Button>
               <Button 
                 variant="outline" 
@@ -362,7 +362,7 @@ export default function ProjectsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
             <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-800">새 프로젝트 등록</h2>
+              <h2 className="text-lg font-semibold text-gray-800">새 프로젝트 추가</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">

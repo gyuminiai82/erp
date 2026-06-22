@@ -282,7 +282,7 @@ export default function CommonCodesPage() {
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {groups.length === 0 ? (
-              <div className="p-4 text-center text-sm text-gray-500">등록된 그룹이 없습니다.</div>
+              <div className="p-4 text-center text-sm text-gray-500">추가된 그룹이 없습니다.</div>
             ) : groups.map(group => (
               <div 
                 key={group.id}
@@ -346,7 +346,7 @@ export default function CommonCodesPage() {
                     {loadingCodes ? (
                       <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">불러오는 중...</td></tr>
                     ) : codes.length === 0 ? (
-                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">등록된 상세 코드가 없습니다.</td></tr>
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-400">추가된 상세 코드가 없습니다.</td></tr>
                     ) : (
                       <SortableContext items={codes.map(c => c.id)} strategy={verticalListSortingStrategy}>
                         {codes.map(code => (

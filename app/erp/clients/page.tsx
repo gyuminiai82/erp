@@ -22,7 +22,7 @@ export default function ClientsPage() {
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  // 팝업 등록용 상태
+  // 팝업 추가용 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newClientData, setNewClientData] = useState({
     client_code: '', client_name: '', client_type: '고객사',
@@ -129,7 +129,7 @@ export default function ClientsPage() {
           });
           if (!res.ok) {
             const data = await res.json();
-            throw new Error(data.detail || "등록 실패");
+            throw new Error(data.detail || "추가 실패");
           }
         } else if (item._state === 'U') {
           const res = await fetch(`/api/clients/${item.id}`, {
@@ -301,14 +301,14 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      {/* 신규 등록 모달 */}
+      {/* 신규 추가 모달 */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/80">
               <h2 className="text-xl font-bold text-gray-800 flex items-center">
                 <ArrowUpRight className="w-5 h-5 mr-2 text-[#107C41]" />
-                신규 거래처 등록
+                신규 거래처 추가
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors px-2">
                 <span className="text-2xl leading-none">&times;</span>
@@ -411,7 +411,7 @@ export default function ClientsPage() {
                   취소
                 </Button>
                 <Button type="submit" className="bg-[#107C41] hover:bg-[#0c5e31] text-white">
-                  임시 등록 (저장 필요)
+                  임시 추가 (저장 필요)
                 </Button>
               </div>
             </form>
