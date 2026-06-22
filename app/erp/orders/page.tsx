@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Search, Plus, Trash2, Save, Undo2, ArrowUpRight } from 'lucide-react';
+import { Search, Plus, Trash2, Save, X, ArrowUpRight } from 'lucide-react';
 
 interface OrderItem {
   id?: number;
@@ -268,12 +268,12 @@ export default function OrdersPage() {
               </select>
 
               <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <Input 
                   value={searchKeyword}
                   onChange={e => setSearchKeyword(e.target.value)}
                   onKeyDown={e => { if(e.key === 'Enter') handleSearch(); }}
-                  className="pl-9 pr-4 bg-white w-full focus:z-10 relative" 
+                  className="pl-9 pr-4 bg-white w-full h-10 focus:z-10 relative" 
                   placeholder="주문번호, 거래처명 검색..." 
                 />
               </div>
@@ -333,7 +333,7 @@ export default function OrdersPage() {
                 신규 {orderType} 등록
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                <Undo2 className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
             
