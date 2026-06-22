@@ -193,14 +193,16 @@ export default function InventoryStatusPage() {
       headerName: '안전재고', 
       width: 100, 
       editable: true,
-      renderCell: (val: any) => <div className="text-right w-full font-medium">{val?.toLocaleString()}</div>
+      align: 'right',
+      renderCell: (val: any) => <div className="text-right w-full">{val?.toLocaleString()}</div>
     },
     { 
       field: 'current_stock', 
       headerName: '현재재고', 
       width: 100, 
       editable: true,
-      renderCell: (val: any) => <div className="text-right w-full font-bold text-[#107C41]">{val?.toLocaleString()}</div>
+      align: 'right',
+      renderCell: (val: any) => <div className="text-right w-full">{val?.toLocaleString()}</div>
     },
     {
       field: 'id', // 더미 필드
@@ -234,36 +236,40 @@ export default function InventoryStatusPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 bg-gray-50/50">
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input 
-                type="text"
-                value={searchKeyword}
-                onChange={e => setSearchKeyword(e.target.value)}
-                className="pl-9 pr-4 border border-gray-200 rounded-lg text-sm bg-white w-full h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent" 
-                placeholder="품목코드, 품목명 검색..." 
-              />
-            </div>
-            <select 
-              value={searchType}
-              onChange={e => setSearchType(e.target.value)}
-              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
-            >
-              <option value="">모든 품목 유형</option>
-              <option value="완제품">완제품</option>
-              <option value="반제품">반제품</option>
-              <option value="원자재">원자재</option>
-            </select>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center space-x-2 w-full max-w-[400px]">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input 
+                    placeholder="품목코드, 품목명 검색..." 
+                    className="pl-9 w-full h-9 text-sm" 
+                    value={searchKeyword}
+                    onChange={e => setSearchKeyword(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                  />
+                </div>
+                <select 
+                  value={searchType}
+                  onChange={e => setSearchType(e.target.value)}
+                  className="flex h-9 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#107C41] min-w-[120px]"
+                >
+                  <option value="">모든 품목 유형</option>
+                  <option value="완제품">완제품</option>
+                  <option value="반제품">반제품</option>
+                  <option value="원자재">원자재</option>
+                </select>
 
-            <Button variant="secondary" onClick={handleSearch} className="h-10 px-6 shrink-0">
-              조회
-            </Button>
-            <Button variant="secondary" onClick={fetchItems} className="h-10 px-3 shrink-0" title="초기화">
-              <Undo2 className="w-4 h-4 text-[#107C41]" />
-            </Button>
-          </div>
-          <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+                <Button variant="secondary" size="sm" onClick={handleSearch} className="h-9 bg-[#e5f0ea] text-[#107C41] hover:bg-[#d1e6db] border-none shrink-0">
+                  조회
+                </Button>
+                <Button variant="secondary" size="sm" onClick={fetchItems} className="h-9 bg-[#e5f0ea] hover:bg-[#d1e6db] border-none shrink-0" title="초기화">
+                  <Undo2 className="w-4 h-4 text-[#107C41]" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               
             <Button 
               size="sm" 
