@@ -92,6 +92,13 @@ jobs:
           
           # 최초 시스템 관리자 계정 생성 (이미 존재하면 무시됨)
           docker-compose -f docker-compose.prod.yml exec -T backend python create_admin.py
+
+          # 로컬 DB 덤프 복원 (존재할 경우)
+          if [ -f "db_dump.sql" ]; then
+            echo "Restoring database from db_dump.sql..."
+            cat db_dump.sql | docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres -d erp
+            echo "Database restore completed."
+          fi
           
           # Nginx가 재생성된 컨테이너의 새 IP를 바라보도록 리로드/재시작
           docker-compose -f docker-compose.prod.yml restart nginx
