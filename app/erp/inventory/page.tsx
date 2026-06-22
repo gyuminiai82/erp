@@ -264,15 +264,6 @@ export default function InventoryStatusPage() {
             </Button>
           </div>
           <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={exportExcel} 
-                className="h-9 flex items-center bg-white text-gray-700 border-gray-300"
-              >
-                <Download className="w-4 h-4 mr-1" />
-                엑셀 다운로드
-              </Button>
               
             <Button 
               size="sm" 
