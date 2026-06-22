@@ -7,7 +7,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Search, Undo2, Download, AlertCircle, CheckCircle2, Edit3, Save } from 'lucide-react';
+import { Search, Undo2, Download, AlertCircle, CheckCircle2, Edit3, Save, FileDown } from 'lucide-react';
 
 interface Item {
   id: number;
@@ -290,13 +290,13 @@ export default function InventoryStatusPage() {
               onClick={exportExcel} 
               className="h-9 flex items-center bg-white"
             >
-              <Download className="w-4 h-4 mr-1 text-[#107C41]" />
+              <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
               엑셀 다운로드
             </Button>
           </div>
         </div>
         
-        <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+        <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
           {loading ? (
             <div className="flex-1 flex items-center justify-center text-gray-500">
               <div className="animate-pulse flex flex-col items-center">
