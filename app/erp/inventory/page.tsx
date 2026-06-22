@@ -28,6 +28,7 @@ export default function InventoryStatusPage() {
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchType, setSearchType] = useState(''); // 품목유형 필터
+  const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
 
   useEffect(() => {
     fetchItems();
@@ -223,50 +224,46 @@ export default function InventoryStatusPage() {
   const hasChanges = items.some(i => i._state === 'U');
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50 p-6 overflow-hidden">
+    <div className="w-full">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center">
-            재고 현황
-          </h1>
-          <p className="text-gray-500 mt-2">영업 및 물류 관리를 위한 품목별 실시간 재고 현황을 조회하고 조정합니다.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">재고 현황</h1>
+          <p className="text-gray-500">영업 및 물류 관리를 위한 품목별 실시간 재고 현황을 조회하고 조정합니다.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1 flex flex-col">
-        <div className="p-4 bg-gray-50/50 flex flex-col h-full">
-          <div className="flex flex-col gap-4 mb-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <select 
-                value={searchType}
-                onChange={e => setSearchType(e.target.value)}
-                className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
-              >
-                <option value="">모든 품목 유형</option>
-                <option value="완제품">완제품</option>
-                <option value="반제품">반제품</option>
-                <option value="원자재">원자재</option>
-              </select>
-
-              <div className="relative flex-1 min-w-[200px] max-w-[300px]">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <Input 
-                  value={searchKeyword}
-                  onChange={e => setSearchKeyword(e.target.value)}
-                  className="pl-9 pr-4 bg-white w-full h-10 focus:z-10 relative" 
-                  placeholder="품목코드, 품목명 검색..." 
-                />
-              </div>
-
-              <Button variant="secondary" onClick={handleSearch} className="h-10 px-6 shrink-0">
-                조회
-              </Button>
-              <Button variant="secondary" onClick={fetchItems} className="h-10 px-3 shrink-0" title="초기화">
-                <Undo2 className="w-4 h-4 text-[#107C41]" />
-              </Button>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 bg-gray-50/50">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input 
+                type="text"
+                value={searchKeyword}
+                onChange={e => setSearchKeyword(e.target.value)}
+                className="pl-9 pr-4 border border-gray-200 rounded-lg text-sm bg-white w-full h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent" 
+                placeholder="품목코드, 품목명 검색..." 
+              />
             </div>
+            <select 
+              value={searchType}
+              onChange={e => setSearchType(e.target.value)}
+              className="border border-gray-200 rounded-lg text-sm bg-white px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent min-w-[120px]"
+            >
+              <option value="">모든 품목 유형</option>
+              <option value="완제품">완제품</option>
+              <option value="반제품">반제품</option>
+              <option value="원자재">원자재</option>
+            </select>
 
-            <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+            <Button variant="secondary" onClick={handleSearch} className="h-10 px-6 shrink-0">
+              조회
+            </Button>
+            <Button variant="secondary" onClick={fetchItems} className="h-10 px-3 shrink-0" title="초기화">
+              <Undo2 className="w-4 h-4 text-[#107C41]" />
+            </Button>
+          </div>
+          <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -277,50 +274,59 @@ export default function InventoryStatusPage() {
                 엑셀 다운로드
               </Button>
               
-              <Button 
-                size="sm" 
-                onClick={handleSave} 
-                disabled={!hasChanges}
-                className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
-              >
-                <Save className="w-4 h-4 mr-1" />
-                변경내역 저장
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleCancel} 
-                disabled={!hasChanges}
-                className="h-9 flex items-center"
-              >
-                <Undo2 className="w-4 h-4 mr-1" />
-                변경 취소
-              </Button>
+            <Button 
+              size="sm" 
+              onClick={handleSave} 
+              disabled={!hasChanges}
+              className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
+            >
+              <Save className="w-4 h-4 mr-1" />
+              변경내역 저장
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleCancel} 
+              disabled={!hasChanges}
+              className="h-9 flex items-center"
+            >
+              <Undo2 className="w-4 h-4 mr-1" />
+              변경 취소
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportExcel} 
+              className="h-9 flex items-center bg-white"
+            >
+              <Download className="w-4 h-4 mr-1 text-[#107C41]" />
+              엑셀 다운로드
+            </Button>
+          </div>
+        </div>
+        
+        <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="animate-pulse flex flex-col items-center">
+                <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
+                데이터를 불러오는 중입니다...
+              </div>
             </div>
-          </div>
-          
-          <div className="flex flex-col flex-1 border border-gray-300 rounded-md overflow-hidden bg-white min-h-[400px]">
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
-                <div className="animate-pulse flex flex-col items-center">
-                  <div className="h-6 w-6 border-2 border-gray-300 border-t-[#107C41] rounded-full animate-spin mb-2"></div>
-                  데이터를 불러오는 중입니다...
-                </div>
-              </div>
-            ) : filteredItems.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
-                조회된 재고 데이터가 없습니다.
-              </div>
-            ) : (
-              <DataGrid 
-                columns={columns} 
-                data={filteredItems}
-                onDataChange={handleDataChange}
-                showCheckboxes={false}
-              />
-            )}
-          </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              조회된 재고 데이터가 없습니다.
+            </div>
+          ) : (
+            <DataGrid 
+              columns={columns} 
+              data={filteredItems}
+              onDataChange={handleDataChange}
+              showCheckboxes={true}
+              selectedRowIndices={selectedRowIndices}
+              onSelectionChange={setSelectedRowIndices}
+            />
+          )}
         </div>
       </div>
     </div>
