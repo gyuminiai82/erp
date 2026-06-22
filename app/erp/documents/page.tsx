@@ -143,12 +143,12 @@ export default function DocumentsPage() {
               </div>
 
               <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
-                <Button variant="outline" size="sm" className="h-9 flex items-center bg-white border-blue-600 text-blue-600 hover:bg-blue-50" onClick={handleIssueContract}>
-                  <FileSignature className="w-4 h-4 mr-1" />
+                <Button variant="outline" size="sm" className="h-9 flex items-center bg-white" onClick={handleIssueContract}>
+                  <FileSignature className="w-4 h-4 mr-1 text-[#107C41]" />
                   근로계약서 발급
                 </Button>
-                <Button size="sm" className="h-9 flex items-center bg-blue-600 hover:bg-blue-700 text-white" onClick={handleIssueCertificate}>
-                  <FileBadge className="w-4 h-4 mr-1" />
+                <Button variant="outline" size="sm" className="h-9 flex items-center bg-white" onClick={handleIssueCertificate}>
+                  <FileBadge className="w-4 h-4 mr-1 text-[#107C41]" />
                   재직/경력증명서 발급
                 </Button>
               </div>
