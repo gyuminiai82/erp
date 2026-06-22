@@ -246,7 +246,7 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
                             <Link
                               key={childMenu.id}
                               href={childMenu.url || "#"}
-                              className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${isChildUrlActive ? 'text-[#107C41] bg-white shadow-sm border border-gray-100' : 'text-gray-500 hover:text-[#107C41] hover:bg-white/60'}`}
+                              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${isChildUrlActive ? 'text-[#107C41] bg-[#f0fdf4]' : 'text-gray-500 hover:text-[#107C41] hover:bg-gray-50'}`}
                             >
                               {childMenu.name}
                             </Link>
