@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DataGrid, ColumnDef } from "@/components/ui/DataGrid";
 import { useDialog } from "@/components/providers/DialogProvider";
+import { useDaumPostcodePopup } from 'react-daum-postcode';
 
 const CLIENT_TYPES = [
   { label: "고객사", value: "고객사" },
@@ -61,6 +62,27 @@ export default function ClientsPage() {
       contact_phone: '', contact_email: '', address: '', is_active: true
     });
     setIsModalOpen(true);
+  };
+
+  const openPostcode = useDaumPostcodePopup('https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js');
+
+  const handleAddressSearch = () => {
+    openPostcode({
+      onComplete: (data) => {
+        let fullAddress = data.address;
+        let extraAddress = '';
+        if (data.addressType === 'R') {
+          if (data.bname !== '') {
+            extraAddress += data.bname;
+          }
+          if (data.buildingName !== '') {
+            extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
+          }
+          fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
+        }
+        setNewClientData({ ...newClientData, address: fullAddress });
+      }
+    });
   };
 
   const handleModalSubmit = (e: React.FormEvent) => {
@@ -399,10 +421,17 @@ export default function ClientsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">주소</label>
-                  <Input 
-                    value={newClientData.address} 
-                    onChange={e => setNewClientData({...newClientData, address: e.target.value})}
-                  />
+                  <div className="flex space-x-2">
+                    <Input 
+                      value={newClientData.address} 
+                      onChange={e => setNewClientData({...newClientData, address: e.target.value})}
+                      className="flex-1"
+                      placeholder="주소를 검색하거나 입력하세요"
+                    />
+                    <Button type="button" variant="outline" onClick={handleAddressSearch} className="shrink-0 bg-white border-gray-300">
+                      우편번호 검색
+                    </Button>
+                  </div>
                 </div>
               </div>
               
