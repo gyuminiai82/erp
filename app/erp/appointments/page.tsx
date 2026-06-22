@@ -150,9 +150,9 @@ export default function AppointmentsPage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">인사 발령 관리</h1>
           <p className="text-gray-500">직원의 부서 이동 및 승진, 직급 변경 등을 발령하고 이력을 관리합니다.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          신규 발령 작성
+        <Button variant="outline" size="sm" onClick={() => setIsModalOpen(true)} className="h-9 flex items-center bg-white">
+          <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
+          신규 발령 추가
         </Button>
       </div>
 
