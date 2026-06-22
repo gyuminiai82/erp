@@ -10,6 +10,7 @@ import { useDialog } from "@/components/providers/DialogProvider";
 export default function DocumentsPage() {
   const [employees, setEmployees] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [appliedQuery, setAppliedQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
@@ -75,7 +76,8 @@ export default function DocumentsPage() {
   ];
 
   const filteredEmployees = employees.filter(emp => {
-    const q = searchQuery.toLowerCase();
+    if (!appliedQuery) return true;
+    const q = appliedQuery.toLowerCase();
     const nameMatch = emp.name && emp.name.toLowerCase().includes(q);
     const empNoMatch = emp.emp_no && emp.emp_no.toLowerCase().includes(q);
     return nameMatch || empNoMatch;
@@ -127,14 +129,15 @@ export default function DocumentsPage() {
                   <Input 
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
+                    onKeyDown={e => { if(e.key === 'Enter') setAppliedQuery(searchQuery); }}
                     className="pl-9 pr-4 bg-white w-full h-10 focus:z-10 relative" 
                     placeholder="이름, 사번 검색..." 
                   />
                 </div>
-                <Button variant="secondary" className="h-10 px-6 shrink-0" onClick={() => {}}>
+                <Button variant="secondary" className="h-10 px-6 shrink-0" onClick={() => setAppliedQuery(searchQuery)}>
                   조회
                 </Button>
-                <Button variant="secondary" onClick={() => setSearchQuery('')} className="h-10 px-3 shrink-0" title="초기화">
+                <Button variant="secondary" onClick={() => { setSearchQuery(''); setAppliedQuery(''); }} className="h-10 px-3 shrink-0" title="초기화">
                   <Undo2 className="w-4 h-4 text-[#107C41]" />
                 </Button>
               </div>
