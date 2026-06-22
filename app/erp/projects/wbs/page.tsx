@@ -9,17 +9,21 @@ export default function WBSPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [tasks, setTasks] = useState<any[]>([]);
+  const [originalTasks, setOriginalTasks] = useState<any[]>([]);
   const [selectedRowIndices, setSelectedRowIndices] = useState<number[]>([]);
   const [token, setToken] = useState<string | null>(null);
+  
+  // Use a dialog provider if needed, or window.alert
+  const showAlert = (msg: string) => window.alert(msg);
 
   const columns: ColumnDef[] = [
     { field: 'id', headerName: 'ID', width: 60 },
-    { field: 'name', headerName: '작업명', },
-    { field: 'assignee_name', headerName: '담당자', width: 120 },
-    { field: 'start_date', headerName: '시작일', width: 120 },
-    { field: 'end_date', headerName: '종료일', width: 120 },
-    { field: 'status', headerName: '상태', width: 100 },
-    { field: 'progress', headerName: '진척도(%)', width: 100 },
+    { field: 'name', headerName: '작업명', editable: true },
+    { field: 'assignee_name', headerName: '담당자', width: 120, editable: true },
+    { field: 'start_date', headerName: '시작일', width: 120, editable: true, editType: 'date' },
+    { field: 'end_date', headerName: '종료일', width: 120, editable: true, editType: 'date' },
+    { field: 'status', headerName: '상태', width: 100, editable: true, editType: 'select', options: [{label: 'TODO', value: 'TODO'}, {label: 'IN_PROGRESS', value: 'IN_PROGRESS'}, {label: 'DONE', value: 'DONE'}] },
+    { field: 'progress', headerName: '진척도(%)', width: 100, editable: true },
   ];
 
   useEffect(() => {
@@ -32,12 +36,64 @@ export default function WBSPage() {
     }
   }, []);
 
-  useEffect(() => {
+  const fetchTasks = () => {
     if (!token || !selectedProject) return;
     fetch(`/api/projects/${selectedProject}/tasks`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.ok ? res.json() : [])
-      .then(data => setTasks(Array.isArray(data) ? data : []));
+      .then(data => {
+        const arr = Array.isArray(data) ? data : [];
+        setTasks(arr);
+        setOriginalTasks(arr);
+        setSelectedRowIndices([]);
+      });
+  };
+
+  useEffect(() => {
+    fetchTasks();
   }, [token, selectedProject]);
+
+  const handleAddRow = () => {
+    if (!selectedProject) {
+      showAlert('프로젝트를 먼저 선택해주세요.');
+      return;
+    }
+    const newTemp = {
+      id: `temp_${Date.now()}`,
+      name: '',
+      assignee_name: '',
+      start_date: '',
+      end_date: '',
+      status: 'TODO',
+      progress: 0,
+      _state: 'C'
+    };
+    setTasks([newTemp, ...tasks]);
+  };
+
+  const handleDataChange = (rowIndex: number, field: string, value: any) => {
+    const updated = [...tasks];
+    updated[rowIndex] = { ...updated[rowIndex], [field]: value, _state: updated[rowIndex]._state === 'C' ? 'C' : 'U' };
+    setTasks(updated);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedRowIndices.length === 0) return;
+    const newTasks = tasks.filter((task, idx) => {
+      if (selectedRowIndices.includes(idx)) {
+        if (task._state === 'C' || String(task.id).startsWith('temp_')) {
+          return false;
+        } else {
+          task._state = 'D';
+          return true;
+        }
+      }
+      return true;
+    });
+    setTasks(newTasks);
+    setSelectedRowIndices([]);
+  };
+
+  const hasChanges = tasks.some(t => t._state === 'C' || t._state === 'U' || t._state === 'D');
 
   return (
     <div className="w-full">
@@ -73,17 +129,21 @@ export default function WBSPage() {
             </Button>
           </div>
           <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
-            <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
+            <Button variant="outline" size="sm" className="h-9 flex items-center bg-white" onClick={handleAddRow}>
               <Plus className="w-4 h-4 mr-1 text-[#107C41]" />
               작업 추가
             </Button>
-            <Button variant="outline" size="sm" className="h-9 flex items-center" disabled={selectedRowIndices.length === 0}>
+            <Button variant="outline" size="sm" className={`h-9 flex items-center ${selectedRowIndices.length > 0 ? 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200' : ''}`} disabled={selectedRowIndices.length === 0} onClick={handleBulkDelete}>
               <Trash2 className="w-4 h-4 mr-1" />
               선택 삭제
             </Button>
-            <Button size="sm" className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white" disabled={true}>
+            <Button size="sm" className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white" disabled={!hasChanges} onClick={() => showAlert("저장 기능은 곧 업데이트 예정입니다.")}>
               <Save className="w-4 h-4 mr-1" />
               저장
+            </Button>
+            <Button variant="outline" size="sm" className="h-9 flex items-center" disabled={!hasChanges} onClick={() => { setTasks([...originalTasks]); setSelectedRowIndices([]); }}>
+              <Undo2 className="w-4 h-4 mr-1" />
+              변경 취소
             </Button>
             <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
               <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
@@ -92,7 +152,7 @@ export default function WBSPage() {
           </div>
         </div>
         <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border-t border-gray-200 overflow-hidden bg-white">
-          {selectedProject ? (<DataGrid columns={columns} data={tasks} showCheckboxes={true} selectedRowIndices={selectedRowIndices} onSelectionChange={setSelectedRowIndices} />) : (<div className="flex items-center justify-center h-full text-gray-500">프로젝트를 선택해주세요.</div>)}
+          {selectedProject ? (<DataGrid columns={columns} data={tasks} showCheckboxes={true} selectedRowIndices={selectedRowIndices} onSelectionChange={setSelectedRowIndices} onDataChange={handleDataChange} />) : (<div className="flex items-center justify-center h-full text-gray-500">프로젝트를 선택해주세요.</div>)}
         </div>
       </div>
     </div>
