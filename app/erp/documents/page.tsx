@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
 import { Input } from "@/components/ui/Input";
-import { FileSignature, FileBadge, X, Printer, Search } from 'lucide-react';
+import { FileSignature, FileBadge, X, Printer, Search, Undo2 } from 'lucide-react';
 import { useDialog } from "@/components/providers/DialogProvider";
 
 export default function DocumentsPage() {
@@ -131,6 +131,12 @@ export default function DocumentsPage() {
                     placeholder="이름, 사번 검색..." 
                   />
                 </div>
+                <Button variant="secondary" className="h-10 px-6 shrink-0" onClick={() => {}}>
+                  조회
+                </Button>
+                <Button variant="secondary" onClick={() => setSearchQuery('')} className="h-10 px-3 shrink-0" title="초기화">
+                  <Undo2 className="w-4 h-4 text-[#107C41]" />
+                </Button>
               </div>
 
               <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
