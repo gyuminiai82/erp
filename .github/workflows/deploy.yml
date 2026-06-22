@@ -69,8 +69,16 @@ jobs:
           git fetch --all
           git reset --hard origin/main
           
-          # DB 암호를 환경변수로 넘기기 위해 .env 파일 생성
+          # DB 암호와 도메인을 환경변수로 넘기기 위해 .env 파일 생성
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DOMAIN_NAME=erp.minstudio.app" >> .env
+          
+          # SSL 인증서가 없는 경우 자동 발급
+          if [ ! -d "./certbot/conf/live/erp.minstudio.app" ]; then
+            echo "SSL certificate not found. Running init-letsencrypt.sh..."
+            chmod +x ./init-letsencrypt.sh
+            sudo ./init-letsencrypt.sh
+          fi
           
           # GHCR 로그인 (Public 레포면 생략 가능하지만 만약을 위해)
           # public 리포지토리의 경우 로그인이 필요 없으므로 생략합니다.
