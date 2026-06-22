@@ -11,6 +11,7 @@ import models
 from auth import SECRET_KEY, ALGORITHM
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
+from notifications_api import create_notification_sync
 
 security = HTTPBearer()
 
@@ -143,6 +144,13 @@ def apply_leave(req: LeaveRequestCreate, emp: models.Employee = Depends(get_curr
     db.add(leave)
     db.commit()
     db.refresh(leave)
+    
+    managers = db.query(models.Employee).join(models.EmployeeRole).join(models.Role).filter(
+        models.Role.name.in_(["master", "hr_manager", "manager"])
+    ).all()
+    for m in managers:
+        create_notification_sync(db, m.id, "휴가 신청", f"{emp.name}님의 휴가 신청이 접수되었습니다.", "/erp/leaves")
+        
     return leave
 
 @router.get("/my", response_model=List[LeaveResponse])
@@ -256,6 +264,11 @@ def update_leave_status(leave_id: int, req: LeaveRequestStatusUpdate, emp: model
     leave.approver_id = emp.id
     db.commit()
     db.refresh(leave)
+    
+    if req.status == "승인":
+        create_notification_sync(db, leave.employee_id, "휴가 승인", f"신청하신 휴가가 승인되었습니다.", "/erp/leaves")
+    elif req.status == "반려":
+        create_notification_sync(db, leave.employee_id, "휴가 반려", f"신청하신 휴가가 반려되었습니다.", "/erp/leaves")
     
     dept_name = leave.employee.department.name if leave.employee and leave.employee.department else None
     pos_name = leave.employee.position.name if leave.employee and leave.employee.position else None

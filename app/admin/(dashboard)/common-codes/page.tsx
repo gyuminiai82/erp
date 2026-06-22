@@ -411,7 +411,7 @@ export default function CommonCodesPage() {
 
       {/* Group Modal */}
       {isGroupModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl p-6 w-[400px] shadow-xl border border-gray-100">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-bold text-gray-900">새 그룹 추가</h2>
@@ -441,7 +441,7 @@ export default function CommonCodesPage() {
 
       {/* Code Modal */}
       {isCodeModalOpen && selectedGroup && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl p-6 w-[400px] shadow-xl border border-gray-100">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-bold text-gray-900">새 상세 코드 추가</h2>
@@ -479,7 +479,7 @@ export default function CommonCodesPage() {
       )}
       {/* Group Edit Modal */}
       {editingGroupId !== null && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl p-6 w-[400px] shadow-xl border border-gray-100">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-bold text-gray-900">그룹 수정</h2>

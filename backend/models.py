@@ -247,6 +247,7 @@ class CompanyInfo(Base):
     contact_email = Column(String)
     contact_phone = Column(String)
     logo_url = Column(String)
+    seal_url = Column(String, nullable=True)
 
 class AttendancePolicy(Base):
     __tablename__ = "attendance_policies"
@@ -598,3 +599,17 @@ class ProjectDocument(Base):
 
     project = relationship("Project", back_populates="documents")
     uploader = relationship("Employee")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"), index=True)
+    title = Column(String(200), nullable=False)
+    message = Column(Text, nullable=False)
+    link = Column(String(500), nullable=True)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+    employee = relationship("Employee", foreign_keys=[employee_id])

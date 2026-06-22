@@ -80,37 +80,17 @@ import taxes_api
 app.include_router(taxes_api.router)
 import dashboard_api
 app.include_router(dashboard_api.router)
+import notifications_api
+app.include_router(notifications_api.router)
 
 models.Base.metadata.create_all(bind=engine)
 
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-        await self.broadcast_sessions()
-
-    def disconnect(self, websocket: WebSocket):
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
-
-    async def broadcast_sessions(self):
-        count = len(self.active_connections)
-        message = json.dumps({"type": "active_sessions", "count": count})
-        for connection in self.active_connections.copy():
-            try:
-                await connection.send_text(message)
-            except Exception:
-                pass
-
-manager = ConnectionManager()
+from websocket_manager import manager
 
 async def broadcast_metrics_task():
     while True:
         try:
-            if manager.active_connections:
+            if manager.all_connections:
                 import psutil
                 vm = psutil.virtual_memory()
                 ram_used = round(vm.used / (1024 ** 3), 1)
@@ -133,7 +113,7 @@ async def broadcast_metrics_task():
                     }
                 }
                 message = json.dumps(metrics)
-                for connection in manager.active_connections.copy():
+                for connection in manager.all_connections.copy():
                     try:
                         await connection.send_text(message)
                     except Exception:
@@ -143,16 +123,32 @@ async def broadcast_metrics_task():
         await asyncio.sleep(1)
 
 @app.websocket("/api/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+async def websocket_endpoint(websocket: WebSocket, token: Optional[str] = None):
+    employee_id = None
+    if token:
+        try:
+            from jose import jwt
+            from auth import SECRET_KEY, ALGORITHM
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            email = payload.get("sub")
+            if email:
+                db = SessionLocal()
+                user = db.query(models.Employee).filter(models.Employee.email == email).first()
+                if user:
+                    employee_id = user.id
+                db.close()
+        except Exception:
+            pass
+
+    await manager.connect(websocket, employee_id)
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, employee_id)
         await manager.broadcast_sessions()
     except Exception:
-        manager.disconnect(websocket)
+        manager.disconnect(websocket, employee_id)
         await manager.broadcast_sessions()
 
 @app.on_event("startup")

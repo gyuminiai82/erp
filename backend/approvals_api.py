@@ -6,6 +6,7 @@ from auth import get_current_user_info
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+from notifications_api import create_notification_sync
 
 router = APIRouter()
 
@@ -57,6 +58,11 @@ def draft_approval(payload: DraftApprovalRequest, db: Session = Depends(get_db),
         db.add(new_line)
         
     db.commit()
+    
+    if new_doc.status == "IN_PROGRESS":
+        first_approver = db.query(ApprovalLine).filter(ApprovalLine.document_id == new_doc.id).order_by(ApprovalLine.sequence_no).first()
+        if first_approver:
+            create_notification_sync(db, first_approver.approver_id, "결재 요청", f"새로운 결재 문서 '{new_doc.title}'이(가) 도착했습니다.", f"/erp/approvals/{new_doc.id}")
     
     return {"message": "기안이 성공적으로 상신되었습니다.", "document_id": new_doc.id}
 
@@ -176,6 +182,11 @@ def approve_document(document_id: int, payload: ApprovalActionRequest, db: Sessi
     
     if my_line.id == lines[-1].id:
         doc.status = "APPROVED"
+        create_notification_sync(db, doc.drafter_id, "결재 승인", f"기안하신 문서 '{doc.title}'이(가) 최종 승인되었습니다.", f"/erp/approvals/{doc.id}")
+    else:
+        next_approver = db.query(ApprovalLine).filter(ApprovalLine.document_id == document_id, ApprovalLine.status == "PENDING").order_by(ApprovalLine.sequence_no).first()
+        if next_approver:
+            create_notification_sync(db, next_approver.approver_id, "결재 대기", f"결재 문서 '{doc.title}'의 결재 차례입니다.", f"/erp/approvals/{doc.id}")
         
     db.commit()
     return {"message": "승인 처리되었습니다."}
@@ -204,6 +215,7 @@ def reject_document(document_id: int, payload: ApprovalActionRequest, db: Sessio
     my_line.acted_at = datetime.utcnow()
     
     doc.status = "REJECTED"
+    create_notification_sync(db, doc.drafter_id, "결재 반려", f"기안하신 문서 '{doc.title}'이(가) 반려되었습니다.", f"/erp/approvals/{doc.id}")
     
     db.commit()
     return {"message": "반려 처리되었습니다."}

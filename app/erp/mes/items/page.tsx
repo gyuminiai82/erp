@@ -236,8 +236,8 @@ export default function ItemsPage() {
     { field: "item_type", headerName: "유형", width: 100, editable: true },
     { field: "standard", headerName: "규격", width: 160, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
     { field: "unit", headerName: "단위", width: 100, editable: true, editType: 'select', options: unitOptions },
-    { field: "standard_cost", headerName: "표준단가", width: 120, editable: true, renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
-    { field: "lead_time", headerName: "L/T", width: 70, editable: true, renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
+    { field: "standard_cost", headerName: "표준단가", width: 120, editable: true, align: 'right', renderCell: (val: any) => <div className="text-right w-full">{Number(val).toLocaleString()}원</div> },
+    { field: "lead_time", headerName: "L/T", width: 70, editable: true, align: 'center', renderCell: (val: any) => <div className="text-center w-full">{val}일</div> },
     { field: "location", headerName: "창고위치", width: 140, editable: true, renderCell: (val: any) => <span className="text-gray-600 text-sm">{val || '-'}</span> },
   ], [unitOptions]);
 
@@ -343,7 +343,7 @@ export default function ItemsPage() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
               <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">

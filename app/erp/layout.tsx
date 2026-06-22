@@ -14,6 +14,9 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
   const [userInfo, setUserInfo] = useState<{name: string, email: string, role_name: string, role_code: string} | null>(null);
   const [attendance, setAttendance] = useState<{check_in?: string, check_out?: string} | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
+  const unreadCount = notifications.filter(n => !n.is_read).length;
   const pathname = usePathname();
   const { showAlert } = useDialog();
 
@@ -63,6 +66,13 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
           })
           .catch(err => console.error(err));
 
+          fetch(`/api/notifications`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          .then(res => res.json())
+          .then(notis => setNotifications(notis))
+          .catch(e => console.error(e));
+
           if (data.role_code !== 'admin') {
             fetch(`/api/attendances/today`, {
               headers: { 'Authorization': `Bearer ${token}` }
@@ -85,7 +95,18 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
 
     const connectWs = () => {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      ws = new WebSocket(`${protocol}//${window.location.host}/api/ws`);
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+      ws = new WebSocket(`${protocol}//${window.location.host}/api/ws${token ? `?token=${token}` : ''}`);
+      
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "new_notification") {
+            setNotifications(prev => [data.data, ...prev]);
+            showAlert(`[${data.data.title}] ${data.data.message}`, { type: "info" });
+          }
+        } catch (e) {}
+      };
       ws.onclose = () => {
         if (!isUnmounted) {
           reconnectTimer = setTimeout(connectWs, 5000);
@@ -293,10 +314,62 @@ export default function ERPlayout({ children }: { children: React.ReactNode }) {
               </div>
             )}
             
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+            <div className="relative">
+              <button onClick={() => setIsNotiOpen(!isNotiOpen)} className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border border-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              
+              {isNotiOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsNotiOpen(false)}></div>
+                  <div className="absolute right-0 mt-3 w-80 max-h-96 overflow-y-auto bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 z-50 transform origin-top-right animate-in fade-in zoom-in-95 duration-100">
+                    <div className="flex items-center justify-between p-3 border-b border-gray-50 bg-gray-50/50 sticky top-0 z-10">
+                      <p className="text-sm font-semibold text-gray-900">알림</p>
+                      {unreadCount > 0 && (
+                        <button onClick={async () => {
+                          const t = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+                          await fetch('/api/notifications/read-all', { method: 'PUT', headers: { Authorization: `Bearer ${t}` }});
+                          setNotifications(prev => prev.map(n => ({...n, is_read: true})));
+                        }} className="text-xs text-[#107C41] hover:underline">모두 읽음</button>
+                      )}
+                    </div>
+                    <div className="flex flex-col relative z-0">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-gray-500">새로운 알림이 없습니다.</div>
+                      ) : (
+                        notifications.map((noti) => (
+                          <div 
+                            key={noti.id} 
+                            onClick={async () => {
+                              if (!noti.is_read) {
+                                const t = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+                                await fetch(`/api/notifications/${noti.id}/read`, { method: 'PUT', headers: { Authorization: `Bearer ${t}` }});
+                                setNotifications(prev => prev.map(n => n.id === noti.id ? {...n, is_read: true} : n));
+                              }
+                              setIsNotiOpen(false);
+                              if (noti.link) window.location.href = noti.link;
+                            }}
+                            className={`p-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors ${!noti.is_read ? 'bg-blue-50/30' : ''}`}
+                          >
+                            <p className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
+                              {!noti.is_read && <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5"></span>}
+                              {noti.title}
+                            </p>
+                            <p className="text-xs text-gray-600 line-clamp-2">{noti.message}</p>
+                            <p className="text-[10px] text-gray-400 mt-1">{new Date(noti.created_at).toLocaleString('ko-KR')}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <div className="h-8 w-px bg-gray-200 mx-2"></div>
             <div className="relative">
               <div 

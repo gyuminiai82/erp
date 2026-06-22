@@ -18,6 +18,7 @@ class CompanyInfoSchema(BaseModel):
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
     logo_url: Optional[str] = None
+    seal_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -51,7 +52,8 @@ def update_company_info(
         "address": info.address,
         "contact_email": info.contact_email,
         "contact_phone": info.contact_phone,
-        "logo_url": info.logo_url
+        "logo_url": info.logo_url,
+        "seal_url": info.seal_url
     }
         
     info.name = data.name
@@ -61,6 +63,7 @@ def update_company_info(
     info.contact_email = data.contact_email
     info.contact_phone = data.contact_phone
     info.logo_url = data.logo_url
+    info.seal_url = data.seal_url
     
     new_info = {
         "name": data.name,
@@ -69,7 +72,8 @@ def update_company_info(
         "address": data.address,
         "contact_email": data.contact_email,
         "contact_phone": data.contact_phone,
-        "logo_url": data.logo_url
+        "logo_url": data.logo_url,
+        "seal_url": data.seal_url
     }
     
     db.commit()

@@ -38,7 +38,13 @@ interface DocDetail {
 }
 
 export default function ApprovalPage() {
-  const [activeTab, setActiveTab] = useState<'inbox' | 'outbox'>('inbox');
+  const [activeTab, setActiveTab] = useState<'inbox' | 'outbox'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('tab') === 'outbox' ? 'outbox' : 'inbox';
+    }
+    return 'inbox';
+  });
   const [items, setItems] = useState<ApprovalDoc[]>([]);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -78,6 +84,18 @@ export default function ApprovalPage() {
   useEffect(() => {
     fetchItems();
   }, [token, activeTab]);
+
+  useEffect(() => {
+    if (token && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const docId = params.get('docId');
+      if (docId && !isNaN(Number(docId))) {
+        setTimeout(() => {
+          openDoc(Number(docId));
+        }, 300);
+      }
+    }
+  }, [token]);
 
   const openDoc = async (id: number) => {
     if (!token) return;
@@ -144,20 +162,27 @@ export default function ApprovalPage() {
   };
 
   const columns: ColumnDef[] = useMemo(() => [
+    {
+      field: 'actions',
+      headerName: '상세보기',
+      width: 100,
+      renderCell: (val: any, row: any) => (
+        <div className="flex justify-center w-full">
+          <button
+            onClick={() => openDoc(row.id)}
+            className="px-3 py-1 bg-white border border-gray-300 rounded text-sm text-gray-700 font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors shadow-sm"
+          >
+            보기
+          </button>
+        </div>
+      )
+    },
     { field: 'id', headerName: '문서번호', width: 100 },
     { field: 'document_type', headerName: '문서종류', width: 120 },
     { 
       field: 'title', 
       headerName: '제목', 
-      width: 400,
-      renderCell: (val: any, row: any) => (
-        <span 
-          className="cursor-pointer text-blue-600 hover:underline"
-          onClick={() => openDoc(row.id)}
-        >
-          {val}
-        </span>
-      )
+      width: 400
     },
     { field: 'drafter_name', headerName: '기안자', width: 150 },
     { 
@@ -165,8 +190,8 @@ export default function ApprovalPage() {
       headerName: '상태', 
       width: 120,
       renderCell: (val: string) => {
-        const info = statusMap[val] || { label: val, color: 'text-gray-600 bg-gray-100' };
-        return <span className={`px-2 py-1 rounded-full text-xs font-medium ${info.color}`}>{info.label}</span>;
+        const info = statusMap[val] || { label: val };
+        return <span>{info.label}</span>;
       }
     },
     { 
@@ -218,41 +243,43 @@ export default function ApprovalPage() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-              <h2 className="text-xl font-bold text-gray-800">결재 문서 상세</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+              <h2 className="text-xl font-bold text-slate-800">결재 문서 상세</h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <XCircle className="w-6 h-6" />
               </button>
             </div>
             
             {docDetail ? (
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-8 bg-white">
                 <div className="flex flex-col lg:flex-row gap-8">
                   {/* Left: Document Content */}
                   <div className="flex-1 space-y-6">
-                    <div className="grid grid-cols-2 gap-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
-                      <div>
-                        <span className="block text-xs font-semibold text-gray-500 mb-1">문서 종류</span>
-                        <span className="text-gray-800 font-medium">{docDetail.document_type}</span>
+                    <div className="border border-slate-100 rounded-xl p-6 bg-slate-50/50 shadow-sm">
+                      <div className="grid grid-cols-2 gap-6 mb-4">
+                        <div>
+                          <span className="block text-xs font-semibold text-slate-400 mb-1">문서 종류</span>
+                          <span className="text-slate-700 font-medium">{docDetail.document_type}</span>
+                        </div>
+                        <div>
+                          <span className="block text-xs font-semibold text-slate-400 mb-1">기안자</span>
+                          <span className="text-slate-700 font-medium">{docDetail.drafter_name} ({docDetail.drafter_dept})</span>
+                        </div>
                       </div>
                       <div>
-                        <span className="block text-xs font-semibold text-gray-500 mb-1">기안자</span>
-                        <span className="text-gray-800 font-medium">{docDetail.drafter_name} ({docDetail.drafter_dept})</span>
-                      </div>
-                      <div className="col-span-2">
-                        <span className="block text-xs font-semibold text-gray-500 mb-1">제목</span>
-                        <span className="text-gray-800 text-lg font-bold">{docDetail.title}</span>
+                        <span className="block text-xs font-semibold text-slate-400 mb-1">제목</span>
+                        <span className="text-slate-900 text-lg font-bold">{docDetail.title}</span>
                       </div>
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                      <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center">
                         <FileText className="w-4 h-4 mr-2 text-blue-600" />
                         상세 내용
                       </h3>
-                      <div className="border border-gray-200 rounded-lg p-6 bg-white min-h-[300px] whitespace-pre-wrap text-gray-700 font-mono text-sm leading-relaxed">
+                      <div className="border border-slate-200 rounded-xl p-6 bg-white min-h-[300px] whitespace-pre-wrap text-slate-700 font-mono text-sm leading-relaxed shadow-sm">
                         {docDetail.content}
                       </div>
                     </div>
@@ -261,28 +288,28 @@ export default function ApprovalPage() {
                   {/* Right: Approval Line */}
                   <div className="w-full lg:w-80 space-y-6">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                      <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         결재선 진행현황
                       </h3>
-                      <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+                      <div className="border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
                         {docDetail.approval_lines.map((line, idx) => (
-                          <div key={line.id} className={`p-4 border-b border-gray-100 last:border-b-0 ${line.status === 'PENDING' ? 'bg-blue-50/50' : ''}`}>
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-semibold text-gray-800 text-sm">{idx + 1}차 결재: {line.approver_name}</span>
-                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusMap[line.status]?.color}`}>
+                          <div key={line.id} className="p-4 border-b border-slate-100 last:border-b-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-slate-800 text-sm">{idx + 1}차 결재: {line.approver_name}</span>
+                              <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium ${statusMap[line.status]?.color}`}>
                                 {statusMap[line.status]?.label}
                               </span>
                             </div>
                             {line.acted_at && (
-                              <div className="text-xs text-gray-500 flex items-center mt-1">
-                                <Clock className="w-3 h-3 mr-1" />
+                              <div className="text-xs text-slate-500 flex items-center mt-2">
+                                <Clock className="w-3.5 h-3.5 mr-1" />
                                 {new Date(line.acted_at).toLocaleString()}
                               </div>
                             )}
                             {line.comment && (
-                              <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-700 border border-gray-100">
-                                <span className="font-semibold text-gray-500 mr-1">의견:</span>
+                              <div className="mt-3 p-3 bg-slate-50 rounded-lg text-sm text-slate-700 border border-slate-100">
+                                <span className="font-semibold text-slate-500 mr-1 block mb-1">의견:</span>
                                 {line.comment}
                               </div>
                             )}
@@ -293,25 +320,25 @@ export default function ApprovalPage() {
                     
                     {/* Actions Panel */}
                     {activeTab === 'inbox' && docDetail.status === 'IN_PROGRESS' && (
-                      <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
-                        <h3 className="text-sm font-semibold text-gray-800 mb-3">결재 처리</h3>
+                      <div className="border border-slate-200 rounded-xl p-5 bg-white shadow-sm">
+                        <h3 className="text-sm font-bold text-slate-800 mb-3">결재 처리</h3>
                         <textarea 
                           value={comment}
                           onChange={e => setComment(e.target.value)}
                           placeholder="의견을 입력하세요 (반려 시 필수)"
-                          className="w-full h-24 p-3 border border-gray-300 rounded-md mb-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                          className="w-full h-24 p-3 border border-slate-200 rounded-lg mb-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-shadow"
                         />
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-3">
                           <Button 
                             variant="danger" 
-                            className="flex-1"
+                            className="flex-1 py-2.5 bg-[#e50000] hover:bg-red-700 text-white font-bold rounded-lg transition-colors border-none"
                             onClick={() => handleAction('reject')}
                           >
                             반려
                           </Button>
                           <Button 
                             variant="default" 
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                            className="flex-1 py-2.5 bg-[#1d4ed8] hover:bg-blue-800 text-white font-bold rounded-lg transition-colors border-none"
                             onClick={() => handleAction('approve')}
                           >
                             승인

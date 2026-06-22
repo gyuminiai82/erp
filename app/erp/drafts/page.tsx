@@ -23,15 +23,30 @@ interface Project {
   name: string;
 }
 
+const TEMPLATES: Record<string, { title: string, content: string }> = {
+  '일반기안': {
+    title: '[일반기안] ',
+    content: '1. 목적: \n\n2. 상세내용: \n   - \n   - \n\n3. 기대효과: \n\n4. 비고: '
+  },
+  '품의서': {
+    title: '[품의] OOO 건에 대한 품의',
+    content: '1. 목적: \n\n2. 상세내용: \n   - \n   - \n\n3. 소요예산: \n\n4. 기대효과: \n\n5. 비고: '
+  },
+  '지출결의서': {
+    title: '[지출] OOO 지출 결의',
+    content: '1. 지출목적: \n\n2. 지출일자: 202X년 X월 X일\n\n3. 지출금액: 금             원 (₩           )\n\n4. 지출내역:\n   - \n   - \n\n5. 결제수단: 법인카드 / 계좌이체\n\n6. 비고: '
+  }
+};
+
 export default function DraftApprovalPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: number; name: string; department?: string } | null>(null);
   
   // Form State
-  const [documentType, setDocumentType] = useState('기안서');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [documentType, setDocumentType] = useState('일반기안');
+  const [title, setTitle] = useState(TEMPLATES['일반기안'].title);
+  const [content, setContent] = useState(TEMPLATES['일반기안'].content);
   const [projectId, setProjectId] = useState<number | ''>('');
   
   // Data State
@@ -85,7 +100,22 @@ export default function DraftApprovalPage() {
       .then(data => setProjects(data))
       .catch(err => console.error("Failed to fetch projects", err));
       
+      
   }, [token, user]);
+
+  const handleDocumentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newType = e.target.value;
+    setDocumentType(newType);
+    
+    // Check if the current content is empty or matches an existing template
+    const isCurrentEmptyOrTemplate = !content.trim() || Object.values(TEMPLATES).some(t => t.content === content);
+    const isCurrentTitleEmptyOrTemplate = !title.trim() || Object.values(TEMPLATES).some(t => t.title === title);
+
+    if (TEMPLATES[newType]) {
+      if (isCurrentEmptyOrTemplate) setContent(TEMPLATES[newType].content);
+      if (isCurrentTitleEmptyOrTemplate) setTitle(TEMPLATES[newType].title);
+    }
+  };
 
   const handleAddApprover = (emp: Employee) => {
     if (selectedApprovers.find(a => a.id === emp.id)) return;
@@ -134,7 +164,7 @@ export default function DraftApprovalPage() {
       if (!res.ok) throw new Error(data.detail || "기안 처리에 실패했습니다.");
 
       alert(isDraft ? "임시저장 되었습니다." : "기안이 성공적으로 상신되었습니다.");
-      router.push('/erp/approvals'); 
+      router.push('/erp/approvals?tab=outbox'); 
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -166,13 +196,12 @@ export default function DraftApprovalPage() {
               <td className="py-2 px-4">
                 <select 
                   value={documentType}
-                  onChange={(e) => setDocumentType(e.target.value)}
+                  onChange={handleDocumentTypeChange}
                   className="px-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none w-48"
                 >
                   <option value="일반기안">일반기안</option>
                   <option value="품의서">품의서</option>
                   <option value="지출결의서">지출결의서</option>
-                  <option value="휴가신청서">휴가신청서</option>
                 </select>
               </td>
             </tr>
@@ -260,7 +289,7 @@ export default function DraftApprovalPage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="상세 내용을 입력하세요." 
-                className="w-full h-40 p-3 outline-none resize-none text-sm text-gray-700 leading-relaxed"
+                className="w-full min-h-[300px] p-3 outline-none resize-y text-sm text-gray-700 leading-relaxed"
               ></textarea>
             </div>
           </div>
@@ -304,7 +333,7 @@ export default function DraftApprovalPage() {
 
       {/* 결재자 지정 모달 */}
       {isApproverModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
             <div className="flex justify-between items-center p-4 border-b">
               <h2 className="text-lg font-bold">결재자 추가</h2>

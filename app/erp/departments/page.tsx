@@ -368,7 +368,7 @@ export default function DepartmentsPage() {
 
       {/* Department Modal */}
       {isDeptModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">{editingDept ? '부서 수정' : '부서 추가'}</h3>
@@ -403,7 +403,7 @@ export default function DepartmentsPage() {
 
       {/* Position Modal */}
       {isPosModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">{editingPos ? '직급 수정' : '직급 추가'}</h3>
