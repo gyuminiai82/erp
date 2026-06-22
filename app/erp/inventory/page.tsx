@@ -300,6 +300,7 @@ export default function InventoryStatusPage() {
               엑셀 다운로드
             </Button>
           </div>
+          </div>
         </div>
         
         <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
