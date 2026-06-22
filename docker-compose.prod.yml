@@ -54,7 +54,7 @@ services:
       - backend
     networks:
       - erp-network
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    command: "/bin/sh -c '/docker-entrypoint.d/20-envsubst-on-templates.sh && while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
     image: certbot/certbot
