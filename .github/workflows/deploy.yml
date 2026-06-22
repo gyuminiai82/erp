@@ -95,9 +95,16 @@ jobs:
 
           # 로컬 DB 덤프 복원 (존재할 경우)
           if [ -f "db_dump.sql" ]; then
+            echo "Stopping backend to release DB locks..."
+            docker-compose -f docker-compose.prod.yml stop backend
+            
             echo "Restoring database from db_dump.sql..."
-            cat db_dump.sql | docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres -d erp
-            echo "Database restore completed."
+            cat db_dump.sql | docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres -d erp > psql_restore.log 2>&1
+            echo "Database restore completed. Output:"
+            cat psql_restore.log
+            
+            echo "Starting backend..."
+            docker-compose -f docker-compose.prod.yml start backend
           fi
           
           # Nginx가 재생성된 컨테이너의 새 IP를 바라보도록 리로드/재시작
