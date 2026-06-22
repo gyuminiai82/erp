@@ -5,7 +5,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(home.minstudio.app)
+domains=(erp.minstudio.app)
 rsa_key_size=4096
 data_path="./certbot"
 email="" # Add a valid email if you want to receive renewal alerts
