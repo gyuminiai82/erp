@@ -90,6 +90,47 @@ def delete_project(project_id: int, db: Session = Depends(database.get_db), curr
     db.commit()
     return {"message": "Project deleted successfully"}
 
+class BulkDeleteProjectsRequest(BaseModel):
+    project_ids: List[int]
+
+@router.post("/bulk-delete")
+def bulk_delete_projects(req: BulkDeleteProjectsRequest, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
+    projects = db.query(models.Project).filter(models.Project.id.in_(req.project_ids)).all()
+    for p in projects:
+        used = db.query(models.JournalEntryLine).filter(models.JournalEntryLine.project_id == p.id).first()
+        if used:
+            raise HTTPException(status_code=400, detail=f"Cannot delete project {p.name} because it is used in accounting entries")
+        db.delete(p)
+    db.commit()
+    return {"message": "Projects deleted successfully"}
+
+class BulkUpdateProject(BaseModel):
+    id: int
+    name: Optional[str] = None
+    client_id: Optional[int] = None
+    manager_id: Optional[int] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    budget: Optional[float] = None
+    status: Optional[str] = None
+
+class BulkUpdateProjectsRequest(BaseModel):
+    projects: List[BulkUpdateProject]
+
+@router.put("/bulk-update")
+def bulk_update_projects(req: BulkUpdateProjectsRequest, db: Session = Depends(database.get_db), current_user=Depends(get_current_user_info)):
+    updated = []
+    for item in req.projects:
+        db_project = db.query(models.Project).filter(models.Project.id == item.id).first()
+        if db_project:
+            update_data = item.dict(exclude_unset=True, exclude={"id"})
+            for key, value in update_data.items():
+                setattr(db_project, key, value)
+            updated.append(db_project)
+    
+    db.commit()
+    return {"message": f"Updated {len(updated)} projects successfully"}
+
 
 # -----------------
 # 1. WBS Tasks

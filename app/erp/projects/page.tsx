@@ -118,28 +118,124 @@ export default function ProjectsPage() {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 60 },
-    { field: 'name', headerName: '프로젝트명', width: 200 },
-    { field: 'client_name', headerName: '발주처', width: 150 },
-    { field: 'manager_name', headerName: 'PM(담당자)', width: 120 },
-    { field: 'start_date', headerName: '시작일', width: 120 },
-    { field: 'end_date', headerName: '종료일', width: 120 },
-    { field: 'budget', headerName: '예산', width: 120, renderCell: (val: any) => Number(val).toLocaleString() + '원' },
-    { field: 'status', headerName: '상태', width: 100 }
+    { field: 'name', headerName: '프로젝트명', width: 200, editable: true },
+    { 
+      field: 'client_id', 
+      headerName: '발주처', 
+      width: 150, 
+      editable: true,
+      editType: 'select',
+      options: clients.map(c => ({ label: c.name, value: c.id })),
+      renderCell: (v: any) => clients.find(c => c.id === v)?.name || '-'
+    },
+    { 
+      field: 'manager_id', 
+      headerName: 'PM(담당자)', 
+      width: 120,
+      editable: true,
+      editType: 'select',
+      options: employees.map(e => ({ label: e.name, value: e.id })),
+      renderCell: (v: any) => employees.find(e => e.id === v)?.name || '-'
+    },
+    { field: 'start_date', headerName: '시작일', width: 120, editable: true },
+    { field: 'end_date', headerName: '종료일', width: 120, editable: true },
+    { field: 'budget', headerName: '예산', width: 120, editable: true, renderCell: (val: any) => Number(val || 0).toLocaleString() + '원' },
+    { 
+      field: 'status', 
+      headerName: '상태', 
+      width: 100,
+      editable: true,
+      editType: 'select',
+      options: [
+        { label: 'PLANNED', value: 'PLANNED' },
+        { label: 'IN_PROGRESS', value: 'IN_PROGRESS' },
+        { label: 'COMPLETED', value: 'COMPLETED' },
+        { label: 'ON_HOLD', value: 'ON_HOLD' }
+      ]
+    }
   ];
+
+  const handleDataChange = (rowIndex: number, field: string, value: any) => {
+    const updated = [...projects];
+    updated[rowIndex] = { ...updated[rowIndex], [field]: value, _state: 'U' } as any;
+    setProjects(updated);
+  };
+
+  const handleSave = async () => {
+    const rowsToUpdate = (projects as any[]).filter(p => p._state === 'U');
+    if (rowsToUpdate.length === 0) {
+      await showAlert("저장할 변경사항이 없습니다.", { type: "info" });
+      return;
+    }
+    
+    const confirmed = await showConfirm(`총 ${rowsToUpdate.length}건의 수정사항을 저장하시겠습니까?`, { type: "warning" });
+    if (!confirmed) return;
+    
+    try {
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+      const payload = rowsToUpdate.map(p => ({
+        id: p.id,
+        name: p.name,
+        client_id: p.client_id ? Number(p.client_id) : null,
+        manager_id: p.manager_id ? Number(p.manager_id) : null,
+        start_date: p.start_date || null,
+        end_date: p.end_date || null,
+        budget: Number(p.budget) || 0,
+        status: p.status
+      }));
+      
+      const res = await fetch('/api/projects/bulk-update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ projects: payload })
+      });
+      
+      if (res.ok) {
+        await showAlert("저장되었습니다.", { type: "success" });
+        fetchProjects();
+      } else {
+        const err = await res.json();
+        await showAlert(err.detail || "저장에 실패했습니다.", { type: "error" });
+      }
+    } catch (e: any) {
+      console.error(e);
+      await showAlert("오류가 발생했습니다.", { type: "error" });
+    }
+  };
 
   const handleDelete = async () => {
     if (selectedRowIndices.length === 0) return;
     const confirmed = await showConfirm(`선택한 ${selectedRowIndices.length}개의 프로젝트를 삭제하시겠습니까?`, { type: "warning" });
     if (!confirmed) return;
     
-    // API call to delete selected projects would go here. For now just clear selection.
-    // fetch('/api/projects/bulk-delete'...)
-    
-    // Fake deletion logic for UI
-    const updated = projects.filter((_, idx) => !selectedRowIndices.includes(idx));
-    setProjects(updated);
-    setSelectedRowIndices([]);
-    await showAlert("삭제되었습니다.", { type: "success" });
+    try {
+      const token = localStorage.getItem('erp_user_token') || localStorage.getItem('erp_user_access_token');
+      const idsToDelete = selectedRowIndices.map(idx => projects[idx].id);
+      
+      const res = await fetch('/api/projects/bulk-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ project_ids: idsToDelete })
+      });
+      
+      if (res.ok) {
+        setSelectedRowIndices([]);
+        await showAlert("삭제되었습니다.", { type: "success" });
+        fetchProjects();
+      } else {
+        const err = await res.json();
+        await showAlert(err.detail || "삭제에 실패했습니다.", { type: "error" });
+      }
+    } catch (e: any) {
+      console.error(e);
+      await showAlert("오류가 발생했습니다.", { type: "error" });
+    }
   };
 
   const handleSearch = () => {
@@ -207,6 +303,15 @@ export default function ProjectsPage() {
                 <Trash2 className="w-4 h-4 mr-1" />
                 선택 삭제
               </Button>
+              <Button 
+                size="sm" 
+                onClick={handleSave} 
+                disabled={!(projects as any[]).some(p => p._state === 'U')}
+                className="h-9 flex items-center bg-[#107C41] hover:bg-[#0c5e31] text-white"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                저장
+              </Button>
               <Button variant="outline" size="sm" className="h-9 flex items-center bg-white">
                 <FileDown className="w-4 h-4 mr-1 text-[#107C41]" />
                 엑셀 다운로드
@@ -218,6 +323,7 @@ export default function ProjectsPage() {
               <DataGrid 
                 columns={columns} 
                 data={filteredProjects} 
+                onDataChange={handleDataChange}
                 showCheckboxes={true}
                 selectedRowIndices={selectedRowIndices}
                 onSelectionChange={setSelectedRowIndices}
