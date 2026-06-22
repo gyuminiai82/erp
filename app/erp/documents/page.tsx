@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DataGrid, ColumnDef } from '@/components/ui/DataGrid';
 import { Button } from '@/components/ui/Button';
+import { Input } from "@/components/ui/Input";
 import { FileSignature, FileBadge, X, Printer, Search } from 'lucide-react';
 import { useDialog } from "@/components/providers/DialogProvider";
 
@@ -114,37 +115,46 @@ export default function DocumentsPage() {
             <p className="text-gray-500">임직원의 근로계약서 및 재직/경력증명서를 생성하고 인쇄합니다.</p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" className="bg-white border-blue-600 text-blue-600 hover:bg-blue-50" onClick={handleIssueContract}>
-              <FileSignature className="w-4 h-4 mr-2" />
-              근로계약서 발급
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleIssueCertificate}>
-              <FileBadge className="w-4 h-4 mr-2" />
-              재직/경력증명서 발급
-            </Button>
           </div>
         </div>
 
-        <div className="flex flex-col h-[calc(100vh-320px)] min-h-[400px] border-2 border-gray-400 shadow-sm overflow-hidden bg-white">
-          <div className="p-4 border-b border-gray-200 flex justify-end items-center bg-gray-50">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="사번 또는 이름 검색"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none w-64"
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-4 bg-gray-50/50">
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative flex-1 min-w-[200px] max-w-[300px]">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Input 
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-9 pr-4 bg-white w-full h-10 focus:z-10 relative" 
+                    placeholder="이름, 사번 검색..." 
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-end gap-2 w-full mt-2">
+                <Button variant="outline" size="sm" className="h-9 flex items-center bg-white border-blue-600 text-blue-600 hover:bg-blue-50" onClick={handleIssueContract}>
+                  <FileSignature className="w-4 h-4 mr-1" />
+                  근로계약서 발급
+                </Button>
+                <Button size="sm" className="h-9 flex items-center bg-blue-600 hover:bg-blue-700 text-white" onClick={handleIssueCertificate}>
+                  <FileBadge className="w-4 h-4 mr-1" />
+                  재직/경력증명서 발급
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col h-[calc(100vh-380px)] min-h-[400px] border border-gray-300 rounded-md overflow-hidden bg-white">
+              <DataGrid
+                columns={columns}
+                data={filteredEmployees}
+                showCheckboxes={true}
+                selectedRowIndices={selectedRowIndices}
+                onSelectionChange={setSelectedRowIndices}
               />
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
           </div>
-          <DataGrid
-            columns={columns}
-            data={filteredEmployees}
-            showCheckboxes={true}
-            selectedRowIndices={selectedRowIndices}
-            onSelectionChange={setSelectedRowIndices}
-          />
         </div>
       </div>
 
