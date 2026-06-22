@@ -51,7 +51,15 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     else:
         user = db.query(models.Employee).filter(models.Employee.email == form_data.username).first()
         role = "user"
-        if user and (user.deleted_at is not None or user.status == "퇴사" or not user.is_active):
+        
+        # 프론트엔드가 무조건 client_id='user'로 보내더라도 관리자 계정 로그인을 허용하기 위해 폴백 추가
+        if not user:
+            admin_fallback = db.query(models.SystemAdmin).filter(models.SystemAdmin.email == form_data.username).first()
+            if admin_fallback:
+                user = admin_fallback
+                role = "admin"
+                
+        if role == "user" and user and getattr(user, 'deleted_at', None) is not None or getattr(user, 'status', None) == "퇴사" or not getattr(user, 'is_active', True):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="퇴사 처리되었거나 비활성화된 계정입니다. 관리자에게 문의하세요.",
