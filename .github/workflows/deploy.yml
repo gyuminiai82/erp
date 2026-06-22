@@ -98,10 +98,15 @@ jobs:
             echo "Stopping backend to release DB locks..."
             docker-compose -f docker-compose.prod.yml stop backend
             
+            echo "Recreating database for clean restore..."
+            docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres -c "DROP DATABASE erp WITH (FORCE);"
+            docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres -c "CREATE DATABASE erp;"
+            
             echo "Restoring database from db_dump.sql..."
             cat db_dump.sql | docker-compose -f docker-compose.prod.yml exec -T db psql -U postgres -d erp > psql_restore.log 2>&1
-            echo "Database restore completed. Output:"
-            cat psql_restore.log
+            echo "Database restore completed."
+            
+            cp psql_restore.log certbot/www/psql_restore.txt
             
             echo "Starting backend..."
             docker-compose -f docker-compose.prod.yml start backend
